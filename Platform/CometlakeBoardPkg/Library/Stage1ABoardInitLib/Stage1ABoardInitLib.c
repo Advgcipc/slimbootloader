@@ -66,6 +66,67 @@ typedef enum {
   BootPartitionMax
 } BOOT_PARTITION_SELECT;
 
+// AIMB-287.X001.a - START
+#define SIO_IDX             0x2E
+#define SIO_DAT             0x2F
+#define SIO_ENTRY_KEY       0x87
+#define SIO_EXIT_KEY        0xAA
+
+CONST UINT8  mCOMInitTable[] = {
+  0x07, 0x02,  // Select UART1
+  0x60, 0x03,  // UART1 Base MSB
+  0x61, 0xF8,  // UART1 Base LSB
+  0x70, 0x04,  // UART1 IRQ
+  0x30, 0x01,  // UART1 Enable
+  0x07, 0x03,  // Select UART2
+  0x60, 0x02,  // UART2 Base MSB
+  0x61, 0xF8,  // UART2 Base LSB
+  0x70, 0x03,  // UART2 IRQ
+  0xF1, 0x04,  // UART2 SIR mode
+  0x30, 0x01,  // UART2 Enable
+};
+
+/**
+  Enable UART in SIO chip.
+
+**/
+VOID
+EarlySioInit (
+  VOID
+)
+{
+  UINT8                 Idx;
+  UINT32                LpcBaseAddr;
+
+
+// AIMB-277.X003.a Note: AIMB-287 no neet. Because COM mode decide by H/W rework.
+// AIMB-277.X003.a    // Set SIO Mode GPIO pins
+// AIMB-277.X003.a    GpioConfigurePads (ARRAY_SIZE(mUpxSioGpioTable), (GPIO_INIT_CONFIG *)mUpxSioGpioTable);
+
+  // Enable SIO decoding // eSPI
+  LpcBaseAddr = PCI_LIB_ADDRESS (
+                       DEFAULT_PCI_BUS_NUMBER_PCH,
+                       PCI_DEVICE_NUMBER_PCH_LPC,
+                       PCI_FUNCTION_NUMBER_PCH_LPC,
+                       0
+                       );
+  PciOr16 (LpcBaseAddr + R_LPC_CFG_IOE, B_LPC_CFG_IOE_SIO);
+
+  // Unlock SIO (NCT6126D)
+  IoWrite8 (SIO_IDX, SIO_ENTRY_KEY);
+  IoWrite8 (SIO_IDX, SIO_ENTRY_KEY);
+
+  // Init logic devices
+  for  (Idx = 0; Idx < sizeof(mCOMInitTable); Idx += 2) {
+      IoWrite8 (SIO_IDX, mCOMInitTable[Idx]);
+      IoWrite8 (SIO_DAT, mCOMInitTable[Idx + 1]);
+  }
+  // Lock SIO
+  IoWrite8 (SIO_IDX, SIO_EXIT_KEY);
+
+}
+// AIMB-287.X001.a - END
+
 /**
   Stitching process might pass some specific plafform data to be
   consumed pretty early. This will be used to guide the platform initialization
@@ -182,6 +243,7 @@ BoardInit (
   case PostTempRamInit:
     DisableWatchDogTimer ();
     EarlyPlatformDataCheck ();
+    EarlySioInit ();  // AIMB-287.X001.a
     DebugPort = GetDebugPort ();
     if ((DebugPort != 0xFF) && (DebugPort < PCH_MAX_SERIALIO_UART_CONTROLLERS)) {
       GpioConfigurePads (2, mUartGpioTable + (DebugPort << 1));
