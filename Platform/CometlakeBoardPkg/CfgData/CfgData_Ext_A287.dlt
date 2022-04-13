@@ -1,0 +1,18 @@
+## @file
+#
+#  Copyright (c) 2019 - 2020, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+## Delta configuration values for platform ID 0x0002
+# This file is not auto-generated. Rather, users must input all the settings
+# that are needed to be overwritten from the base DSC into this file.
+# This file is similar to changing BSF file in BCT for the new settings.
+
+PLATFORMID_CFG_DATA.PlatformId | 0x11
+PLAT_NAME_CFG_DATA.PlatformName           | 'A287'
+GEN_CFG_DATA.PayloadId | 'UEFI'
+
+MEMORY_CFG_DATA.SpdAddressTable           | {0xA0, 0xA2, 0xA4, 0xA6}
+MEMORY_CFG_DATA.FClkFrequency             | 0x01
+MEMORY_CFG_DATA.UserBd                    | 0x01
+MEMORY_CFG_DATA.DualDpc                   | 0x01

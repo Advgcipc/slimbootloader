@@ -136,7 +136,8 @@ class Board(BaseBoard):
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE + 0x4000
         self._CFGDATA_INT_FILE    = ['CfgData_Int_Cmls.dlt']
-        self._CFGDATA_EXT_FILE    = ['CfgData_Ext_Dummy.dlt']
+        # AIMB-287.X003.aself._CFGDATA_EXT_FILE    = ['CfgData_Ext_Dummy.dlt']
+        self._CFGDATA_EXT_FILE    = ['CfgData_Ext_A287.dlt'] # AIMb-287.X003.a
 
     def GetPlatformDsc (self):
         dsc = {}

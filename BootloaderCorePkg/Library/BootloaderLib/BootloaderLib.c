@@ -96,7 +96,8 @@ GetPlatformId (
   VOID
   )
 {
-  return GetLoaderGlobalDataPointer()->PlatformId;
+  // AIMB-287.X002.areturn GetLoaderGlobalDataPointer()->PlatformId;
+  return 0x11; // AIMB-287.X002.a
 }
 
 /**
