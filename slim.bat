@@ -42,6 +42,7 @@ git clone --recurse-submodules https://github.com/Advgcipc/slimbootloader.git
 @IF "%2"=="tgl" goto Buildtgl
 @IF "%2"=="tglh" goto Buildtglh
 @IF "%2"=="cfl" goto Buildcfl
+@IF "%2"=="cml" goto Buildcml
 @IF "%2"=="ehl" goto Buildehl
 @goto BuildEnd
 
@@ -90,7 +91,7 @@ python BuildLoader.py build ehl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADRel.fd:U
 :Buildcml
 @title Slim Boot Loader - Buildcml
 @IF "%3"=="-r" goto Buildcmlr
-python BuildLoader.py build cml -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADDbg.fd:UEFI:Lzma"
+python BuildLoader.py build cml -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADDbg.fd:UEFI:Lzma" -fd
 @goto BuildEnd
 :Buildcmlr
 python BuildLoader.py build cml -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADRel.fd:UEFI:Lzma"
@@ -152,7 +153,7 @@ python Platform/ElkhartlakeBoardPkg/Script/StitchLoader.py -i Platform/Elkhartla
 @goto StitchEnd
 
 :Stitchcml
-::python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/BiosBin/AmiTglHCfg1.bin -s Outputs/tgl/SlimBootloader.bin -o Build/AmiTglHCfg1S.bin
+python Platform/CometlakeBoardPkg/Script/StitchLoader.py -i Platform/CometlakeBoardPkg/BiosBin/A287000H160V111.BIN -s Outputs/cml/SlimBootloader.bin -o Build/A28700SH160V111.BIN -p AA00FF11
 
 @goto StitchEnd
 
