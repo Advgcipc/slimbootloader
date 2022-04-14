@@ -9,7 +9,7 @@
 
 // LPC Bridge - Device 31, Function 0
 scope (\_SB.PCI0.LPCB) {
-      Include ("EC.ASL")
+// AIMB-287.X007.a      Include ("EC.ASL")
       Include ("LPC_DEV.ASL")
       Include ("H8S2113_SIO.ASL")
 

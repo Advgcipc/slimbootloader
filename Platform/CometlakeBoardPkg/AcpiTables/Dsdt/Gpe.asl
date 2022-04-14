@@ -728,7 +728,7 @@
 //      }
 //
       // Make it an attended wake event, no matter what.
-      Notify(\_SB.PWRB,0x02)
+// AIMB-287.X007.a      Notify(\_SB.PWRB,0x02)
 //    }
     Return ()
   }

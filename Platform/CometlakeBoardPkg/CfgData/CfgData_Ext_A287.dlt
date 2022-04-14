@@ -17,6 +17,8 @@ MEMORY_CFG_DATA.FClkFrequency             | 0x01
 MEMORY_CFG_DATA.UserBd                    | 0x01
 MEMORY_CFG_DATA.DualDpc                   | 0x01
 
+SILICON_CFG_DATA.ECEnable                | 0
+
 PCIE_CFG_DATA.ClkFeatures0.ClkUsage      | 0xFF
 PCIE_CFG_DATA.ClkFeatures1.ClkUsage      | 0xFF
 PCIE_CFG_DATA.ClkFeatures2.ClkUsage      | 0x05
