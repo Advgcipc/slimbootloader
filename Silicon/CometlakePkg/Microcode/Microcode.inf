@@ -16,6 +16,7 @@
 [Sources]
  m22A0653_000000CC.mcb  # CML G1-Step
  m22A0655_000000CA.mcb
+ Platform/CometlakeBoardPkg/Microcode/m22A0654_000000C6.mcb # AIMB-287.X009.a
 
 [UserExtensions.SBL."CloneRepo"]
   REPO  = https://github.com/tianocore/edk2-non-osi.git
