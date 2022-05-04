@@ -47,6 +47,202 @@ typedef struct  {
 #pragma warning (pop)
 #endif
 
+//7583X003_4
+const HDAUDIO_VERB_TABLE OemHdaVerbTblSomDb5830 = HDAUDIO_VERB_TABLE_INIT (
+// ;===================================================================================================
+// ;
+// ;                               Realtek Semiconductor Corp.
+// ;
+// ;===================================================================================================
+// 
+// ;Realtek High Definition Audio Configuration - Version : 5.0.3.1
+// ;Realtek HD Audio Codec : ALC892
+// ;PCI PnP ID : PCI\VEN_8086&DEV_2668&SUBSYS_00000000
+// ;HDA Codec PnP ID : HDAUDIO\FUNC_01&VEN_10EC&DEV_0892&SUBSYS_00000000
+// ;The number of verb command block : 17
+// 
+// ;    NID 0x11 : 0x40000000
+// ;    NID 0x12 : 0x411111F0
+// ;    NID 0x14 : 0x01014010
+// ;    NID 0x15 : 0x411111F0
+// ;    NID 0x16 : 0x411111F0
+// ;    NID 0x17 : 0x411111F0
+// ;    NID 0x18 : 0x01A19040
+// ;    NID 0x19 : 0x411111F0
+// ;    NID 0x1A : 0x01813030
+// ;    NID 0x1B : 0x411111F0
+// ;    NID 0x1C : 0x411111F0
+// ;    NID 0x1D : 0x40220601
+// ;    NID 0x1E : 0x01451120
+// ;    NID 0x1F : 0x411111F0
+// 
+// 
+  //
+  //  VerbTable: TGL Display Audio Codec
+  //  Revision ID = 0xFF
+  //  Codec Vendor: 0x10EC0888
+  //
+  0x10EC, 0x0888,
+  0xFF, 0xFF,
+// ;===== HDA Codec Subsystem ID Verb-table =====
+// ;HDA Codec Subsystem ID  : 0x00000000
+// dd 00172000h
+// dd 00172100h
+// dd 00172200h
+// dd 00172300h
+   0x00172000,
+   0x00172100,
+   0x00172200,
+   0x00172300,
+// 
+// 
+// ;===== Pin Widget Verb-table =====
+// ;Widget node 0x01 :
+// dd 0017FF00h
+// dd 0017FF00h
+// dd 0017FF00h
+// dd 0017FF00h
+   0x0017FF00,
+   0x0017FF00,
+   0x0017FF00,
+   0x0017FF00,
+// ;Pin widget 0x11 - S/PDIF-OUT2
+// dd 01171C00h
+// dd 01171D00h
+// dd 01171E00h
+// dd 01171F40h
+   0x01171C00,
+   0x01171D00,
+   0x01171E00,
+   0x01171F40,
+// ;Pin widget 0x12 - DMIC
+// dd 01271CF0h
+// dd 01271D11h
+// dd 01271E11h
+// dd 01271F41h
+   0x01271CF0,
+   0x01271D11,
+   0x01271E11,
+   0x01271F41,
+// ;Pin widget 0x14 - FRONT (Port-D)
+// dd 01471C10h
+// dd 01471D40h
+// dd 01471E01h
+// dd 01471F01h
+   0x01471C10,
+   0x01471D40,
+   0x01471E01,
+   0x01471F01,
+// ;Pin widget 0x15 - SURR (Port-A)
+// dd 01571CF0h
+// dd 01571D11h
+// dd 01571E11h
+// dd 01571F41h
+   0x01571CF0,
+   0x01571D11,
+   0x01571E11,
+   0x01571F41,
+// ;Pin widget 0x16 - CEN/LFE (Port-G)
+// dd 01671CF0h
+// dd 01671D11h
+// dd 01671E11h
+// dd 01671F41h
+   0x01671CF0,
+   0x01671D11,
+   0x01671E11,
+   0x01671F41,
+// ;Pin widget 0x17 - SIDESURR (Port-H)
+// dd 01771CF0h
+// dd 01771D11h
+// dd 01771E11h
+// dd 01771F41h
+   0x01771CF0,
+   0x01771D11,
+   0x01771E11,
+   0x01771F41,
+// ;Pin widget 0x18 - MIC1 (Port-B)
+// dd 01871C40h
+// dd 01871D90h
+// dd 01871EA1h
+// dd 01871F01h
+   0x01871C40,
+   0x01871D90,
+   0x01871EA1,
+   0x01871F01,
+// ;Pin widget 0x19 - MIC2 (Port-F)
+// dd 01971CF0h
+// dd 01971D11h
+// dd 01971E11h
+// dd 01971F41h
+   0x01971CF0,
+   0x01971D11,
+   0x01971E11,
+   0x01971F41,
+// ;Pin widget 0x1A - LINE1 (Port-C)
+// dd 01A71C30h
+// dd 01A71D30h
+// dd 01A71E81h
+// dd 01A71F01h
+   0x01A71C30,
+   0x01A71D30,
+   0x01A71E81,
+   0x01A71F01,
+// ;Pin widget 0x1B - LINE2 (Port-E)
+// dd 01B71CF0h
+// dd 01B71D11h
+// dd 01B71E11h
+// dd 01B71F41h
+   0x01B71CF0,
+   0x01B71D11,
+   0x01B71E11,
+   0x01B71F41,
+// ;Pin widget 0x1C - CD-IN
+// dd 01C71CF0h
+// dd 01C71D11h
+// dd 01C71E11h
+// dd 01C71F41h
+   0x01C71CF0,
+   0x01C71D11,
+   0x01C71E11,
+   0x01C71F41,
+// ;Pin widget 0x1D - BEEP-IN
+// dd 01D71C01h
+// dd 01D71D06h
+// dd 01D71E22h
+// dd 01D71F40h
+   0x01D71C01,
+   0x01D71D06,
+   0x01D71E22,
+   0x01D71F40,
+// ;Pin widget 0x1E - S/PDIF-OUT
+// dd 01E71C20h
+// dd 01E71D11h
+// dd 01E71E45h
+// dd 01E71F01h
+   0x01E71C20,
+   0x01E71D11,
+   0x01E71E45,
+   0x01E71F01,
+// ;Pin widget 0x1F - S/PDIF-IN
+// dd 01F71CF0h
+// dd 01F71D11h
+// dd 01F71E11h
+// dd 01F71F41h
+   0x01F71CF0,
+   0x01F71D11,
+   0x01F71E11,
+   0x01F71F41,
+// ;Widget node 0x20 :
+// dd 02050007h
+// dd 020409C8h
+// dd 02050007h
+// dd 020409C8h
+   0x02050007,
+   0x020409C8,
+   0x02050007,
+   0x020409C8,
+);
+//7583X003_4
 
 CONST HDAUDIO_VERB_TABLE HdaVerbTableDisplayAudio = HDAUDIO_VERB_TABLE_INIT (
   //

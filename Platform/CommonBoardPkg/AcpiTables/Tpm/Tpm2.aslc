@@ -36,8 +36,10 @@ EFI_TPM2_ACPI_TABLE  TPM2 = {
   },
   0, // BIT0~15:  PlatformClass
      // BIT16~31: Reserved
-  0, // Control Area
-  EFI_TPM2_ACPI_TABLE_START_METHOD_TIS, // StartMethod
+//7583X003_2  0, // Control Area
+//7583X003_2  EFI_TPM2_ACPI_TABLE_START_METHOD_TIS, // StartMethod
+  0xFED40040, // Control Area
+  EFI_TPM2_ACPI_TABLE_START_METHOD_COMMAND_RESPONSE_BUFFER_INTERFACE, // StartMethod
   {0},
   0x10000,  //64 KB
   0

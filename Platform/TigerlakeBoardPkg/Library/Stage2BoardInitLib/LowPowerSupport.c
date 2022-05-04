@@ -233,9 +233,10 @@ UINT64 GetLowPowerS0IdleConstraint(VOID)
   ZeroMem (PepSerialIoUart, sizeof (PepSerialIoUart));
   for (Index = 0; Index < PCH_MAX_SERIALIO_UART_CONTROLLERS; Index++) {
     PepSerialIoUart[Index] = FspsConfig->SerialIoUartMode[Index];
-    if ((PepSerialIoUart[Index] == 0) && IsSerialIoUartFunction0Enabled (Index)) {
-      PepSerialIoUart[Index] = 1;
-    }
+// SOM7583    if ((PepSerialIoUart[Index] == 0) && IsSerialIoUartFunction0Enabled (Index)) {
+// SOM7583     PepSerialIoUart[Index] = 1;
+// SOM7583   }
+
   }
 
   LowPowerS0IdleConstraint  = (((FspsConfig->SataEnable == 1 ? 0x3:0) & PepConfigData->PepSataContraints)        <<  0) | // Bit[1:0] - Storage (0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3)

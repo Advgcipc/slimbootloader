@@ -1,0 +1,95 @@
+## @file
+#
+#  Platform Configuration Delta File.
+#
+#  Copyright (c) 2019 - 2021, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+#
+
+PLATFORMID_CFG_DATA.PlatformId                              | 0x0010
+PLAT_NAME_CFG_DATA.PlatformName                             | 'SOM-7583'
+
+
+MEMORY_CFG_DATA.SpdAddressTable                             | {0xA0, 0, 0xA0, 0, 0xA0, 0, 0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+MEMORY_CFG_DATA.DisableDimmChannel1                         | 3
+
+MEMORY_CFG_DATA.DqsMapCpu2DramMc0Ch0                        | {0, 1}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc0Ch1                        | {0, 1}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc0Ch2                        | {0, 1}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc0Ch3                        | {0, 1}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc1Ch0                        | {0, 0}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc1Ch1                        | {0, 0}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc1Ch2                        | {0, 0}
+MEMORY_CFG_DATA.DqsMapCpu2DramMc1Ch3                        | {0, 0}
+
+MEMORY_CFG_DATA.DqMapCpu2DramMc0Ch0                         | {0,  1,  3,  2,  4,  5,  6,  7,  9,  8, 14, 15, 11, 12, 13, 10}
+MEMORY_CFG_DATA.DqMapCpu2DramMc0Ch1                         | {3,  4,  2,  5,  1,  6,  0,  7,  9, 11, 10,  8, 14, 15, 12, 13}
+MEMORY_CFG_DATA.DqMapCpu2DramMc0Ch2                         | {3,  2,  1,  0,  4,  5,  6,  7, 13, 12, 14, 15, 11, 10,  9,  8}
+MEMORY_CFG_DATA.DqMapCpu2DramMc0Ch3                         | {7,  0,  1,  6,  5,  4,  2,  3, 15, 14,  8,  9, 10, 12, 11, 13}
+MEMORY_CFG_DATA.DqMapCpu2DramMc1Ch0                         | {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+MEMORY_CFG_DATA.DqMapCpu2DramMc1Ch1                         | {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+MEMORY_CFG_DATA.DqMapCpu2DramMc1Ch2                         | {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+MEMORY_CFG_DATA.DqMapCpu2DramMc1Ch3                         | {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+
+MEMORY_CFG_DATA.DmaControlGuarantee                         | 1
+
+MEMORY_CFG_DATA.UsbTcPortEnPreMem                           | 0
+
+MEMORY_CFG_DATA.PcieClkSrcUsage   | { 0x40, 0x80, 0xFF, 0xFF, 0x08, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+
+
+
+#SILICON_CFG_DATA.PortUsb20Enable.Usb2Port1                  | 0
+
+# PCH LP :  GPIO_VER2_LP_GPP_B15
+PLDSEL_CFG_DATA.PldSelGpio.Enable                           | 1
+PLDSEL_CFG_DATA.PldSelGpio.PadGroup                         | 1
+PLDSEL_CFG_DATA.PldSelGpio.PinNumber                        | 15
+PLDSEL_CFG_DATA.PldSelGpio.PinPolarity                      | 0
+
+# PLDSEL_CFG_DATA.PldSelGpio.PinPolarity value will read 0 for UEFI Payload.
+# PLDSEL_CFG_DATA.PldSelGpio.PinPolarity value will read 1 for OS Loader.
+
+#
+# By default use Osloader Payload, set to "UEFI" to select UEFI payload.
+#
+# Here set to 'AUTO' to enable payload selection using GPIO.
+# This GPIO maps to pins 3/4 on 4-pin jumper J9J5 which is closest to the coin
+# cell battery on the UP3 RVP board.
+#
+# When 3/4 is stuffed the value will read 0 for UEFI Payload.
+# When 3/4 is un-stuffed the value will read 1 for OS Loader.
+#
+GEN_CFG_DATA.PayloadId                                      | 'AUTO'
+ 
+GPIO_CFG_DATA.GpioPinConfig0_GPP_B15.GPIODirection_GPP_B15  | 0xB
+SILICON_CFG_DATA.PchHdaEnable                               | 0x00
+
+GPIO_CFG_DATA.GpioPinConfig1_GPP_A19.GPIOSkip_GPP_A19       | 1           # TGL-U Only. Skip for TGL-H.
+
+
+SILICON_CFG_DATA.EcEnable                                   | 0
+SILICON_CFG_DATA.PchTsnEnable                               | 0
+
+FEATURES_CFG_DATA.Features.FusaEnable                       | 0
+FEATURES_CFG_DATA.Features.S0ix                             | 1
+
+#PEP_CFG_DATA.PepTcss                                        | 0
+PEP_CFG_DATA.PepSpi                                         | 0
+PEP_CFG_DATA.PepUart                                        | 0
+
+FEATURES_CFG_DATA.Features.MeasuredBoot     | 1
+
+
+# BOOT_OPTION_CFG_DATA_0 is USB boot
+# Allow to boot from USB partition 0 and FAT filesystem by default
+BOOT_OPTION_CFG_DATA_1.ImageType_1                          | 0
+BOOT_OPTION_CFG_DATA_1.BootFlags_1                          | 0
+BOOT_OPTION_CFG_DATA_1.BootDeviceType_1                     | 5
+BOOT_OPTION_CFG_DATA_1.BootDeviceInstance_1                 | 0
+BOOT_OPTION_CFG_DATA_1.SwPart_1                             | 0
+BOOT_OPTION_CFG_DATA_1.HwPart_1                             | 0
+BOOT_OPTION_CFG_DATA_1.FsType_1                             | 0
+BOOT_OPTION_CFG_DATA_1.BootImage_1                          | 'usb-ubuntu'

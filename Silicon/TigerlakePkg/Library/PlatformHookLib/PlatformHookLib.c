@@ -139,7 +139,8 @@ LegacySerialPortInitialize (
                       0);
 
   Data16 = PciCf8Read16 (LpcBaseAddr + R_LPC_CFG_IOD);
-  Data16 |= (V_LPC_CFG_IOD_COMB_3E8 << N_LPC_CFG_IOD_COMB);
+// 7583X004_1  Data16 |= (V_LPC_CFG_IOD_COMB_3E8 << N_LPC_CFG_IOD_COMB);
+  Data16 |= (1 << N_LPC_CFG_IOD_COMB); //V_LPC_CFG_IOD_COMB_2F8
   Data16 |= (V_LPC_CFG_IOD_COMA_3F8 << N_LPC_CFG_IOD_COMA);
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOD), Data16);
   PciCf8Write16 (LpcBaseAddr + R_LPC_CFG_IOD, Data16);

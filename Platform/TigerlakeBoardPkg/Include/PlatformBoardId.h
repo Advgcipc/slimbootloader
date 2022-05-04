@@ -33,4 +33,6 @@ Defines Platform BoardIds
 #define BoardIdTglHDdr4SODimm             0x21
 #define BoardIdTglULp4Gcs                 0x15
 
+#define BoardIdTglUSOM7583                0x10
+
 #endif

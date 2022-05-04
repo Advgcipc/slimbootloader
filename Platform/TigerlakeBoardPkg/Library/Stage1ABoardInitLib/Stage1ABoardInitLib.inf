@@ -41,6 +41,8 @@
   PlatformHookLib
   SerialPortLib
   GpioLib
+# //7583X003_1
+  PchPcrLib
 
 [Guids]
 

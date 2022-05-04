@@ -10,4 +10,6 @@
 scope (\_SB.PC00.LPCB) {
       Include ("EC.ASL")
       Include ("LpcDev.asl")
+//7583X003_1
+      Include ("A9610ECAsl.asl") 
 }

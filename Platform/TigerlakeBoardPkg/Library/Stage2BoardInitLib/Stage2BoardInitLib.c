@@ -130,6 +130,7 @@ CHAR8 *mBoardIdIndex[] = {
   "TigerLake U LPDDR4/4x T4 RVP",          // 0x03
   "TigerLake H DDR4 SODIMM RVP",           // 0x21 or 0xF
   "Up Xtreme i11 DDR4 SODIMM",             // 0x04
+  "SOM-7583",                              // 0x10
 };
 
 //
@@ -587,9 +588,21 @@ InitializeSmbiosInfo (
   //
   // SMBIOS_TYPE_BASEBOARD_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-    1, "Intel Corporation");
   switch (GetPlatformId ()) {
+    case BoardIdTglUSOM7583:
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        1, "Advantech Corp.");
+      break;
+    default:
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        1, "Intel Corporation");
+      break;
+  }
+
+  switch (GetPlatformId ()) {
+    case BoardIdTglUSOM7583:
+      BrdIdx = 5;
+      break;
     case BoardIdTglUDdr4:
       BrdIdx = 1;
       break;
@@ -794,6 +807,20 @@ TglULpDdr4GopVbtSpecificUpdate(
   ChildStructPtr[2]->AUX_Channel  = AUX_CHANNEL_B;
   ChildStructPtr[2]->DDCBus       = 0x2;
 }
+//
+// GOP VBT update for TGL U DDR4
+//
+VOID
+EFIAPI
+SOM7583GopVbtSpecificUpdate(
+  IN CHILD_STRUCT **ChildStructPtr
+  )
+{
+  ChildStructPtr[4]->DeviceClass = HDMI_DVI;
+  ChildStructPtr[4]->DVOPort = HDMI_B;
+  ChildStructPtr[4]->AUX_Channel = 0;
+  ChildStructPtr[4]->HdmiLevelShifterConfig.Bits.HdmiMaxDataRateBits = 1;  //[2.97 Gbps]
+}
 
 //Initialize Platform Igd OpRegion
 VOID
@@ -821,6 +848,9 @@ IgdOpRegionPlatformInit (
       break;
     case BoardIdTglULp4Type4:
       IgdPlatformInfo.callback = (GOP_VBT_UPDATE_CALLBACK)(UINTN)&TglULpDdr4GopVbtSpecificUpdate;
+      break;
+    case BoardIdTglUSOM7583:
+      IgdPlatformInfo.callback = (GOP_VBT_UPDATE_CALLBACK)(UINTN)&SOM7583GopVbtSpecificUpdate;
       break;
     default:
       DEBUG((DEBUG_INFO, "Unsupported board Id %x .....\n", GetPlatformId ()));
@@ -885,6 +915,8 @@ BoardInit (
             ConfigureGpio (CDATA_NO_TAG, sizeof (mTglHTsnDeviceGpioTable) / sizeof (mTglHTsnDeviceGpioTable[0]), (UINT8*)mTglHTsnDeviceGpioTable);
             break;
           default:
+          case BoardIdTglUSOM7583:
+            break;
           case BoardIdTglUDdr4:
           case BoardIdTglULp4Type4:
             ConfigureGpio (CDATA_NO_TAG, sizeof (mTglUTsnDeviceGpioTable) / sizeof (mTglUTsnDeviceGpioTable[0]), (UINT8*)mTglUTsnDeviceGpioTable);
@@ -1026,7 +1058,20 @@ BoardInit (
     if ((GetBootMode() != BOOT_ON_FLASH_UPDATE) && (GetPayloadId() == 0)) {
       ProgramSecuritySetting ();
     }
-
+//7583X003_3
+{
+  // EC boot count command
+    IoWrite8(0x29A, 0x2F);  // EC boot count
+  //	Set GPIO to System_OK_LED turn on.
+  // GPP_E7, FD6A0000h + AE0h
+  // Bit9 GPIO RX Disable, Bit8 GPIO TX Disable
+  // Bit1 GPIO RX State, Bit0 GPIO TX State
+    UINT32  GPIOlevel;
+    GPIOlevel = MmioRead32( 0xFD6A0AE0 );
+    GPIOlevel = (GPIOlevel & 0xFFFFFEFE) | 0x200;    // set System_OK LED#
+    MmioWrite32(0xFD6A0AE0, GPIOlevel );
+}
+//7583X003_3
     break;
   default:
     break;
@@ -1311,7 +1356,15 @@ UpdateFspConfig (
 
   // Update serial io
   SerialIoPostMemConfig (FspsConfig);
-
+// SOM7583 >>
+    FspsConfig->SerialIoUartMode[0] = 0;  // Force UART to PCI mode to enable OS to have full control
+    FspsConfig->SerialIoUartMode[1] = 0;  // Force UART to PCI mode to enable OS to have full control
+//7583X004_1
+  if (GetDebugPort () < PCH_MAX_SERIALIO_UART_CONTROLLERS) 
+    FspsConfig->SerialIoUartMode[2] = 1;  //7583X004_1 Force UART to PCI mode to enable OS to have full control
+  else 
+    FspsConfig->SerialIoUartMode[2] = 0;  //7583X003_1 Force UART to PCI mode to enable OS to have full control
+// SOM7583 >>
   //
   // Update device interrupt table
   //
@@ -1400,6 +1453,8 @@ UpdateFspConfig (
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc711;
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc701;
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc274;
+//7583X003_4
+      HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &OemHdaVerbTblSomDb5830;
       FspsUpd->FspsConfig.PchHdaVerbTablePtr      = (UINT32)(UINTN) HdaVerbTablePtr;
       FspsUpd->FspsConfig.PchHdaVerbTableEntryNum = HdaVerbTableNum;
     } else {
@@ -1421,7 +1476,8 @@ UpdateFspConfig (
   // Enable IEH
   FspsConfig->IehMode = 0x1;
 
-  FspsConfig->SerialIoSpiMode[1] = 0x1;
+// SOM7583 >>  FspsConfig->SerialIoSpiMode[1] = 0x1;
+  FspsConfig->SerialIoSpiMode[1] = 0;
   for (Index = 0; Index < GetPchMaxSerialIoSpiControllersNum (); Index++) {
     for (CsIndex = 0; CsIndex < PCH_MAX_SERIALIO_SPI_CHIP_SELECTS; CsIndex++) {
       FspsConfig->SerialIoSpiCsPolarity[Index * PCH_MAX_SERIALIO_SPI_CHIP_SELECTS + CsIndex] = 0x1;
@@ -2708,7 +2764,8 @@ PlatformUpdateAcpiGnvs (
   PlatformNvs->EnableDigitalThermalSensor   = 0;
   PlatformNvs->Rtd3Support                  = 1;
   PlatformNvs->TenSecondPowerButtonEnable   = 0x9;
-  PlatformNvs->HidEventFilterEnable         = 0x01;
+// SOM7583 >>  PlatformNvs->HidEventFilterEnable         = 0x01;
+  PlatformNvs->HidEventFilterEnable         = 0x0;
   PlatformNvs->LowPowerS0Idle               = S0IX_STATUS();
 
   // Bit[1:0] - Storage (0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3)

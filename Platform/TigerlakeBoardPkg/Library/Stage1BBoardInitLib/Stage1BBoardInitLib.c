@@ -445,6 +445,9 @@ UpdateFspConfig (
   case BoardIdTglULp4Type4:
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mTglULpDdr4RowDisplayDdiConfig, sizeof(mTglULpDdr4RowDisplayDdiConfig));
     break;
+  case BoardIdTglUSOM7583:
+    CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mSOM7583DisplayDdiConfig, sizeof(mSOM7583DisplayDdiConfig));
+    break;
   default:
     DEBUG((DEBUG_INFO, "Unsupported board Id %x .....\n", BoardId));
     break;
@@ -652,6 +655,10 @@ PlatformFeaturesInit (
       LdrFeatures &= ~FEATURE_VERIFIED_BOOT;
     }
   }
+//7583X003_2
+PlatformData->BtGuardInfo.BypassTpmInit = FALSE;
+PlatformData->BtGuardInfo.TpmType = Ptt;
+//7583X003_2
 
   SetFeatureCfg (LdrFeatures);
 }
@@ -671,6 +678,11 @@ TpmInitialize (
 
   BootMode     = GetBootMode();
   PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
+
+//7583X003_2
+if(PlatformData->BtGuardInfo.TpmType == Ptt)
+    Status = TpmInit(PlatformData->BtGuardInfo.BypassTpmInit, BootMode);
+//7583X003_2
 
   if((PlatformData != NULL) && PlatformData->BtGuardInfo.MeasuredBoot &&
     (!PlatformData->BtGuardInfo.DisconnectAllTpms) &&
@@ -853,6 +865,9 @@ DEBUG_CODE_END();
       case 0xF:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemTglHDdr4) / sizeof (mGpioTablePreMemTglHDdr4[0]), (UINT8*)mGpioTablePreMemTglHDdr4);
         break;
+      case BoardIdTglUSOM7583:
+        ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemSOM7583) / sizeof (mGpioTablePreMemSOM7583[0]), (UINT8*)mGpioTablePreMemSOM7583);
+        break;
       case BoardIdTglUDdr4:
       case BoardIdTglULp4Type4:
       default:
@@ -870,9 +885,9 @@ DEBUG_CODE_END();
   case PreTempRamExit:
     break;
   case PostTempRamExit:
-    if (MEASURED_BOOT_ENABLED()) {
+//7583X003_1    if (MEASURED_BOOT_ENABLED()) {
       TpmInitialize();
-    }
+//7583X003_1    }
     break;
   default:
     break;
