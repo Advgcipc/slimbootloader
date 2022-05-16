@@ -102,7 +102,9 @@ def update_btGuard_xml(btg_profile, stitch_dir, tree):
 
 
 def gen_bpmgen2_params (stitch_cfg_file, InFile, OutFile):
-    InFileptr = open(InFile, 'r', encoding='utf8')
+#// 7583X005_1    InFileptr = open(InFile, 'r', encoding='utf8')
+    InFileptr = open(InFile, 'r', encoding='utf8', errors='ignore')
+    
     lines = InFileptr.readlines()
     InFileptr.close()
 

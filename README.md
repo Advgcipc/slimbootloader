@@ -12,6 +12,22 @@
     Flash ROM   : Winbond W25R256JVEIQ
 
 #  Revision History
+    BIOS Name     : 7583000S060X005.bin;7583001S060X005.bin
+    BIOS Checksum : 26CA;03F9
+    BIOS String   : 
+    Release Date  : 2022/05/04
+    Owner         : Mike.Fan
+    Requester     : Lauryn.Hsu
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583X005_1  Add BootGuard stitch support.
+ 
+#  Release BIOS Information
+    7583000S060X005.bin  Release mode BIOS
+    7583001S060X005.bin  Debug mode BIOS
+
+#  Revision History
     BIOS Name     : 7583000S060X004.bin;7583001S060X004.bin
     BIOS Checksum : 0BAC;5AD2
     BIOS String   : 
