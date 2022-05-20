@@ -12,6 +12,6 @@ ResetVector.*.raw
 /Build
 /Conf
 PayloadModPkg
-/Platform/TigerlakeBoardPkg/BiosBin/StitchTools/Temp/
+/Platform/TigerlakeBoardPkg/Binaries/StitchTools/Temp/
 meu.log
 SFDpCmd

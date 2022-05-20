@@ -1,9 +1,10 @@
 @set BIOS_NAME=758300
 @set BIOS_DEBUG=1
-@set BIOS_FEATURE=S00
-@set BIOS_VERSION=0X005
+@set BIOS_FEATURE=S06
+@set BIOS_VERSION=0V106
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 @set PLATFORM_ID_DEBUGUART=AA00FE10
+::@set PLATFORM_ID_DEBUGUART=AA000210
 
 @IF "%1"=="" goto EnvSet
 @IF "%1"=="-a" goto BuildStitchSlim
@@ -56,13 +57,15 @@ git clone --recurse-submodules https://github.com/Advgcipc/slimbootloader.git
 @IF "%2"=="-r" set BIOS_DEBUG=0
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 @IF "%2"=="-r" goto BuildSlimR
-python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADDbg.fd:UEFI:Lzma"
+::python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADDbg.fd:UEFI:Lzma"
+python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
+::python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD.fd:UEFI:Lzma"
 @goto BuildEnd
 
 :BuildSlimR
 @IF "%2"=="-r" set BIOS_DEBUG=0
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-python BuildLoader.py build tgl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADRel.fd:UEFI:Lzma"
+python BuildLoader.py build tgl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_RELEASE.fd:UEFI:Lzma"
 @goto BuildEnd
 
 
@@ -72,17 +75,28 @@ python BuildLoader.py build tgl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADRel.fd:U
 
 :BuildStitch
 @IF "%2"=="-r" goto BuildStitchR
-
 @title Stitch Boot Loader - Build %BIOS_IMAGE%
-python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/%BIOS_DEBUG_IMAGE% -p %PLATFORM_ID_DEBUGUART%
+
+@set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchLoader.py
+@set SBL_SOURCE_BINFILE=Outputs/tgl/SlimBootloader.bin
+@set INPUT_BIOS_BINFILE=Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN
+
+python %BASE_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
+::python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
 @goto StitchEnd
 
 :BuildStitchR
 @IF "%2"=="-r" set BIOS_DEBUG=0
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-
 @title Stitch Boot Loader - Build %BIOS_IMAGE%
-python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
+
+@set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchLoader.py
+@set SBL_SOURCE_BINFILE=Outputs/tgl/SlimBootloader.bin
+@set INPUT_BIOS_BINFILE=Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN
+
+python %BASE_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
+
+::python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
 @goto StitchEnd
 
 
@@ -90,8 +104,8 @@ python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBo
 :BuildStitchBootGuard
 @set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchIfwi.py
 @set SOURCE_BIN_FILE=Outputs/tgl/Stitch_Components.zip
-@set CONFIG_PY_FILE=Platform/TigerlakeBoardPkg/BiosBin/StitchTools/Script/StitchIfwiConfig_SOM7583.py
-@set WORK_PATH=Platform/TigerlakeBoardPkg/BiosBin/StitchTools
+@set CONFIG_PY_FILE=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Script/StitchIfwiConfig_SOM7583.py
+@set WORK_PATH=Platform/TigerlakeBoardPkg/Binaries/StitchTools
 
 @set BIOS_FEATURE=S10
 @IF "%2"=="-r" set BIOS_DEBUG=0

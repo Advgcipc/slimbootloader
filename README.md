@@ -12,6 +12,22 @@
     Flash ROM   : Winbond W25R256JVEIQ
 
 #  Revision History
+    BIOS Name     : 7583000S060V106.bin;7583001S060V106.bin
+    BIOS Checksum : E3AA;C21B
+    BIOS String   : 
+    Release Date  : 2022/05/020
+    Owner         : Mike.Fan
+    Requester     : Lauryn.Hsu
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583X006_1    Add BIOS string support and update UEFI payload image.
+ 
+#  Release BIOS Information
+    7583000S060V106.bin  Release mode BIOS
+    7583001S060V106.bin  Debug mode BIOS
+
+#  Revision History
     BIOS Name     : 7583000S060X005.bin;7583001S060X005.bin
     BIOS Checksum : 26CA;03F9
     BIOS String   : 

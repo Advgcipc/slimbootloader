@@ -90,6 +90,13 @@
 BOOLEAN mTccDsoTuning      = FALSE;
 UINT8   mTccRtd3Support    = 0;
 
+ //7583V106_1 >>
+#include <BiosStringHob.h> 
+
+#include <IndustryStandard/SmBios.h>
+#define TYPE_TERMINATOR_SIZE          2     // Each Type is terminated by 0000 - 2 bytes
+#include "A9610Lib.c"
+//7583V106_1 >>
 //
 // The EC implements an embedded controller interface at ports 0x60/0x64 and a ACPI compliant
 // system management controller at ports 0x62/0x66. Port 0x66 is the command and status port,
@@ -130,7 +137,7 @@ CHAR8 *mBoardIdIndex[] = {
   "TigerLake U LPDDR4/4x T4 RVP",          // 0x03
   "TigerLake H DDR4 SODIMM RVP",           // 0x21 or 0xF
   "Up Xtreme i11 DDR4 SODIMM",             // 0x04
-  "SOM-7583",                              // 0x10
+//7583V106_1   "SOM-7583",                              // 0x10
 };
 
 //
@@ -322,6 +329,216 @@ EnableLegacyRegions (
   VOID
   );
 
+
+//7583V106_1 >>
+
+void *
+FindSmbiosTypePtr (
+  IN  UINT8   Type
+  )
+{
+  SMBIOS_STRUCTURE              *TypeHdr;
+  SMBIOS_STRUCTURE              *LastTypeHdr;
+  SMBIOS_TABLE_ENTRY_POINT      *SmbiosEntry;
+  UINT8                         *StringPtr;
+  UINT32                         CurLimit;
+
+  LastTypeHdr = NULL;
+  SmbiosEntry = (SMBIOS_TABLE_ENTRY_POINT *)(UINTN)PcdGet32 (PcdSmbiosTablesBase);
+  if (SmbiosEntry == NULL) {
+    return NULL;
+  }
+
+  TypeHdr  = (SMBIOS_STRUCTURE *) (UINTN) SmbiosEntry->TableAddress;
+  CurLimit = (UINT32) (UINTN) ((UINT8 *) SmbiosEntry + SmbiosEntry->EntryPointLength + sizeof (UINT8) + SmbiosEntry->TableLength);
+
+  while ( (UINT32)(UINTN)TypeHdr < CurLimit ) {
+    if (TypeHdr->Type == Type) {
+      LastTypeHdr = TypeHdr;
+    }
+    //
+    // Go to the end of strings to find next Type header
+    //
+    StringPtr = (UINT8 *) TypeHdr + TypeHdr->Length;
+    while ( !(StringPtr[0] == 0 && StringPtr[1] == 0) ) {
+      StringPtr++;
+    }
+    TypeHdr = (SMBIOS_STRUCTURE *)(StringPtr + TYPE_TERMINATOR_SIZE);
+  }
+
+  return LastTypeHdr;
+}
+
+EFI_STATUS
+UpdateSmbiosData (
+  IN  UINT8     Type,
+  IN  UINT16    Offset,
+  IN  UINT8     Width,
+  IN  UINT8     *Value
+  )
+{
+  UINT8             *TypeHdr;
+  //
+  // Find the header to append a string
+  //
+  TypeHdr = (UINT8 *) FindSmbiosTypePtr (Type);
+  if (TypeHdr == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  if (Width != 0)
+    CopyMem ((TypeHdr + Offset), Value, Width);
+
+  
+  return EFI_SUCCESS;
+}
+
+VOID
+UpdateSmbiosInfo (
+  VOID
+  )
+{
+  EFI_STATUS        Status;
+  BOOT_LOADER_VERSION  *VerInfoTbl;
+
+  UINT8             MajorVer;
+  UINT8             MinorVer;
+  UINT8             BiosReserved;
+  EFI_GUID          SmbiosUuid = {0x3397e2ee, 0xbe6a, 0x4362, {0xb4, 0x51, 0xf, 0xe6, 0x2a, 0x55, 0xff, 0x1} };
+// {3397e2ee-be6a-4362-b451-0fe62a55ff01} 
+
+  VerInfoTbl    = GetVerInfoPtr ();
+  MajorVer   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+  MinorVer   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+
+  //  System BIOS Major/Minor Release
+  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, SystemBiosMajorRelease), 1, &MajorVer);
+  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, SystemBiosMinorRelease), 1, &MinorVer);
+
+  //  Embedded controller firmware major/minor Release
+  Status = A9610Read_FW_Version (&MajorVer, &MinorVer);
+  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMajorRelease), 1, &MajorVer);
+  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMinorRelease), 1, &MinorVer);
+
+  //  MISC_BIOS_CHARACTERISTICS_EXTENSION.BiosReserved
+  //  Bit 0 - AcpiIsSupported                    
+  //  Bit 1 - UsbLegacyIsSupported               
+  BiosReserved = BIT0 | BIT1;
+  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, BiosCharacteristics), 1, &BiosReserved);
+
+  //  System Information (Type 1) Uuid
+  UpdateSmbiosData (SMBIOS_TYPE_SYSTEM_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE1, Uuid), sizeof(EFI_GUID), (UINT8*)&SmbiosUuid);
+
+
+}
+
+VOID
+EFIAPI
+BuildBiosStringHob ()
+{
+  EFI_PEI_BIOS_STRING_HOB *BiosStringHob;
+  BOOT_LOADER_VERSION  *VerInfoTbl;
+  CHAR8 PlatformName[10]= {0};
+  VerInfoTbl    = GetVerInfoPtr ();
+
+  BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
+
+  if (BiosStringHob != NULL) {
+    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: PcdVerInfoBuildDate %a\n", PcdGetPtr (PcdVerInfoBuildDate)));
+    CopyMem (PlatformName, GetPlatformName (), 8);
+
+    AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
+    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: ProjectName %a Len: %x\n", BiosStringHob->ProjectName, AsciiStrLen (BiosStringHob->ProjectName)));
+
+    BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+    BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+    BiosStringHob->BIOSFormalVersion  = 'V';
+    
+    AsciiSPrint (BiosStringHob->ProjectBuildDate, 16, "%a",PcdGetPtr (PcdVerInfoBuildDate));
+  }
+
+}
+
+
+VOID
+Stage2BoardInitNotify (
+  IN  BOARD_INIT_PHASE    InitPhase
+)
+{
+  EFI_STATUS            Status;
+
+  switch (InitPhase) {
+  case PreSiliconInit:
+    {
+  	UINT8 Data;
+    Data = 0x0;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+
+    break;
+  case PostSiliconInit:
+    BuildBiosStringHob();
+    break;
+  case PostPciEnumeration:
+    UpdateSmbiosInfo ();
+
+    if (GetBootMode() == BOOT_ON_S3_RESUME) {
+  	UINT8 Data;
+    Data = 0x01;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+    break;
+  case PrePayloadLoading:
+    break;
+
+  case EndOfStages:
+    {
+  	UINT8 Data;
+    Data = 0x01;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+    break;
+
+  case ReadyToBoot:
+  {
+  //	Set GPIO to System_OK_LED turn on.
+  // GPP_E7, FD6A0000h + AE0h
+  // Bit9 GPIO RX Disable, Bit8 GPIO TX Disable
+  // Bit1 GPIO RX State, Bit0 GPIO TX State
+    UINT32  GPIOlevel;
+    GPIOlevel = MmioRead32( 0xFD6A0AE0 );
+    GPIOlevel = (GPIOlevel & 0xFFFFFEFE) | 0x200;    // set System_OK LED#
+    MmioWrite32(0xFD6A0AE0, GPIOlevel );
+  // EC boot count command
+    IoWrite8(0x29A, 0x2F);  // EC boot count
+  }
+
+    break;
+
+  default:
+    break;
+  }
+}
+
+//7583V106_1 >>
 /**
 Return Cpu stepping type
 
@@ -541,9 +758,55 @@ InitializeSmbiosInfo (
   TempSmbiosStrTbl  = (SMBIOS_TYPE_STRINGS *) AllocateTemporaryMemory (0);
   VerInfoTbl    = GetVerInfoPtr ();
 
+ 
   //
   // SMBIOS_TYPE_BIOS_INFORMATION
   //
+//7883V106_1 >>
+  switch (GetPlatformId ()) {
+    case BoardIdTglUSOM7583:
+    {
+      CHAR8 PlatformName[10]= {0};
+
+      if (VerInfoTbl != NULL) {
+        CopyMem (PlatformName, GetPlatformName (), 8);
+      } else {
+        AsciiSPrint (PlatformName, 10, "%a\0", "Unknown");
+      }
+
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        1, "Advantech Corp.");
+
+        AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
+          "%a00%cS060V%d%02d\0",
+          PlatformName,
+          VerInfoTbl->ImageVersion.BldDebug ? '1' : '0',
+          VerInfoTbl->ImageVersion.ProjMajorVersion,
+          VerInfoTbl->ImageVersion.ProjMinorVersion);
+
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        2, TempStrBuf);
+      
+      AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), 
+        "%a",PcdGetPtr (PcdVerInfoBuildDate));
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        3, TempStrBuf);
+  //
+  // SMBIOS_TYPE_BASEBOARD_INFORMATION
+  //
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        1, "Advantech Corp.");
+      AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),"%a\0", PlatformName);
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        2, TempStrBuf);
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        3, "A101-2");
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        4, "1234567");
+      }
+      break;
+    default:
+//7583V106_1 >>
   AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
     1, "Intel Corporation");
   if (VerInfoTbl != NULL) {
@@ -565,6 +828,9 @@ InitializeSmbiosInfo (
     2, TempStrBuf);
   AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
     3, __DATE__);
+
+       break;
+   }
 
   //
   // SMBIOS_TYPE_SYSTEM_INFORMATION
@@ -588,21 +854,21 @@ InitializeSmbiosInfo (
   //
   // SMBIOS_TYPE_BASEBOARD_INFORMATION
   //
-  switch (GetPlatformId ()) {
-    case BoardIdTglUSOM7583:
-      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-        1, "Advantech Corp.");
-      break;
-    default:
+   switch (GetPlatformId ()) {
+     case BoardIdTglUSOM7583:
+//7583V106_1       AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+//7583V106_1         1, "Advantech Corp.");
+       break;
+     default:
       AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
         1, "Intel Corporation");
-      break;
-  }
+//7583V106_1       break;
+//7583V106_1   }
 
   switch (GetPlatformId ()) {
-    case BoardIdTglUSOM7583:
-      BrdIdx = 5;
-      break;
+//7583V106_1     case BoardIdTglUSOM7583:
+//7583V106_1       BrdIdx = 5;
+//7583V106_1       break;
     case BoardIdTglUDdr4:
       BrdIdx = 1;
       break;
@@ -629,6 +895,10 @@ InitializeSmbiosInfo (
   AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
     4, "Board Serial Number");
 
+//7583V106_1 >>
+      break;
+  }
+//7583V106_1 >>
   //
   // SMBIOS_TYPE_PROCESSOR_INFORMATION : TBD
   //
@@ -979,6 +1249,7 @@ BoardInit (
         ReadCpuDts ();
       }
     }
+
     break;
   case PostPciEnumeration:
     Status = SetFrameBufferWriteCombining (0, MAX_UINT32);
@@ -1059,23 +1330,26 @@ BoardInit (
       ProgramSecuritySetting ();
     }
 //7583X003_3
-{
-  // EC boot count command
-    IoWrite8(0x29A, 0x2F);  // EC boot count
-  //	Set GPIO to System_OK_LED turn on.
-  // GPP_E7, FD6A0000h + AE0h
-  // Bit9 GPIO RX Disable, Bit8 GPIO TX Disable
-  // Bit1 GPIO RX State, Bit0 GPIO TX State
-    UINT32  GPIOlevel;
-    GPIOlevel = MmioRead32( 0xFD6A0AE0 );
-    GPIOlevel = (GPIOlevel & 0xFFFFFEFE) | 0x200;    // set System_OK LED#
-    MmioWrite32(0xFD6A0AE0, GPIOlevel );
-}
+//7583V106_1{
+//  // EC boot count command
+//    IoWrite8(0x29A, 0x2F);  // EC boot count
+//  //	Set GPIO to System_OK_LED turn on.
+//  // GPP_E7, FD6A0000h + AE0h
+//  // Bit9 GPIO RX Disable, Bit8 GPIO TX Disable
+//  // Bit1 GPIO RX State, Bit0 GPIO TX State
+//    UINT32  GPIOlevel;
+//    GPIOlevel = MmioRead32( 0xFD6A0AE0 );
+//    GPIOlevel = (GPIOlevel & 0xFFFFFEFE) | 0x200;    // set System_OK LED#
+//    MmioWrite32(0xFD6A0AE0, GPIOlevel );
+//}
 //7583X003_3
+//    BuildBIOSStringHob();
     break;
   default:
     break;
   }
+  Stage2BoardInitNotify (InitPhase); //7563V106_1
+
 }
 
 CPU_FAMILY

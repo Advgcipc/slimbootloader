@@ -78,6 +78,7 @@
   gEfiGraphicsInfoHobGuid
   gCpuInitDataHobGuid
   gSiFusaInfoGuid
+  gAhcBiosStringGuid    #//7583V106_1
 
 [Pcd]
   gPlatformModuleTokenSpaceGuid.PcdGraphicsVbtAddress
@@ -111,3 +112,4 @@
   gPlatformModuleTokenSpaceGuid.PcdAcpiTableTemplatePtr
   gPlatformModuleTokenSpaceGuid.PcdEnableDts
   gPlatformModuleTokenSpaceGuid.PcdPciResourceMem64Base
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate  #//7583V106_1
