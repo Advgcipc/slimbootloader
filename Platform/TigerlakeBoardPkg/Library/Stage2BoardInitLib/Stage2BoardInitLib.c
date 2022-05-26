@@ -83,6 +83,8 @@
 #include <Library/WatchDogTimerLib.h>
 #include "Dts.h"
 #include "SerialIo.h"
+#include <Library/PciePm.h>
+#include <Library/PlatformInfo.h>
 #include <Library/PlatformHookLib.h>
 
 
@@ -1010,7 +1012,7 @@ UpdatePayloadId (
 
   PldSelCfgData = (PLDSEL_CFG_DATA *)FindConfigDataByTag (CDATA_PLDSEL_TAG);
   if ((PldSelCfgData != NULL) && (PldSelCfgData->PldSelGpio.Enable != 0)) {
-    PayloadSelGpioPad = GpioGroupPinToPad (PldSelCfgData->PldSelGpio.PadGroup,  PldSelCfgData->PldSelGpio.PinNumber);
+    PayloadSelGpioPad = GpioGroupPinToPad (PldSelCfgData->PldSelGpio.PadGroup, PldSelCfgData->PldSelGpio.PinNumber);
     if (PayloadSelGpioPad == 0) {
       Status = EFI_ABORTED;
     } else {
@@ -1086,10 +1088,10 @@ SOM7583GopVbtSpecificUpdate(
   IN CHILD_STRUCT **ChildStructPtr
   )
 {
-  ChildStructPtr[4]->DeviceClass = HDMI_DVI;
-  ChildStructPtr[4]->DVOPort = HDMI_B;
-  ChildStructPtr[4]->AUX_Channel = 0;
-  ChildStructPtr[4]->HdmiLevelShifterConfig.Bits.HdmiMaxDataRateBits = 1;  //[2.97 Gbps]
+//7583V107_2  ChildStructPtr[4]->DeviceClass = HDMI_DVI;
+//7583V107_2  ChildStructPtr[4]->DVOPort = HDMI_B;
+//7583V107_2  ChildStructPtr[4]->AUX_Channel = 0;
+//7583V107_2  ChildStructPtr[4]->HdmiLevelShifterConfig.Bits.HdmiMaxDataRateBits = 1;  //[2.97 Gbps]
 }
 
 //Initialize Platform Igd OpRegion
@@ -1178,7 +1180,7 @@ BoardInit (
     SiCfgData = (SILICON_CFG_DATA *)FindConfigDataByTag (CDATA_SILICON_TAG);
     if (SiCfgData != NULL) {
       // Configure TSN GPIO table if TSN is enabled.
-      if (SiCfgData->PchTsnEnable == 1) {
+      if (SiCfgData->PchTsnEnable[0] || SiCfgData->PchTsnEnable[1]) {
         switch (GetPlatformId ()) {
           case BoardIdTglHDdr4SODimm:
           case 0x0F:
@@ -1252,6 +1254,9 @@ BoardInit (
 
     break;
   case PostPciEnumeration:
+    if (FeaturePcdGet (PcdEnablePciePm)) {
+      PciePmConfig ();
+    }
     Status = SetFrameBufferWriteCombining (0, MAX_UINT32);
     if (EFI_ERROR(Status)) {
       DEBUG ((DEBUG_INFO, "Failed to set GFX framebuffer as WC\n"));
@@ -1838,10 +1843,10 @@ UpdateFspConfig (
     TsnMacAddrBase      = NULL;
     TsnMacAddrSize      = 0;
 
-    FspsConfig->PchTsnEnable    = SiCfgData->PchTsnEnable;
+    CopyMem (FspsConfig->PchTsnEnable, SiCfgData->PchTsnEnable, sizeof(SiCfgData->PchTsnEnable));
     FspsConfig->PchTsnLinkSpeed = SiCfgData->PchTsnLinkSpeed;
 
-    if(SiCfgData->PchTsnEnable == 1) {
+    if (SiCfgData->PchTsnEnable[0] || SiCfgData->PchTsnEnable[1]) {
       FspsConfig->PchTsnMultiVcEnable = SiCfgData->PchTsnMultiVcEnable;
       Status = LoadComponent (SIGNATURE_32 ('I', 'P', 'F', 'W'), SIGNATURE_32 ('T', 'M', 'A', 'C'),
                               (VOID **)&TsnMacAddrBase, &TsnMacAddrSize);
@@ -1874,7 +1879,7 @@ UpdateFspConfig (
     FspsConfig->CpuUsb3OverCurrentPin[1] = 0x1;
     FspsConfig->CpuUsb3OverCurrentPin[2] = 0x2;
     FspsConfig->CpuUsb3OverCurrentPin[3] = 0x3;
-    if ((SiCfgData != NULL) && (SiCfgData->PchTsnEnable)) {
+    if ((SiCfgData != NULL) && (SiCfgData->PchTsnEnable[0] || SiCfgData->PchTsnEnable[1])) {
       FspsConfig->Usb2OverCurrentPin[1] = 0xff;
       FspsConfig->Usb2OverCurrentPin[4] = 0xff;
       FspsConfig->Usb3OverCurrentPin[1] = 0xff;
@@ -1935,6 +1940,7 @@ UpdateFspConfig (
   FspsConfig->UsbTcPortEn = 0xf;
 
   if (SiCfgData != NULL) {
+    FspsConfig->EnableTcoTimer   = SiCfgData->EnableTcoTimer;
     FspsConfig->EnableTimedGpio0 = SiCfgData->EnableTimedGpio0;
     FspsConfig->EnableTimedGpio1 = SiCfgData->EnableTimedGpio1;
     FspsConfig->XdciEnable       = SiCfgData->XdciEnable;
@@ -1982,7 +1988,8 @@ UpdateFspConfig (
     FspsConfig->D3HotEnable = 0;
     FspsConfig->D3ColdEnable = 1;
     FspsConfig->PchLanEnable = 0;
-    FspsConfig->PchTsnEnable = 0;
+    FspsConfig->PchTsnEnable[0] = 0;
+    FspsConfig->PchTsnEnable[1] = 0;
     FspsConfig->XdciEnable = 0;
 
     // PCH SERIAL_UART_CONFIG
@@ -1991,6 +1998,10 @@ UpdateFspConfig (
       FspsConfig->SerialIoUartDmaEnable[Index]       = 1;
       FspsConfig->SerialIoUartDbg2[Index]            = 0;
     }
+  }
+
+  if (FeaturePcdGet (PcdEnablePciePm)) {
+    StoreRpConfig (FspsConfig);
   }
 }
 
@@ -2247,7 +2258,8 @@ UpdateSerialPortInfo (
   IN  SERIAL_PORT_INFO  *SerialPortInfo
 )
 {
-  SerialPortInfo->BaseAddr = (UINT32) GetSerialPortBase();
+  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
+  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
   SerialPortInfo->RegWidth = GetSerialPortStrideSize();
   if (GetDebugPort () >= PCH_MAX_SERIALIO_UART_CONTROLLERS) {
     // IO Type
@@ -2994,7 +3006,7 @@ PlatformUpdateAcpiGnvs (
 
   // TSN
   SiCfgData = (SILICON_CFG_DATA *)FindConfigDataByTag (CDATA_SILICON_TAG);
-  if ((SiCfgData != NULL) && (SiCfgData->PchTsnEnable)) {
+  if ((SiCfgData != NULL) && (SiCfgData->PchTsnEnable[0] || SiCfgData->PchTsnEnable[1])) {
     PlatformNvs->TsnPcsEnabled  = 1;
   }
 

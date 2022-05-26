@@ -134,6 +134,7 @@ class BaseBoard(object):
         self.ACPI_PM_TIMER_BASE     = 0x0408
         self.ACPI_PROCESSOR_ID_BASE = 1
         self.USB_KB_POLLING_TIMEOUT = 1
+        self.USB_CMD_TIMEOUT        = 0x1000
 
         self.VERIFIED_BOOT_STAGE_1B   = 0x0
         self.BOOT_MEDIA_SUPPORT_MASK  = 0xFFFFFFFF
@@ -185,6 +186,7 @@ class BaseBoard(object):
         self.BUILD_CSME_UPDATE_DRIVER    = 0
 
         self.CPU_MAX_LOGICAL_PROCESSOR_NUMBER = 16
+        self.CPU_SORT_METHOD       = 0
 
         self.ACM_SIZE              = 0
         self.DIAGNOSTICACM_SIZE    = 0
@@ -237,6 +239,8 @@ class BaseBoard(object):
         self.FSPDEBUG_MODE         = 0
         self.MIN_FSP_REVISION      = 0
         self.FSP_IMAGE_ID          = ''
+
+        self.MAX_MEMORY_MAP_ENTRY_NUM = 0x20
 
         self.TOP_SWAP_SIZE         = 0
         self.REDUNDANT_SIZE        = 0
@@ -868,6 +872,7 @@ class Build(object):
             'DOWNGRADE_PMEM64',
             'DOWNGRADE_BUS0',
             'FLAG_ALLOC_PMEM_FIRST',
+            'FLAG_ALLOC_ROM_BAR',
             'BUS_SCAN_TYPE',
             'BUS_SCAN_ITEMS'
         ]
@@ -1246,7 +1251,7 @@ class Build(object):
             gen_config_file (self._fv_dir, board_override_name, self._board.BOARD_PKG_NAME, self._board._PLATFORM_ID,
                              self._board._CFGDATA_PRIVATE_KEY, self._board.CFG_DATABASE_SIZE, self._board.CFGDATA_SIZE,
                              self._board._CFGDATA_INT_FILE, self._board._CFGDATA_EXT_FILE,
-                             self._board._SIGNING_SCHEME, HASH_VAL_STRING[self._board.SIGN_HASH_TYPE], svn)
+                             self._board._SIGNING_SCHEME, HASH_VAL_STRING[self._board.SIGN_HASH_TYPE], svn, self._board.BOARD_NAME)
 
         # rebuild reset vector
         vtf_dir = os.path.join('BootloaderCorePkg', 'Stage1A', 'Ia32', 'Vtf0')

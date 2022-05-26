@@ -1,7 +1,7 @@
 ## @file
 # This file is used to provide board specific image information.
 #
-#  Copyright (c) 2018 - 2021, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2018 - 2022, Intel Corporation. All rights reserved.<BR>
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -25,8 +25,8 @@ class Board(BaseBoard):
 
         self.VERINFO_IMAGE_ID       = 'SBL_TGL'
         self.VERINFO_PROJ_MAJOR_VER = 1
-#//7583V106_1        self.VERINFO_PROJ_MINOR_VER = 4
-        self.VERINFO_PROJ_MINOR_VER = 6
+#//7583V107_1        self.VERINFO_PROJ_MINOR_VER = 5
+        self.VERINFO_PROJ_MINOR_VER = 7
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -74,6 +74,7 @@ class Board(BaseBoard):
         self.ENABLE_FRAMEBUFFER_INIT    = 1
         # 1: To read ambient temperature at boot time 0: Disable the feature
         self.ENABLE_DTS           = 1
+        self.ENABLE_PCIE_PM       = 1
         self.ENABLE_FAST_BOOT     = 0
         self.HAVE_FUSA            = 1
         # 0: Disable  1: Enable  2: Auto (disable for UEFI payload, enable for others)
@@ -163,7 +164,6 @@ class Board(BaseBoard):
         self.VARIABLE_SIZE        = 0x00002000
         self.SBLRSVD_SIZE         = 0x00001000
         self.FWUPDATE_SIZE        = 0x00020000 if self.ENABLE_FWU else 0
-        self.OS_LOADER_FD_SIZE    = 0x0004F000
         self.OS_LOADER_FD_NUMBLK  = self.OS_LOADER_FD_SIZE // self.FLASH_BLOCK_SIZE
 
         self.TOP_SWAP_SIZE        = 0x080000
@@ -294,6 +294,17 @@ class Board(BaseBoard):
 
         if self.BUILD_CSME_UPDATE_DRIVER:
             dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(PCH_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+
+        if self.ENABLE_PCIE_PM:
+            lib = [
+                'PciePm|Silicon/$(PCH_PKG_NAME)/Library/PciePm/PciePm.inf',
+                'PciExpressHelpersLib|Silicon/$(PCH_PKG_NAME)/Library/PciExpressHelpersLibrary/PciExpressHelpersLibrary.inf',
+                'BasePcieHelperLib|Silicon/$(PCH_PKG_NAME)/Library/BasePcieHelperLib/BasePcieHelperLib.inf',
+                'PcieClientRpLib|Silicon/$(PCH_PKG_NAME)/Library/PcieClientRpLib/PcieClientRpLib.inf'
+            ]
+            dsc['LibraryClasses.%s' % self.BUILD_ARCH].extend (lib)
+        else:
+            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('PciePm|Silicon/CommonSocPkg/Library/PciePmNull/PciePmNull.inf')
 
         dsc['PcdsFeatureFlag.%s' % self.BUILD_ARCH] = [
             'gPlatformTigerLakeTokenSpaceGuid.PcdFusaEnabled | $(HAVE_FUSA)'

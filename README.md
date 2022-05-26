@@ -12,6 +12,22 @@
     Flash ROM   : Winbond W25R256JVEIQ
 
 #  Revision History
+    BIOS Name     : 7583000S060V107.bin;7583001S060V107.bin
+    BIOS Checksum : 6A3A;3EEE
+    BIOS String   : 
+    Release Date  : 2022/05/26
+    Owner         : Mike.Fan
+    Requester     : Lauryn.Hsu
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583X007_1    Merge 10a9e53b [ADLN] Add GPIO configuration from Cfg Data (#1566).
+ 
+#  Release BIOS Information
+    7583000S060V107.bin  Release mode BIOS
+    7583001S060V107.bin  Debug mode BIOS
+
+#  Revision History
     BIOS Name     : 7583000S060V106.bin;7583001S060V106.bin
     BIOS Checksum : E3AA;C21B
     BIOS String   : 
