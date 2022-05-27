@@ -42,6 +42,21 @@ case "$1" in
 		  python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/$BIOS_IMAGE -p $PLATFORM_ID_DEBUGUART
 		  echo "python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/$BIOS_IMAGE -p $PLATFORM_ID_DEBUGUART"
 		;;
+	"-ss")
+		echo "build Stitch BootGuard"
+		if [ "$2" == "-r" ]; then
+			BIOS_DEBUG="0"
+      BIOS_IMAGE=$BIOS_NAME$BIOS_DEBUG$BIOS_FEATURE$BIOS_VERSION".bin"
+		fi
+      BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchIfwi.py
+      SOURCE_BIN_FILE=Outputs/tgl/Stitch_Components.zip
+      CONFIG_PY_FILE=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Script/StitchIfwiConfig_SOM7583.py
+      WORK_PATH=Platform/TigerlakeBoardPkg/Binaries/StitchTools
+
+
+      python $BASE_PY_FILE -b vm -w $WORK_PATH -c $CONFIG_PY_FILE -s $SOURCE_BIN_FILE -p tglu_b0 -d $PLATFORM_ID_DEBUGUART -op Build -of $BIOS_IMAGE
+		  echo "python $BASE_PY_FILE -b vm -w $WORK_PATH -c $CONFIG_PY_FILE -s $SOURCE_BIN_FILE -p tglu_b0 -d $PLATFORM_ID_DEBUGUART -op Build -of $BIOS_IMAGE"
+		;;
 	# -c:
 	"-c")
 		echo "build clean"
