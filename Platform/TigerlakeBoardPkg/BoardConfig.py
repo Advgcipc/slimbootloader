@@ -26,7 +26,8 @@ class Board(BaseBoard):
         self.VERINFO_IMAGE_ID       = 'SBL_TGL'
         self.VERINFO_PROJ_MAJOR_VER = 1
 #//7583V107_1        self.VERINFO_PROJ_MINOR_VER = 5
-        self.VERINFO_PROJ_MINOR_VER = 7
+#//7583V108        self.VERINFO_PROJ_MINOR_VER = 7
+        self.VERINFO_PROJ_MINOR_VER = 8
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -137,7 +138,8 @@ class Board(BaseBoard):
         self.ENABLE_CSME_UPDATE   = 1
 
         # CSME update library is required to enable this option and will be available as part of CSME kit
-        self.BUILD_CSME_UPDATE_DRIVER   = 0
+#//7583V108        self.BUILD_CSME_UPDATE_DRIVER   = 0
+        self.BUILD_CSME_UPDATE_DRIVER   = 1
 
         self.STAGE1B_XIP          = 1
 
@@ -191,7 +193,8 @@ class Board(BaseBoard):
         # The info can be found in the 'RomSize' of Outputs/tgl/FlashMap.txt
         # Max size for 16MB IFWI: 0xAD8000
         # Default value in UEFI BIOS (32MB IFWI): 0xC00000
-        self.SLIMBOOTLOADER_SIZE  = 0xAD0000
+#//7583V108        self.SLIMBOOTLOADER_SIZE  = 0xAD0000
+        self.SLIMBOOTLOADER_SIZE  = 0xC00000
         self.NON_REDUNDANT_SIZE   = self.SLIMBOOTLOADER_SIZE - \
                                     (self.TOP_SWAP_SIZE + self.REDUNDANT_SIZE) * 2 - \
                                     self.NON_VOLATILE_SIZE
@@ -293,7 +296,8 @@ class Board(BaseBoard):
         ]
 
         if self.BUILD_CSME_UPDATE_DRIVER:
-            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(PCH_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+#//7583V108            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(PCH_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Platform/$(BOARD_PKG_NAME)/Binaries/Sbl32/MeFwUpdateLib.inf')
 
         if self.ENABLE_PCIE_PM:
             lib = [

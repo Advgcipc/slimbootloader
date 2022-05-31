@@ -3,7 +3,7 @@
 BIOS_NAME="758300"
 BIOS_DEBUG="1"
 BIOS_FEATURE="S06"
-BIOS_VERSION="0V107"
+BIOS_VERSION="0V108"
 BIOS_IMAGE=$BIOS_NAME$BIOS_DEBUG$BIOS_FEATURE$BIOS_VERSION".bin"
 PLATFORM_ID_DEBUGUART="AA00FE10"
 
@@ -16,7 +16,7 @@ fi
 case "$1" in
 	# -b:
 	"-b")
-		echo "build realease"
+		echo "Build Slim"
 
 		#echo BIOS_IMAGE=$BIOS_IMAGE
 
@@ -33,7 +33,7 @@ case "$1" in
 		;;
 	# -s:
 	"-s")
-		echo "build Stitch"
+		echo "Build Stitch"
 		if [ "$2" == "-r" ]; then
 			BIOS_DEBUG="0"
       BIOS_IMAGE=$BIOS_NAME$BIOS_DEBUG$BIOS_FEATURE$BIOS_VERSION".bin"
@@ -43,7 +43,7 @@ case "$1" in
 		  echo "python Platform/TigerlakeBoardPkg/Script/StitchLoader.py -i Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN -s Outputs/tgl/SlimBootloader.bin -o Build/$BIOS_IMAGE -p $PLATFORM_ID_DEBUGUART"
 		;;
 	"-ss")
-		echo "build Stitch BootGuard"
+		echo "Build Stitch BootGuard"
 		if [ "$2" == "-r" ]; then
 			BIOS_DEBUG="0"
       BIOS_IMAGE=$BIOS_NAME$BIOS_DEBUG$BIOS_FEATURE$BIOS_VERSION".bin"
@@ -56,6 +56,21 @@ case "$1" in
 
       python $BASE_PY_FILE -b vm -w $WORK_PATH -c $CONFIG_PY_FILE -s $SOURCE_BIN_FILE -p tglu_b0 -d $PLATFORM_ID_DEBUGUART -op Build -of $BIOS_IMAGE
 		  echo "python $BASE_PY_FILE -b vm -w $WORK_PATH -c $CONFIG_PY_FILE -s $SOURCE_BIN_FILE -p tglu_b0 -d $PLATFORM_ID_DEBUGUART -op Build -of $BIOS_IMAGE"
+		;;
+	"-fwu")
+		echo "Build Firmware Update Image"
+
+      BASE_PY_FILE=BootloaderCorePkg/Tools/GenCapsuleFirmware.py
+      PAYLOAD_FILE0=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Temp/BiosRegion.bin
+      PAYLOAD_FILE1=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Temp/MeRegionFile.bin
+      PAYLOAD_FILE2=Build/BootloaderCorePkg/DEBUG_GCC5/IA32/CsmeUpdateDriver.efi
+      FWU_KEY=$SBL_KEY_DIR/FirmwareUpdateTestKey_Priv_RSA3072.pem 
+      FWU_OUTPUTFILE=Build/FwuImage.bin
+		if [ "$2" == "-r" ]; then
+      PAYLOAD_FILE2=Build/BootloaderCorePkg/RELEASE_GCC5/IA32/CsmeUpdateDriver.efi
+		fi
+      
+      python $BASE_PY_FILE -p BIOS $PAYLOAD_FILE0 -p CSME $PAYLOAD_FILE1 -p CSMD $PAYLOAD_FILE2 -k $FWU_KEY -o $FWU_OUTPUTFILE -v
 		;;
 	# -c:
 	"-c")

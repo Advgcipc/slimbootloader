@@ -446,11 +446,11 @@ BuildBiosStringHob ()
   BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
 
   if (BiosStringHob != NULL) {
-    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: PcdVerInfoBuildDate %a\n", PcdGetPtr (PcdVerInfoBuildDate)));
+//7583V108    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: PcdVerInfoBuildDate %a\n", PcdGetPtr (PcdVerInfoBuildDate)));
     CopyMem (PlatformName, GetPlatformName (), 8);
 
     AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
-    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: ProjectName %a Len: %x\n", BiosStringHob->ProjectName, AsciiStrLen (BiosStringHob->ProjectName)));
+//7583V108    DEBUG((DEBUG_ERROR, "BuildBiosStringHob: ProjectName %a Len: %x\n", BiosStringHob->ProjectName, AsciiStrLen (BiosStringHob->ProjectName)));
 
     BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
     BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
