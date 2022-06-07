@@ -3,7 +3,7 @@
 BIOS_NAME="758300"
 BIOS_DEBUG="1"
 BIOS_FEATURE="S06"
-BIOS_VERSION="0V108"
+BIOS_VERSION="0V109"
 BIOS_IMAGE=$BIOS_NAME$BIOS_DEBUG$BIOS_FEATURE$BIOS_VERSION".bin"
 PLATFORM_ID_DEBUGUART="AA00FE10"
 
@@ -63,12 +63,9 @@ case "$1" in
       BASE_PY_FILE=BootloaderCorePkg/Tools/GenCapsuleFirmware.py
       PAYLOAD_FILE0=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Temp/BiosRegion.bin
       PAYLOAD_FILE1=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Temp/MeRegionFile.bin
-      PAYLOAD_FILE2=Build/BootloaderCorePkg/DEBUG_GCC5/IA32/CsmeUpdateDriver.efi
+      PAYLOAD_FILE2=Platform/TigerlakeBoardPkg/Binaries/Sbl32/CsmeUpdateDriver.efi
       FWU_KEY=$SBL_KEY_DIR/FirmwareUpdateTestKey_Priv_RSA3072.pem 
       FWU_OUTPUTFILE=Build/FwuImage.bin
-		if [ "$2" == "-r" ]; then
-      PAYLOAD_FILE2=Build/BootloaderCorePkg/RELEASE_GCC5/IA32/CsmeUpdateDriver.efi
-		fi
       
       python $BASE_PY_FILE -p BIOS $PAYLOAD_FILE0 -p CSME $PAYLOAD_FILE1 -p CSMD $PAYLOAD_FILE2 -k $FWU_KEY -o $FWU_OUTPUTFILE -v
 		;;
@@ -77,6 +74,30 @@ case "$1" in
 		echo "build clean"
 		python BuildLoader.py clean
 		echo "python BuildLoader.py clean"
+		;;
+	*)
+	# -?:
+	"-?")
+    echo "Slim Boot Loader Setup & Build Environment"
+    echo "      -c      Clean Slim Boot Loader"
+    echo "      -a      Build & Stitch Slim Boot Loader"
+    echo "      -b      Build Slim Boot Loader"
+    echo "      -s      Stitch Slim Boot Loader"
+    echo "      -ss     Stitch BootGuard"
+    echo "      -fwu    Build FirmwareUpdate Image"
+    echo "      -k      Create SBL Keys"
+    echo "      -r      Build Release Mode Slim Boot Loader"
+    echo "      -?      Show Help message"
+    echo " Recommand before rebuild Slim Boot Loader clean it first.."
+    echo " Example: Slim -c"
+    echo " Build & Stitch Slim Boot Loader"
+    echo " Example: Slim -a"
+    echo " Build & Stitch Slim Boot Loader release mode"
+    echo " Example: Slim -a -r"
+    echo " Stitch Slim Boot Loader with BootGuard feature"
+    echo " Example: Slim -ss"
+    echo " Build Firmware Update Image into Build\FwuImage.bin"
+    echo " Example: Slim -fwu"
 		;;
 	*)
 		echo "Usage: slim.sh <arg1> <arg2>"

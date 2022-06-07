@@ -135,21 +135,18 @@ def get_xml_change_list (platform, plt_params_list):
         ('./FlashLayout/GbeRegion/InputFile',                                        '$SourceDir\GbeRegion.bin'),
         ('./FlashLayout/GbeRegion/Enabled',                                          'Disabled'),
         ('./FlashLayout/SubPartitions/PchcSubPartitionData/InputFile',               '$SourceDir\PchcSubPartitionData.bin'),
+        ('./FlashLayout/SubPartitions/IunitSubPartition/InputFile',                  '$SourceDir\IPU.bin'),
         ('./FlashSettings/FlashComponents/FlashComponent1Size',                      '32MB'),
         ('./FlashSettings/FlashConfiguration/FastReadClockFreq',                     '25MHz'),
         ('./FlashSettings/FlashConfiguration/ReadIdAndReadStatClkFreq',              '25MHz'),
         ('./FlashSettings/FlashConfiguration/WriteEraseClockFreq',                   '25MHz'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'VsccEntry0'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0xEF'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x40'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x19'),
-        ('./IntelAmt/IntelAmtConfiguration/AmtSupported',                            'Yes'),
-        ('./IntelAmt/IntelAmtConfiguration/NetServicesSupported',                    'Yes'),
-        ('./IntelAmt/IntelAmtConfiguration/MngAppSupported',                         'Yes'),
+        ('./IntelAmt/IntelAmtConfiguration/AmtSupported',                            'No'),
+        ('./IntelAmt/IntelAmtConfiguration/MngHwStatus',                             'Disabled'),
+        ('./IntelAmt/IntelAmtConfiguration/NetServicesSupported',                    'No'),
+        ('./IntelAmt/IntelAmtConfiguration/MngAppSupported',                         'No'),
+        ('./IntelAmt/IntelAmtConfiguration/MngAppPowerUpState',                      'Disabled'),
+        ('./IntelAmt/KvmConfiguration/KvmSupported',                                 'No'),
         ('./PlatformProtection/PlatformIntegrity/OemPublicKeyHash',                  'F8 F0 E3 69 15 81 76 99 0A 54 9E D4 C3 6D 1A 86 39 D8 87 3D EF F7 ED 2D E3 4C B4 1B CC B3 04 76 CE 0A A0 63 BC 5B 7A AC FF D9 50 9E 96 40 C6 99'),
-#            <OemPublicKeyHash value="99 A4 9A FA 4A C9 45 0C E3 C8 87 1D DD 2C 92 93 D3 CB 73 32 36 D6 76 24 FC 99 99 25 3C BF 40 03 C6 52 4F CE 06 F6 C7 F3 FE 84 56 EE D3 A1 78 F6" label="OEM Public Key Hash" help_text="Raw hash string for the SHA-384 hash of the OEM public key corresponding to the private key used to sign the OEM Key hash manifest. When manufacture is completed, this hash value is burned into an FPF, and is permament. This value is used to verify the OEM Key hash, and also DnX images. 
-#        ('./PlatformProtection/PlatformIntegrity/OemPublicKeyHash',                  '99 A4 9A FA 4A C9 45 0C E3 C8 87 1D DD 2C 92 93 D3 CB 73 32 36 D6 76 24 FC 99 99 25 3C BF 40 03 C6 52 4F CE 06 F6 C7 F3 FE 84 56 EE D3 A1 78 F6'),
-#        ('./PlatformProtection/PlatformIntegrity/OemExtInputFile',                   'AmiCrbOEMP.bin'),
         ('./PlatformProtection/PlatformIntegrity/OemExtInputFile',                   ''),
         ('./PlatformProtection/BootGuardConfiguration/BtGuardKeyManifestId',         '0x1'),
         ('./PlatformProtection/BiosGuardConfiguration/BiosGrdProtOvrdEn',            'Yes'),
@@ -160,6 +157,8 @@ def get_xml_change_list (platform, plt_params_list):
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC4',   'Enabled'),
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC5',   'Disabled'),
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC6',   'Disabled'),
+        ('./NetworkingConnectivity/NetworkingConfiguration/PlatformVproNIC/vproNicEnabled',          'Yes'),
+        ('./NetworkingConnectivity/NetworkingConfiguration/PlatformVproNIC/vproNicSMBusAddress',     '0x59'),
         ('./NetworkingConnectivity/WiredLanConfiguration/GbePCIePortSelect',         'None'),
         ('./NetworkingConnectivity/WiredLanConfiguration/PhyConnected',              'No PHY Connected'),
         ('./NetworkingConnectivity/WirelessLanConfiguration/MeClinkEnable',          'No'),
@@ -200,14 +199,14 @@ def get_xml_change_list (platform, plt_params_list):
         ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0xEF'),
         ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x60'),
         ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x19'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'MX25L25673G'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0xC2'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x20'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x19'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'ATF26DF321'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0x1F'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x47'),
-        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x00'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'MX25L25673G'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0xC2'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x20'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x19'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'ATF26DF321'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryVendorId',        '0x1F'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId0',       '0x47'),
+#        ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryDeviceId1',       '0x00'),
         ('./FlexIO/PcieLaneReversalConfiguration/PCIeCtrl3LnReversal',               'No'),
         ('./FlexIO/PciePortConfiguration/PCIeContoller2Config',               '1x4'),
         ('./FlexIO/PciePortConfiguration/PCIeContoller3Config',               '4x1'),
@@ -241,8 +240,6 @@ def get_xml_change_list (platform, plt_params_list):
     if (platform == 'tglu_b0'):
         print ("Applying changes to tglu_b0 silicon")
         xml_change_list.append ([
-# //ddd        ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort4Config',                   'DP Fixed Connection'),
-# //ddd        ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs3Cfg',              'Legacy VCCIO'),
         ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort1Config',                   'DP Fixed Connection'),
         ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs0Cfg',              'Legacy VCCIO'),
             ])
@@ -283,5 +280,5 @@ def get_xml_change_list (platform, plt_params_list):
             ])
 
     return xml_change_list
- 
+ 
  

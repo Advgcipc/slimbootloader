@@ -12,6 +12,26 @@
     Flash ROM   : Winbond W25R256JVEIQ
 
 #  Revision History
+    BIOS Name     : 7583000S060V109.bin;7583000S160V109.bin
+    BIOS Checksum : 78AD
+    BIOS String   : **** SOM-7583 BIOS V1.09 (06/07/2022) ****
+    Release Date  : 2022/06/07
+    Owner         : Mike.Fan
+    Requester     : Lauryn.Hsu
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583V109      Update PepGbe to 0 to fix blocked postcode 0x05 during rebooting.
+
+#  Release BIOS Information
+    SourceVersion        2a3898c8b4d9e022
+    7583000S060V109.bin  Release mode BIOS
+    7583000S160V109.bin  Release mode BIOS with Boot Guard 
+    FwuImage.bin         Firmware update Image put into USB Root.
+      Window command line : "cscript fmu.vbs" then reboot
+      Linux : "echo 1 > /sys/bus/wmi/devices/44FADEB1-B204-40F2-8581-394BBDC1B651/firmware_update_request" then reboot
+
+#  Revision History
     BIOS Name     : 7583000S060V108.bin
     BIOS Checksum : 78AD
     BIOS String   : **** SOM-7583 BIOS V1.08 (05/31/2022) ****
@@ -21,7 +41,7 @@
     Customer      : Advantech-SOM
 
 #  Release Description
-    7583X008      Update Firmware update support.
+    7583V108      Update Firmware update support.
  
 #  Release BIOS Information
     7583000S060V108.bin  Release mode BIOS

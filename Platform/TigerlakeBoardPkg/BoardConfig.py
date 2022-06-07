@@ -27,7 +27,8 @@ class Board(BaseBoard):
         self.VERINFO_PROJ_MAJOR_VER = 1
 #//7583V107_1        self.VERINFO_PROJ_MINOR_VER = 5
 #//7583V108        self.VERINFO_PROJ_MINOR_VER = 7
-        self.VERINFO_PROJ_MINOR_VER = 8
+#//7583V109        self.VERINFO_PROJ_MINOR_VER = 8
+        self.VERINFO_PROJ_MINOR_VER = 9
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -138,8 +139,8 @@ class Board(BaseBoard):
         self.ENABLE_CSME_UPDATE   = 1
 
         # CSME update library is required to enable this option and will be available as part of CSME kit
-#//7583V108        self.BUILD_CSME_UPDATE_DRIVER   = 0
-        self.BUILD_CSME_UPDATE_DRIVER   = 1
+        self.BUILD_CSME_UPDATE_DRIVER   = 0
+#//7583V109        self.BUILD_CSME_UPDATE_DRIVER   = 1
 
         self.STAGE1B_XIP          = 1
 

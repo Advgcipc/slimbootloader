@@ -1,7 +1,7 @@
 @set BIOS_NAME=758300
 @set BIOS_DEBUG=1
 @set BIOS_FEATURE=S06
-@set BIOS_VERSION=0V108
+@set BIOS_VERSION=0V109
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 @set PLATFORM_ID_DEBUGUART=AA00FE10
 ::@set PLATFORM_ID_DEBUGUART=AA000210
@@ -121,10 +121,9 @@ python %BASE_PY_FILE% -b vm -w %WORK_PATH% -c %CONFIG_PY_FILE% -s %SOURCE_BIN_FI
 @set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
 @set PAYLOAD_FILE0=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\BiosRegion.bin
 @set PAYLOAD_FILE1=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\MeRegionFile.bin
-@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2017\IA32\CsmeUpdateDriver.efi
+@set PAYLOAD_FILE2=Platform\TigerlakeBoardPkg\Binaries\Sbl32\CsmeUpdateDriver.efi
 @set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
 @set FWU_OUTPUTFILE=Build\FwuImage.bin
-@IF "%2"=="-r" set PAYLOAD_FILE2=Build\BootloaderCorePkg\RELEASE_VS2017\IA32\CsmeUpdateDriver.efi
 
 python %BASE_PY_FILE% -p BIOS %PAYLOAD_FILE0% -p CSME %PAYLOAD_FILE1% -p CSMD %PAYLOAD_FILE2% -k %FWU_KEY% -o %FWU_OUTPUTFILE% -v
 @goto Exit

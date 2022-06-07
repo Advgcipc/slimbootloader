@@ -21,7 +21,7 @@
 #include <LowPowerSupport.h>
 #include <ConfigDataStruct.h>
 #include <Library/ConfigDataLib.h>
-
+#include <PlatformBoardId.h>
 
 /**
   Check if given root port has device connected and enable wake capability
@@ -193,6 +193,7 @@ UINT64 GetLowPowerS0IdleConstraint(VOID)
   if (!PchIsGbeSupported()) {
     PepConfigData->PepGbe = 0;
   }
+
   if (PciRead32 ((UINT32)SataPciCfgBase (SATA_1_CONTROLLER_INDEX) + PCI_VENDOR_ID_OFFSET) == 0xFFFF) {
     PepConfigData->PepSataContraints = 0;
   }
@@ -238,6 +239,11 @@ UINT64 GetLowPowerS0IdleConstraint(VOID)
 // SOM7583   }
 
   }
+//7583V109 >>
+  if (GetPlatformId () == BoardIdTglUSOM7583) {
+    PepConfigData->PepGbe = 0;
+  }
+//7583V109 >>
 
   LowPowerS0IdleConstraint  = (((FspsConfig->SataEnable == 1 ? 0x3:0) & PepConfigData->PepSataContraints)        <<  0) | // Bit[1:0] - Storage (0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3)
                                ((PepSerialIoUart[0] && PepConfigData->PepUart)                                   <<  2) | // Bit[2]   - En/Dis UART0
