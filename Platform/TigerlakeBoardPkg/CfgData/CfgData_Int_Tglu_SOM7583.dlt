@@ -69,6 +69,10 @@ SILICON_CFG_DATA.PchHdaEnable                               | 0x00
 
 GPIO_CFG_DATA.GpioPinConfig1_GPP_A19.GPIOSkip_GPP_A19       | 1           # TGL-U Only. Skip for TGL-H.
 
+GPIO_CFG_DATA.GpioPinConfig1_GPP_C02.GPIOSkip_GPP_C02       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E04.GPIOSkip_GPP_E04       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E05.GPIOSkip_GPP_E05       | 1           
+
 
 SILICON_CFG_DATA.EcEnable                                   | 0
 SILICON_CFG_DATA.PchTsnEnable                               | 0
@@ -79,6 +83,7 @@ FEATURES_CFG_DATA.Features.S0ix                             | 1
 #PEP_CFG_DATA.PepTcss                                        | 0
 PEP_CFG_DATA.PepSpi                                         | 0
 PEP_CFG_DATA.PepUart                                        | 0
+PEP_CFG_DATA.PepGbe                                         | 0
 
 FEATURES_CFG_DATA.Features.MeasuredBoot     | 1
 

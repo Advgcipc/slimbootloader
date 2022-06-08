@@ -240,9 +240,9 @@ UINT64 GetLowPowerS0IdleConstraint(VOID)
 
   }
 //7583V109 >>
-  if (GetPlatformId () == BoardIdTglUSOM7583) {
-    PepConfigData->PepGbe = 0;
-  }
+//7583V110  if (GetPlatformId () == BoardIdTglUSOM7583) {
+//7583V110    PepConfigData->PepGbe = 0;
+//7583V110  }
 //7583V109 >>
 
   LowPowerS0IdleConstraint  = (((FspsConfig->SataEnable == 1 ? 0x3:0) & PepConfigData->PepSataContraints)        <<  0) | // Bit[1:0] - Storage (0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3)

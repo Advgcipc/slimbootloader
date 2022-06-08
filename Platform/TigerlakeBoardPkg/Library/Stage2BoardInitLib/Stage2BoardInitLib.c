@@ -1979,6 +1979,12 @@ UpdateFspConfig (
     FspsConfig->SataPwrOptEnable = 1;
     FspsConfig->SataPortsDevSlp[0] = 1;
     FspsConfig->SataPortsDevSlp[1] = 1;
+//7583V110 >>
+  if (GetPlatformId () == BoardIdTglUSOM7583) {
+    FspsConfig->SataPortsDevSlp[0] = 0;
+    FspsConfig->SataPortsDevSlp[1] = 0;
+  }
+//7583V110 >>
     FspsConfig->SataPortsHotPlug[0] = 0;
     FspsConfig->SataPortsHotPlug[1] = 0;
     FspsConfig->SataPortsExternal[0] = 0;

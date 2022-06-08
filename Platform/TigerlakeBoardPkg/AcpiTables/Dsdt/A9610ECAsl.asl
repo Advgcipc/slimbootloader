@@ -128,37 +128,42 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 		}
 
 		Method(_Q21) {          	// ACPI LID make event
-			store(0x51,DBG1)
+//    D8XH (0, 0x21)
 		}
 
 		Method(_Q22) {          	// ACPI LID break event
-			store(0x22,DBG1)
+    D8XH (0, 0x22)
 		}
 
 		Method(_Q23) {          	// ACPI Sleep button event
-			store(0x50,DBG1)
+    D8XH (0, 0x50)
 		}
 
 		Method(_Q30) {                  // WDIN button event
-			store(0x30,DBG1)
+    D8XH (0, 0x30)
 		}
 
 		Method(_Q50) {          	// Adapter event
+
+    D8XH (0, 0x50)
 		}
 
 		Method(_Q51) {          	// Battery event
-			store(0x52,DBG1)
+    D8XH (0, 0x51)
 		}
 
 		Method(_Q52) {                  // power button event
+    D8XH (0, 0x52)
 			Notify(\_SB.PWRB,0x80)
 		}
 
 		Method(_Q53) {          	// Battery status event
+
+    D8XH (0, 0x53)
 		}
 
 		Method(_Q60) {          	// Warn temperature event
-			store(0x60,DBG1)
+    D8XH (0, 0x60)
 		}
 
 	} // end of Device(EC0)
@@ -195,19 +200,15 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 		    	DMA(Compatibility, NotBusMaster, Transfer8) {}
         })
 	      Method(_CRS, 0) {
-//	      \SDBM("SBL UART2 CRS")
  
-	      Return(CRS2)}	//Get UART current resources
+	        Return(CRS2)
+	      }	//Get UART current resources
 			}	//End of UAR2
 
 Scope(\){
 	Name(ECF,Zero)
 	Name(ECCT, 5)
 
-  OperationRegion(\DEBG, SystemIO, 0x80, 0x1)
-	Field(\DEBG, ByteAcc, NoLock, Preserve) {
-		DBG1, 8,
-	}
 
   Method (SDBM, 1, Serialized)
   {
@@ -250,6 +251,6 @@ Scope(\){
 Scope(\_GPE) {        // System Bus scope
     Method(_L02, 0) { // GPP_C2  SMB_ALT_PCH# @GPE_DW0
                       // mapped to GPE[31:0]
-	  store(0x53,DBG1)
+    D8XH (0, 0x53)
   }
 } // end _GPE scope

@@ -618,3 +618,152 @@ GpioGetGpioPadFromCfgDw (
   Dw1->PadNum = 0;
   Dw1->GrpIdx = 0;
 }
+
+//7583V110 >>
+
+#define B_PMC_PWRM_GPIO_CFG_GPE0_DW2                        (BIT11 | BIT10 | BIT9 | BIT8)
+#define N_PMC_PWRM_GPIO_CFG_GPE0_DW2                        8
+#define B_PMC_PWRM_GPIO_CFG_GPE0_DW1                        (BIT7 | BIT6 | BIT5 | BIT4)
+#define N_PMC_PWRM_GPIO_CFG_GPE0_DW1                        4
+#define B_PMC_PWRM_GPIO_CFG_GPE0_DW0                        (BIT3 | BIT2 | BIT1 | BIT0)
+#define N_PMC_PWRM_GPIO_CFG_GPE0_DW0                        0
+
+/**
+  This function sets Group to GPE0 configuration
+
+  @param[out] GpeDw0Value       GPIO Group to GPE_DW0 assignment
+  @param[out] GpeDw1Value       GPIO Group to GPE_DW1 assignment
+  @param[out] GpeDw2Value       GPIO Group to GPE_DW2 assignment
+**/
+VOID
+PmcSetGpioGpe (
+  IN UINT32    GpeDw0Value,
+  IN UINT32    GpeDw1Value,
+  IN UINT32    GpeDw2Value
+  )
+{
+  UINT32               Data32Or;
+  UINT32               Data32And;
+
+  //
+  // Program GPIO_CFG register
+  //
+  Data32And = (UINT32) ~(B_PMC_PWRM_GPIO_CFG_GPE0_DW2 | B_PMC_PWRM_GPIO_CFG_GPE0_DW1 | B_PMC_PWRM_GPIO_CFG_GPE0_DW0);
+  Data32Or  = (UINT32) ((GpeDw2Value << N_PMC_PWRM_GPIO_CFG_GPE0_DW2) |
+                        (GpeDw1Value << N_PMC_PWRM_GPIO_CFG_GPE0_DW1) |
+                        (GpeDw0Value << N_PMC_PWRM_GPIO_CFG_GPE0_DW0));
+
+  MmioAndThenOr32 (
+    (UINTN) (PCH_PWRM_BASE_ADDRESS + R_CNL_PCH_PWRM_GPIO_CFG),
+    Data32And,
+    Data32Or
+    );
+}
+
+/**
+  This procedure will set Group to GPE mapping. If group has more than 32 bits
+  it is possible to map only single DW of pins (e.g. 0-31, 32-63) because
+  ACPI GPE_DWx register is 32 bits large.
+
+  @param[in]  GroupToGpeDw0       GPIO group to be mapped to GPE_DW0
+  @param[in]  GroupDwForGpeDw0    DW of pins to be mapped to GPE_DW0
+  @param[in]  GroupToGpeDw1       GPIO group to be mapped to GPE_DW1
+  @param[in]  GroupDwForGpeDw1    DW of pins to be mapped to GPE_DW1
+  @param[in]  GroupToGpeDw2       GPIO group to be mapped to GPE_DW2
+  @param[in]  GroupDwForGpeDw2    DW of pins to be mapped to GPE_DW2
+
+  @retval EFI_SUCCESS             The function completed successfully
+  @retval EFI_INVALID_PARAMETER   Invalid group or pad number
+**/
+VOID
+GpioSetGroupDwToGpeDwX (
+  IN GPIO_GROUP                GroupToGpeDw0,
+  IN UINT32                    GroupDwForGpeDw0,
+  IN GPIO_GROUP                GroupToGpeDw1,
+  IN UINT32                    GroupDwForGpeDw1,
+  IN GPIO_GROUP                GroupToGpeDw2,
+  IN UINT32                    GroupDwForGpeDw2
+  )
+{
+  UINT32                     Data32Or;
+  UINT32                     Data32And;
+  PCH_SBI_PID                *GpioComSbiIds;
+  UINT32                     NoOfGpioComs;
+  UINT32                     GpioComIndex;
+  UINT32                     GpioGpeDwx[3];
+  UINT32                     PmcGpeDwx[3];
+  GPIO_GROUP                 GroupToGpeDwX[3];
+  UINT32                     GroupDwForGpeDwX[3];
+  UINT8                      GpeDwXIndex;
+  UINT32                     Index;
+  GPIO_GROUP_TO_GPE_MAPPING  *GpioGpeMap;
+  UINT32                     GpioGpeMapLength;
+
+  ZeroMem (GpioGpeDwx, sizeof (GpioGpeDwx));
+  ZeroMem (PmcGpeDwx, sizeof (PmcGpeDwx));
+  //
+  // Check if each group number is unique
+  //
+  if ((GroupToGpeDw0 == GroupToGpeDw1) ||
+      (GroupToGpeDw0 == GroupToGpeDw2) ||
+      (GroupToGpeDw1 == GroupToGpeDw2)) {
+//    return EFI_INVALID_PARAMETER;
+    return;
+  }
+
+  GroupToGpeDwX[0] = GroupToGpeDw0;
+  GroupDwForGpeDwX[0] = GroupDwForGpeDw0;
+  GroupToGpeDwX[1] = GroupToGpeDw1;
+  GroupDwForGpeDwX[1] = GroupDwForGpeDw1;
+  GroupToGpeDwX[2] = GroupToGpeDw2;
+  GroupDwForGpeDwX[2] = GroupDwForGpeDw2;
+
+  GpioGetGroupToGpeMapping (&GpioGpeMap, &GpioGpeMapLength);
+
+  for (GpeDwXIndex = 0; GpeDwXIndex < 3; GpeDwXIndex++) {
+    for (Index = 0; Index < GpioGpeMapLength; Index++) {
+
+      if ((GpioGpeMap[Index].Group == GroupToGpeDwX[GpeDwXIndex]) &&
+          (GpioGpeMap[Index].GroupDw == GroupDwForGpeDwX[GpeDwXIndex])) {
+        PmcGpeDwx[GpeDwXIndex] = GpioGpeMap[Index].PmcGpeDwxVal;
+        GpioGpeDwx[GpeDwXIndex] = GpioGpeMap[Index].GpioGpeDwxVal;
+        break;
+      }
+    }
+
+  }
+
+  //
+  // Program GPE configuration in PMC register
+  //
+  PmcSetGpioGpe (
+    PmcGpeDwx[0],
+    PmcGpeDwx[1],
+    PmcGpeDwx[2]
+    );
+
+  //
+  // Program GPE configuration in GPIO registers
+  //
+  Data32And = (UINT32) ~(B_GPIO_PCR_MISCCFG_GPE0_DW2 | B_GPIO_PCR_MISCCFG_GPE0_DW1 | B_GPIO_PCR_MISCCFG_GPE0_DW0);
+  Data32Or = (UINT32) ((GpioGpeDwx[2] << N_GPIO_PCR_MISCCFG_GPE0_DW2) |
+                       (GpioGpeDwx[1] << N_GPIO_PCR_MISCCFG_GPE0_DW1) |
+                       (GpioGpeDwx[0] << N_GPIO_PCR_MISCCFG_GPE0_DW0));
+
+  NoOfGpioComs = GpioGetComSbiPortIds (&GpioComSbiIds);
+
+  //
+  // Program MISCCFG register for each community
+  //
+  for (GpioComIndex = 0; GpioComIndex < NoOfGpioComs; GpioComIndex++) {
+    MmioAndThenOr32 (
+      PCH_PCR_ADDRESS (GpioComSbiIds[GpioComIndex], R_GPIO_PCR_MISCCFG),
+      Data32And,
+      Data32Or
+      );
+  }
+
+}
+//7583V110 >>
+
+

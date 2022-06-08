@@ -42,6 +42,9 @@
 #include <Library/SocInitLib.h>
 #include <Library/TccLib.h>
 
+//7583V110 >>
+#include <Register/GpioRegs.h>
+
 CONST PLT_DEVICE  mPlatformDevices[]= {
   {{0x00001700}, OsBootDeviceSata  , 0 },
   {{0x00001F05}, OsBootDeviceSpi   , 0 },
@@ -712,7 +715,17 @@ if(PlatformData->BtGuardInfo.TpmType == Ptt)
     SetFeatureCfg (Features);
   }
 }
-
+//7583V110 >>
+VOID
+GpioSetGroupDwToGpeDwX (
+  IN GPIO_GROUP                GroupToGpeDw0,
+  IN UINT32                    GroupDwForGpeDw0,
+  IN GPIO_GROUP                GroupToGpeDw1,
+  IN UINT32                    GroupDwForGpeDw1,
+  IN GPIO_GROUP                GroupToGpeDw2,
+  IN UINT32                    GroupDwForGpeDw2
+  );
+//7583V110 >>
 /**
   Read the current platform state from PM status reg.
 
@@ -725,6 +738,8 @@ GetPlatformPowerState (
 {
   UINT8         BootMode;
   UINT32        PmconA;
+//  UINT32                     Data32Or;
+//  UINT32                     Data32And;
 
   PmconA = MmioRead32 (PCH_PWRM_BASE_ADDRESS + R_PMC_PWRM_GEN_PMCON_A);
 
@@ -735,6 +750,22 @@ GetPlatformPowerState (
     IoWrite16 (ACPI_BASE_ADDRESS + R_ACPI_IO_PM1_STS, B_ACPI_IO_PM1_STS_PRBTNOR);
   }
 
+//  GpioSetGroupDwToGpeDwX (GPIO_VER2_LP_GROUP_GPP_C,0, GPIO_VER2_LP_GROUP_GPP_D,0, GPIO_VER2_LP_GROUP_GPP_E,0);
+
+
+//  MmioWrite32 (PCH_PWRM_BASE_ADDRESS + R_CNL_PCH_PWRM_GPIO_CFG, 0xC7B);//ddd
+//
+//  Data32And = (UINT32) ~(B_GPIO_PCR_MISCCFG_GPE0_DW2 | B_GPIO_PCR_MISCCFG_GPE0_DW1 | B_GPIO_PCR_MISCCFG_GPE0_DW0);
+//  Data32Or = (UINT32) ((0x0C << N_GPIO_PCR_MISCCFG_GPE0_DW2) |
+//                       (0x07 << N_GPIO_PCR_MISCCFG_GPE0_DW1) |
+//                       (0x0B << N_GPIO_PCR_MISCCFG_GPE0_DW0));
+//
+//    MmioAndThenOr32 (
+//      PCH_PCR_ADDRESS (PID_GPIOCOM4, R_GPIO_PCR_MISCCFG),
+//      Data32And,
+//      Data32Or
+//      );
+//PID_GPIOCOM4 = 0x6A
   //
   // If Global Reset Status, Power Failure. Host Reset Status bits are set, return S5 State
   //
@@ -853,6 +884,11 @@ DEBUG_CODE_END();
     PlatformNameInit ();
     SetBootMode (IsFirmwareUpdate() ? BOOT_ON_FLASH_UPDATE : GetPlatformPowerState());
     PlatformFeaturesInit ();
+//7583V110 >>
+    if (GetPlatformId () == BoardIdTglUSOM7583) {
+      GpioSetGroupDwToGpeDwX (GPIO_VER2_LP_GROUP_GPP_C,0, GPIO_VER2_LP_GROUP_GPP_D,0, GPIO_VER2_LP_GROUP_GPP_E,0);
+    }
+//7583V110 >>
     break;
   case PreMemoryInit:
     //
