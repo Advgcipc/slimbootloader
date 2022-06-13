@@ -120,7 +120,8 @@ class Board(BaseBoard):
         self.STAGE1_DATA_SIZE     = 0x00014000
 
         self.PAYLOAD_EXE_BASE     = 0x00B00000
-        self.PAYLOAD_SIZE         = 0x00029000
+#//AIMB586X001        self.PAYLOAD_SIZE         = 0x00029000
+        self.PAYLOAD_SIZE         = 0x00050000
         if len(self._PAYLOAD_NAME.split(';')) > 1:
             self.UEFI_VARIABLE_SIZE = 0x00040000
         else:
@@ -165,7 +166,8 @@ class Board(BaseBoard):
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE + 0x4000
         self._CFGDATA_INT_FILE    = ['CfgDataInt_Cfls.dlt', 'CfgDataInt_Cflh.dlt', 'CfgDataInt_Whl.dlt']
-        self._CFGDATA_EXT_FILE    = ['CfgDataExt_Upx.dlt']
+#//AIMB586X001        self._CFGDATA_EXT_FILE    = ['CfgDataExt_Upx.dlt']
+        self._CFGDATA_EXT_FILE    = ['CfgDataExt_Upx.dlt', 'CfgDataExt_AIMB586.dlt'] # AIMB586X001
 
         # If mulitple VBT table support is required, list them as:
         #   {VbtImageId1 : VbtFileName1, VbtImageId2 : VbtFileName2, ...}
@@ -173,7 +175,7 @@ class Board(BaseBoard):
         #   the ImageId field in the VBT container.
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
-        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'VbtCflH.dat', 3:'VbtCflS.dat'}
+        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'VbtCflH.dat', 3:'VbtCflS.dat', 4:'VbtAIMB586_HDMI12.dat'} # AIMB586X001
 
     def GetPlatformDsc (self):
         debug_port_enable = False

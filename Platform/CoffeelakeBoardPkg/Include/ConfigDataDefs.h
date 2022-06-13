@@ -13,6 +13,7 @@
 #define PLATFORM_ID_CFL_H       0x16
 #define PLATFORM_ID_CFL_S       0x1B
 
+#define PLATFORM_ID_AIMB586     0x02 // AIMB586X001
 #include <ConfigDataCommonDefs.h>
 
 #include "ConfigDataStruct.h"

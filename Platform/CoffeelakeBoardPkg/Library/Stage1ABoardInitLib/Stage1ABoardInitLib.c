@@ -73,6 +73,17 @@ CONST UINT8  mUpxSioInitTable[] = {
   0x30, 0x01,  // UART2 Enable
 };
 
+// AIMB586X001 >>
+CONST UINT8  mAIMB586SioInitTable[] = {
+  0x2A, 0x40,  // Multi Function Selection COMA
+  0x07, 0x02,  // Select UART1
+  0x60, 0x03,  // UART1 Base MSB
+  0x61, 0xF8,  // UART1 Base LSB
+  0x70, 0x04,  // UART1 IRQ
+  0x30, 0x01,  // UART1 Enable
+};
+// AIMB586X001 >>
+
 // F81438 mode
 // M1  M2
 //  0  0:  RS-422 Full Duplex
@@ -141,6 +152,32 @@ EarlySioInit (
     // Lock SIO
     IoWrite8 (SIO_IDX, SIO_EXIT_KEY);
   }
+// AIMB586X001 >>
+  if (GetPlatformId() == PLATFORM_ID_AIMB586) {
+    // Set SIO Mode GPIO pins
+    // GpioConfigurePads (ARRAY_SIZE(mUpxSioGpioTable), (GPIO_INIT_CONFIG *)mUpxSioGpioTable);
+
+    // Enable SIO decoding
+    LpcBaseAddr = PCI_LIB_ADDRESS (
+                       DEFAULT_PCI_BUS_NUMBER_PCH,
+                       PCI_DEVICE_NUMBER_PCH_LPC,
+                       PCI_FUNCTION_NUMBER_PCH_LPC,
+                       0
+                       );
+    PciOr16 (LpcBaseAddr + R_LPC_CFG_IOE, B_LPC_CFG_IOE_SIO);
+  
+    // Unlock SIO (F71889/F81801)
+    IoWrite8 (SIO_IDX, SIO_ENTRY_KEY);
+    IoWrite8 (SIO_IDX, SIO_ENTRY_KEY);
+    // Init logic devices
+    for  (Idx = 0; Idx < sizeof(mAIMB586SioInitTable); Idx += 2) {
+      IoWrite8 (SIO_IDX, mAIMB586SioInitTable[Idx]);
+      IoWrite8 (SIO_DAT, mAIMB586SioInitTable[Idx + 1]);
+    }
+    // Lock SIO
+    IoWrite8 (SIO_IDX, SIO_EXIT_KEY);
+  }
+// AIMB586X001 >>
 }
 
 /**
@@ -271,6 +308,13 @@ BoardInit (
     }
 
     PlatformHookSerialPortInitialize ();
+// AIMB586X001 >>
+   if (GetPlatformId() == PLATFORM_ID_AIMB586) {
+      if (DebugPort == 3) {
+         IoRead8 (0x3F8);
+      }
+   }
+// AIMB586X001 >>
     SerialPortInitialize ();
     Status = GetBootPartition (&BootPartition);
     if (!EFI_ERROR(Status)) {

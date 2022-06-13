@@ -11,6 +11,22 @@
 #include <GpioPinsCnlLp.h>
 
 
+//AIMB586X001 >>
+static GPIO_INIT_CONFIG mGpioTableAIMB586[] =
+{
+  // PEG slot
+  {GPIO_CNL_H_GPP_F22,  { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh, GpioIntDefault, GpioPlatformReset, GpioTermNone }},//GPIO_PEG SLOT_RESET
+  // turn on power in premem after reset asserted
+  {GPIO_CNL_H_GPP_F8,  { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh, GpioIntDefault, GpioPlatformReset, GpioTermNone }},//DGPU_PWR_EN_N
+  {GPIO_CNL_H_GPP_K22,  { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh, GpioIntDefault, GpioPlatformReset, GpioTermNone }},//PCH_PEGSLOT1_PWREN
+  {GPIO_CNL_H_GPP_K10,  { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh, GpioIntDefault, GpioHostDeepReset, GpioTermNone }},//PCH_RST_GPIO for PEG aux power
+  // Titan Ridge
+  {GPIO_CNL_H_GPP_K1,  { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh, GpioIntDefault, GpioHostDeepReset, GpioTermWpu2K, GpioPadConfigLock }},//PLX_SX_ENTRY_G1_PCH_N
+  //Asserting power pin enable in pre-mem phase to solve some NVMe devices cannot be detected.
+  {GPIO_CNL_H_GPP_I10, { GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut, GpioOutHigh,    GpioIntDefault, GpioPlatformReset, GpioTermNone }},//GPP_I_10_DDPD_CTRLDATA
+};
+//AIMB586X001 >>
+
 //
 // CFL S 82 UDIMM GPIO TBL
 //

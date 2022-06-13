@@ -601,6 +601,10 @@ InitializeSmbiosInfo (
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "CoffeeLake Client Platform");
   } else if (PlatformId == PLATFORM_ID_WHL) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "WhiskeyLake Client Platform");
+// AIMB586X001 >>
+  } else if (PlatformId == PLATFORM_ID_AIMB586) {
+    AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "AIMB-586");
+// AIMB586X001 >>
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
@@ -626,6 +630,10 @@ InitializeSmbiosInfo (
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "CoffeeLake H DDR4 RVP");
   } else if (PlatformId == PLATFORM_ID_WHL) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "WhiskeyLake U DDR4 ERB");
+// AIMB586X001 >>
+  } else if (PlatformId == PLATFORM_ID_AIMB586) {
+    AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "AIMB-586");
+// AIMB586X001 >>
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
