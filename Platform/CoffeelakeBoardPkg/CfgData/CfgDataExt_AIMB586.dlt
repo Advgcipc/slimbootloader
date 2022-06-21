@@ -39,6 +39,8 @@ MEMORY_CFG_DATA.DualDpc                   | 0x01
 
 GEN_CFG_DATA.VbtImageId                   | 4
 
+SILICON_CFG_DATA.ECEnable                 | 0
+
 POWER_CFG_DATA.OneCoreRatioLimit          | 0x29
 POWER_CFG_DATA.TwoCoreRatioLimit          | 0x28
 POWER_CFG_DATA.ThreeCoreRatioLimit        | 0x27

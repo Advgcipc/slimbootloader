@@ -72,10 +72,10 @@ python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD.fd:UEFI:Lz
 :Buildcfl
 @title Slim Boot Loader - Buildcfl
 @IF "%3"=="-r" goto Buildcflr
-python BuildLoader.py build cfl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADDbg.fd:UEFI:Lzma"
+python BuildLoader.py build cfl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
 @goto Stitchcfl
 :Buildcflr
-python BuildLoader.py build cfl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOADRel.fd:UEFI:Lzma"
+python BuildLoader.py build cfl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_RELEASE.fd:UEFI:Lzma"
 @goto Stitchcfl
 
 :Buildehl
@@ -128,7 +128,7 @@ python Platform/ApollolakeBoardPkg/Script/StitchLoader.py -i Platform/Apollolake
 
 :Stitchcfl
 ::python Platform/CoffeelakeBoardPkg/Script/StitchLoader.py -i Platform/CoffeelakeBoardPkg/BiosBin/6882000U160V110.BIN -s Outputs/cfl/SlimBootloader.bin -o Build/6882000S160X001.BIN -p AA000201
-python Platform/CoffeelakeBoardPkg/Script/StitchLoader.py -i Platform/CoffeelakeBoardPkg/BiosBin/A586000Q060V201.BIN -s Outputs/cfl/SlimBootloader.bin -o Build/A586000Q060X001.BIN -p AA000302
+python Platform/CoffeelakeBoardPkg/Script/StitchLoader.py -i Platform/CoffeelakeBoardPkg/Binaries/BiosBin/A586000Q060V201.BIN -s Outputs/cfl/SlimBootloader.bin -o Build/A586000Q060X002.BIN -p AA000302
 @goto StitchEnd
 
 :Stitchtgl
