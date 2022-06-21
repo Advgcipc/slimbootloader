@@ -10,7 +10,24 @@
     ClockGEN    : CNP-H
     SuperI/O    : NCT6776D + NCT5114D
     Flash ROM   : MX25L25673G
+	
+#  Revision History
+    BIOS Name     : A586000Q060X002.BIN
+    BIOS Checksum : A2E2
+    BIOS String   : 
+    Release Date  : 2022/06/21
+    Owner         : Jason.Yang
+    Requester     : 
+    Customer      : Advantech-AIMB
 
+#  Release Description
+    AIMB586X002      Move BiosBin and UEFI Payload to Platform/CoffeelakeBoardPkg.
+                     Set ECEnable to 0.
+
+#  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:AIMB-586)
+    A586000Q060X002.bin  Release mode BIOS
+	
 #  Revision History
     BIOS Name     : A586000Q060X001.BIN
     BIOS Checksum : A790
