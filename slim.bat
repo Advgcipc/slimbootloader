@@ -153,7 +153,7 @@ python Platform/ElkhartlakeBoardPkg/Script/StitchLoader.py -i Platform/Elkhartla
 @goto StitchEnd
 
 :Stitchcml
-python Platform/CometlakeBoardPkg/Script/StitchLoader.py -i Platform/CometlakeBoardPkg/BiosBin/A287000H160V111.BIN -s Outputs/cml/SlimBootloader.bin -o Build/A28700SH160V111.BIN -p AA00FF11
+python Platform/CometlakeBoardPkg/Script/StitchLoader.py -i Platform/CometlakeBoardPkg/BiosBin/A287000H160V111.BIN -s Outputs/cml/SlimBootloader.bin -o Build/A28700SH160X001.BIN -p AA00FF11
 
 @goto StitchEnd
 
