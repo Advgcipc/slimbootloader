@@ -76,31 +76,24 @@ case "$1" in
 		echo "python BuildLoader.py clean"
 		;;
 	*)
-	# -?:
-	"-?")
-    echo "Slim Boot Loader Setup & Build Environment"
-    echo "      -c      Clean Slim Boot Loader"
-    echo "      -a      Build & Stitch Slim Boot Loader"
-    echo "      -b      Build Slim Boot Loader"
-    echo "      -s      Stitch Slim Boot Loader"
-    echo "      -ss     Stitch BootGuard"
-    echo "      -fwu    Build FirmwareUpdate Image"
-    echo "      -k      Create SBL Keys"
-    echo "      -r      Build Release Mode Slim Boot Loader"
-    echo "      -?      Show Help message"
-    echo " Recommand before rebuild Slim Boot Loader clean it first.."
-    echo " Example: Slim -c"
-    echo " Build & Stitch Slim Boot Loader"
-    echo " Example: Slim -a"
-    echo " Build & Stitch Slim Boot Loader release mode"
-    echo " Example: Slim -a -r"
-    echo " Stitch Slim Boot Loader with BootGuard feature"
-    echo " Example: Slim -ss"
-    echo " Build Firmware Update Image into Build\FwuImage.bin"
-    echo " Example: Slim -fwu"
-		;;
-	*)
-		echo "Usage: slim.sh <arg1> <arg2>"
+		echo "Slim Boot Loader Setup & Build Environment"
+		echo "      -c      Clean Slim Boot Loader"
+#		echo "      -a      Build & Stitch Slim Boot Loader"
+		echo "      -b      Build Slim Boot Loader"
+		echo "      -s      Stitch Slim Boot Loader"
+		echo "      -ss     Stitch BootGuard"
+		echo "      -fwu    Build FirmwareUpdate Image"
+#		echo "      -k      Create SBL Keys"
+#		echo "      -r      Build Release Mode Slim Boot Loader"
+		echo "      -?      Show Help message"
+		echo " Recommand before rebuild Slim Boot Loader clean it first.."
+		echo "Usage:"
+		echo "    ./slim.sh -c      : Clean Slim Boot Loader" 
+		echo "    ./slim.sh -a      : Build & Stitch Slim Boot Loader release mode"
+#		echo "    ./slim.sh -a -r   : Stitch Slim Boot Loader with BootGuard feature"
+		echo "    ./slim.sh -s      : Build Firmware Update Image"
+		echo "    ./slim.sh -ss     : Build Firmware Update Image into Build\FwuImage.bin"
+		echo "    ./slim.sh -fwu    : Build FirmwareUpdate Image"
 		exit 1
 		;;
 esac
