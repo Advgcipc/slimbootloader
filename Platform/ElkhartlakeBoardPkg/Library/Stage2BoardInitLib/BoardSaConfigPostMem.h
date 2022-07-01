@@ -82,3 +82,25 @@ GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mEhlCrbRowDisplayDdiConfig[17] = {
   DdiDisable,      // DDI Port 3 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
   DdiDisable       // DDI Port 4 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
 };
+
+//DS202_SBL_X001_06// >>
+GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mEhlDisplayDdiConfigDS202[17] = {
+  DdiPortADp,      // DDI Port A Config : DdiPortADisabled = Disabled, DdiPortAEdp = eDP, DdiPortAMipiDsi = MIPI DSI, DdiPortADp = Dp
+  DdiPortBDp,      // DDI Port B Config : DdiPortBDisabled = Disable, DdiPortBDp = Dp, DdiPortBMipiDsi = MIPI DSI, DdiPortBHdmi = Hdmi
+  DdiPortCHdmi,    // DDI Port C Config : DdiPortCDisabled = Disable, DdiPortCHdmi = Dp, DdiPortCDp = Dp
+  DdiHpdEnable,    // DDI Port A HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdEnable,    // DDI Port B HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdEnable,    // DDI Port C HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdDisable,   // DDI Port 1 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdDisable,   // DDI Port 2 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdDisable,   // DDI Port 3 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiHpdDisable,   // DDI Port 4 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+  DdiDisable,      // DDI Port A DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDdcEnable,    // DDI Port B DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDdcEnable,    //DS202_X002_01// DdiDisable,      // DDI Port C DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDisable,      // DDI Port 1 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDisable,      // DDI Port 2 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDisable,      // DDI Port 3 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+  DdiDisable       // DDI Port 4 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+};
+//DS202_SBL_X001_06// <<

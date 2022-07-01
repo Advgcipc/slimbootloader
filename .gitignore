@@ -11,5 +11,4 @@ ResetVector.*.raw
 /Outputs
 /Build
 /Conf
-/PayloadPkg/PayloadBins
 PayloadModPkg

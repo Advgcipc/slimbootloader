@@ -103,6 +103,40 @@ typedef struct {
   UINT32    Rsvd2:3;
 } GPIO_CFG_DATA_DW1;
 
+//DS202_SBL_X001_04// >>
+///
+/// Subsystem Vendor ID / Subsystem ID
+///
+typedef struct {
+  UINT16         SubSystemVendorId;
+  UINT16         SubSystemId;
+} SVID_SID_VALUE;
+
+//
+// Below is to match PCI_SEGMENT_LIB_ADDRESS () which can directly send to PciSegmentRead/Write functions.
+//
+typedef struct {
+  union {
+    struct {
+      UINT32  Register:12;
+      UINT32  Function:3;
+      UINT32  Device:5;
+      UINT32  Bus:8;
+      UINT32  Reserved1:4;
+      UINT32  Segment:16;
+      UINT32  Reserved2:16;
+    } Bits;
+    UINT64    SegBusDevFuncRegister;
+  } Address;
+  SVID_SID_VALUE SvidSidValue;
+  UINT32 Reserved;
+} SVID_SID_INIT_ENTRY;
+
+#define PCI_DEVICE_NUMBER_PCH_HDA      31
+#define PCI_FUNCTION_NUMBER_PCH_HDA    3
+#define SI_MAX_DEVICE_COUNT            70
+//DS202_SBL_X001_04// <<
+
 SMMBASE_INFO mSmmBaseInfo = {
   { BL_PLD_COMM_SIG, SMMBASE_INFO_COMM_ID, 0, 0 }
 };
@@ -1214,7 +1248,11 @@ UpdateFspConfig (
     Fspscfg->PeiGraphicsPeimInit        = SiCfgData->PeiGraphicsPeimInit;
     Fspscfg->GraphicsConfigPtr          = PcdGet32(PcdGraphicsVbtAddress);
 
-    CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mEhlCrbRowDisplayDdiConfig, sizeof(mEhlCrbRowDisplayDdiConfig));
+//DS202_SBL_X001_06// >>
+//  CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mEhlCrbRowDisplayDdiConfig, sizeof(mEhlCrbRowDisplayDdiConfig));
+    CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mEhlDisplayDdiConfigDS202, sizeof(mEhlDisplayDdiConfigDS202));
+//DS202_SBL_X001_06// <<  
+
     Fspscfg->DdiPortAConfig             = SaDisplayConfigTable[0];
     Fspscfg->DdiPortBConfig             = SaDisplayConfigTable[1];
     Fspscfg->DdiPortCConfig             = SaDisplayConfigTable[2];
@@ -1784,6 +1822,58 @@ UpdateFspConfig (
   }
   // PCH_GPIO_PADS
   Fspscfg->PchUnlockGpioPads = (UINT8)SiCfgData->PchUnlockGpioPads;
+
+
+//DS202_SBL_X001_04// >>
+{  
+    UINT32               *HdaVerbTablePtr;
+    UINT8                HdaVerbTableNum;
+    GRAPHICS_CFG_DATA    *GfxCfgData;
+    UINT32               EntryCount;
+    STATIC SVID_SID_INIT_ENTRY  SsidTablePtr[SI_MAX_DEVICE_COUNT] = {0};
+
+
+    GfxCfgData = (GRAPHICS_CFG_DATA *)FindConfigDataByTag (CDATA_GRAPHICS_TAG);
+    if (GfxCfgData != NULL) {
+        if ( GfxCfgData->PchHdaEnable == 1) { 
+                HdaVerbTablePtr = (UINT32 *) AllocateZeroPool (4 * sizeof (UINT32));
+                if (HdaVerbTablePtr != NULL) {
+                  HdaVerbTableNum = 0;
+                  HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &HdaVerbTableAlc888;
+
+                  Fspscfg->PchHdaVerbTablePtr          = (UINT32)(UINTN) HdaVerbTablePtr;
+                  Fspscfg->PchHdaVerbTableEntryNum     = HdaVerbTableNum;
+                } else {
+                  DEBUG ((DEBUG_ERROR, "UpdateFspConfig Error: Could not allocate Memory for HdaVerbTable\n"));
+                }
+        }
+    } else {
+        DEBUG ((DEBUG_ERROR, "GfxCfgData not found!\n"));
+        ASSERT (GfxCfgData != NULL);
+    } //end of GfxCfgData
+
+
+   //Program HDA SVID/SSID
+   EntryCount = 0;
+   SsidTablePtr[EntryCount].Address.Bits.Device   = PCI_DEVICE_NUMBER_PCH_HDA;
+   SsidTablePtr[EntryCount].Address.Bits.Function = PCI_FUNCTION_NUMBER_PCH_HDA;
+   SsidTablePtr[EntryCount].SvidSidValue.SubSystemVendorId = 0x13FE;
+   SsidTablePtr[EntryCount].SvidSidValue.SubSystemId       = 0x4000;
+   EntryCount ++;
+   ASSERT (EntryCount < SI_MAX_DEVICE_COUNT);
+
+
+   Fspscfg->SiSsidTablePtr = (UINTN) SsidTablePtr;
+   Fspscfg->SiNumberOfSsidTableEntry = (UINT16) EntryCount;
+}
+//DS202_SBL_X001_04// <<  
+
+//DS202_SBL_X001_08// >>
+   Fspscfg->GnaEnable           = 0;  
+   Fspscfg->ScsEmmcEnabled      = 0;
+   Fspscfg->ScsSdCardEnabled    = 0;
+//DS202_SBL_X001_08// <<
+
 }
 
 

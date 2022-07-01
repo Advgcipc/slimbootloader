@@ -1003,11 +1003,12 @@ TpmInitialize (
   PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
   BootMode = GetBootMode();
 
-  if((PlatformData != NULL) && ((PlatformData->BtGuardInfo.MeasuredBoot == 1) &&
-    (PlatformData->BtGuardInfo.DisconnectAllTpms == 0) &&
-    ((PlatformData->BtGuardInfo.TpmType == dTpm20) || (PlatformData->BtGuardInfo.TpmType == Ptt)))){
+//DS202_SBL_X001_09//  if((PlatformData != NULL) && ((PlatformData->BtGuardInfo.MeasuredBoot == 1) &&
+//DS202_SBL_X001_09//    (PlatformData->BtGuardInfo.DisconnectAllTpms == 0) &&
+//DS202_SBL_X001_09//    ((PlatformData->BtGuardInfo.TpmType == dTpm20) || (PlatformData->BtGuardInfo.TpmType == Ptt)))){
 
     // Initialize TPM if it has not already been initialized by BootGuard component (i.e. ACM)
+    PlatformData->BtGuardInfo.BypassTpmInit = FALSE; //DS202_SBL_X001_09//
     Status = TpmInit(PlatformData->BtGuardInfo.BypassTpmInit, BootMode);
 
     if (EFI_SUCCESS == Status) {
@@ -1019,9 +1020,9 @@ TpmInitialize (
     } else {
       CpuHalt ("Tpm Initialization failed !!\n");
     }
-  } else {
-    DisableTpm();
-  }
+//DS202_SBL_X001_09//} else {
+//DS202_SBL_X001_09//  DisableTpm();
+//DS202_SBL_X001_09//}
 }
 
 /**
@@ -1153,7 +1154,9 @@ DEBUG_CODE_END();
     // prior to starting DRAM Initialization Sequence.
     //
     MmioOr32 (PmcBase + R_PMC_PWRM_GEN_PMCON_A, B_PMC_PWRM_GEN_PMCON_A_DISB);
-    ConfigureGpio (CDATA_NO_TAG, ARRAY_SIZE(mGpioTablePreMemEhl), (UINT8*)mGpioTablePreMemEhl);
+//DS202_SBL_X001_05// >> ConfigureGpio (CDATA_NO_TAG, ARRAY_SIZE(mGpioTablePreMemEhl), (UINT8*)mGpioTablePreMemEhl);
+    ConfigureGpio (CDATA_NO_TAG, ARRAY_SIZE(mGpioTablePreMemEhlDS202), (UINT8*)mGpioTablePreMemEhlDS202);
+//DS202_SBL_X001_05// <<
     break;
   case PostMemoryInit:
     //
@@ -1165,9 +1168,9 @@ DEBUG_CODE_END();
   case PreTempRamExit:
     break;
   case PostTempRamExit:
-    if (MEASURED_BOOT_ENABLED()) {
+   //DS202_SBL_X001_09// if (MEASURED_BOOT_ENABLED()) {
       TpmInitialize();
-    }
+   //DS202_SBL_X001_09// }
     break;
   default:
     break;
