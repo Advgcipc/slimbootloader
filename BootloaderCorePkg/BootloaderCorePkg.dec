@@ -1,7 +1,7 @@
 ## @file
 # Provides bootloader driver related package definitions.
 #
-# Copyright (c) 2016 - 2021, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2016 - 2022, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
@@ -90,7 +90,7 @@
   gPlatformModuleTokenSpaceGuid.PcdVariableRegionBase     | 0x00000000 | UINT32 | 0x2000008E
   gPlatformModuleTokenSpaceGuid.PcdVariableRegionSize     | 0x00000000 | UINT32 | 0x2000008F
 
-  gPlatformModuleTokenSpaceGuid.PcdMemoryMapEntryNumber   | 0x00000020 | UINT32 | 0x200000A2
+  gPlatformModuleTokenSpaceGuid.PcdMemoryMapEntryNumber   | 0x00000000 | UINT32 | 0x200000A2
   gPlatformModuleTokenSpaceGuid.PcdOsBootOptionNumber     | 0x00000008 | UINT32 | 0x200000A3
   gPlatformModuleTokenSpaceGuid.PcdServiceNumber          | 0x00000004 | UINT32 | 0x200000A4
 
@@ -146,6 +146,10 @@
   gPlatformModuleTokenSpaceGuid.PcdSeedListBufferSize     | 0x00000400 | UINT32 | 0x200000E2
 
   gPlatformModuleTokenSpaceGuid.PcdSmbiosTablesSize       |     0x1000 | UINT16 | 0x200000E3
+  # 0: Sort the CPU according to their thread distances
+  # 1: Sort the CPU based on CPU APIC ID in ascending order
+  # 2: Sort the CPU based on CPU APIC ID in descending order
+  gPlatformModuleTokenSpaceGuid.PcdCpuSortMethod          |     0      | UINT32 | 0x200000E4
 
   # Size of the Hash store allocated in bootloader
   gPlatformModuleTokenSpaceGuid.PcdHashStoreSize          | 0x00000200 | UINT32 | 0x200000F1
@@ -225,3 +229,4 @@
   gPlatformModuleTokenSpaceGuid.PcdEnableSetup            | FALSE      | BOOLEAN | 0x20000213
   gPlatformModuleTokenSpaceGuid.PcdLegacyEfSegmentEnabled | TRUE       | BOOLEAN | 0x20000214
   gPlatformModuleTokenSpaceGuid.PcdEnableDts              | FALSE      | BOOLEAN | 0x20000215
+  gPlatformModuleTokenSpaceGuid.PcdEnablePciePm           | FALSE      | BOOLEAN | 0x20000222

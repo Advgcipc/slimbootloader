@@ -23,6 +23,41 @@ Supported Platforms
 -------------------
 Please visit [Supported Hardware](https://slimbootloader.github.io/supported-hardware/index.html) page for a list of platforms supported by Slim Bootloader.
 
+Supported Platforms & Board
+---------------------------
+
+Apollolake
+----------
+
+SOM-2569  0x10  UEFI Payload
+
+SOM-3569  0x11  UEFI Payload
+
+SOM-6869  0x12  UEFI Payload
+
+SOM-7569  0x13  UEFI Payload
+
+
+Coffeelake
+----------
+
+SOM-6882  0x01  UEFI Payload
+
+Cometlake
+----------
+
+AIMB-277  NotReady  Bring up
+
+Tigerlake
+----------
+
+SOM-7583  0x10  UEFI Payload
+
+Elkhartlake
+----------
+
+SOM-2532  0x10  UEFI Payload
+
 Platform CI Build Status
 ------------------------
 

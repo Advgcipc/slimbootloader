@@ -85,6 +85,10 @@ jobs:
         Build.Name:   "ehl"
         Build.Arch:   ""
         Build.Target: ""
+      ADLS_X86_DEBUG:
+        Build.Name:   "adls"
+        Build.Arch:   ""
+        Build.Target: ""
 
   pool:
     vmImage: 'ubuntu-20.04'
@@ -92,7 +96,7 @@ jobs:
   steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.6.x'
+      versionSpec: '3.8.x'
       architecture: 'x64'
     displayName: Set Python version
 
@@ -163,14 +167,22 @@ jobs:
         Build.Name:   "ehl"
         Build.Arch:   "-a x64"
         Build.Target: ""
+      ADLS_X86_RELEASE:
+        Build.Name:   "adls"
+        Build.Arch:   ""
+        Build.Target: "-r"
+      ADLS_X64_DEBUG:
+        Build.Name:   "adls"
+        Build.Arch:   "-a x64"
+        Build.Target: ""
 
   pool:
-    vmImage: 'windows-latest'
+    vmImage: 'windows-2019'
 
   steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.6.x'
+      versionSpec: '3.8.x'
       architecture: 'x64'
     displayName: Set Python version
 
@@ -203,7 +215,7 @@ jobs:
     displayName: Environment configuration
 
   - script: |
-      python BuildLoader.py build $(Build.Name) $(Build.Arch) $(Build.Target) -k
+      python BuildLoader.py build $(Build.Name) $(Build.Arch) $(Build.Target) -t vs2019 -k
     displayName: 'Run $(Build.Name) build'
 
 

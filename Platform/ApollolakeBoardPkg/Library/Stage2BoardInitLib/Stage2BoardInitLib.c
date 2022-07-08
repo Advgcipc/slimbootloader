@@ -1464,7 +1464,8 @@ UpdateSerialPortInfo (
 //SOM3569X001 >>
 
 //SOM3569X001  SerialPortInfo->Type     = 2;
-  SerialPortInfo->BaseAddr = (UINT32) GetSerialPortBase();
+  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
+  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
   SerialPortInfo->RegWidth = GetSerialPortStrideSize();
 
   DEBUG ((DEBUG_INFO, "SerialPortInfo Type=%d BaseAddr=0x%08X RegWidth=%d\n",
