@@ -12,6 +12,25 @@
     Flash ROM   : Winbond W25R256JVEIQ
 
 #  Revision History
+    BIOS Name     : 7583000S060V111.bin;7583000S160V111.bin
+    BIOS Checksum : C655;DE74
+    BIOS String   : **** SOM-7583 BIOS V1.11 (06/08/2022) ****
+    Release Date  : 2022/06/08
+    Owner         : Mike.Fan
+    Requester     : Lauryn.Hsu
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583V111      Add I2C and Gpio function of EC.
+
+#  Hardware Configuration
+    CPU         : TigerLake-UP3
+    Chipset     : TigerLake-UP3
+    ClockGEN    : ICC
+    SuperI/O    : RDC-IS211
+    Flash ROM   : Winbond W25R256JVEIQ
+
+#  Revision History
     BIOS Name     : 7583000S060V110.bin;7583000S160V110.bin
     BIOS Checksum : C655;DE74
     BIOS String   : **** SOM-7583 BIOS V1.10 (06/08/2022) ****

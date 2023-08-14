@@ -205,6 +205,37 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 	      }	//Get UART current resources
 			}	//End of UAR2
 
+//7583V111 >>
+			Device(EI2C) {
+				Name(_UID, 0x08)	                          // Unique ID.
+				Name(LDN, 0x20)	                            // Logical Device Number
+      	Name(_HID, EISAID("AHC0510"))               //Advantech Device ID for RDC I2C
+	      Name(_STA, 0xF)                             //Get Device status
+        Name(CRS3, ResourceTemplate(){
+		    	IO(Decode16, 0x280, 0x280, 1, 0x10)
+          IRQ(Edge,ActiveLow,Shared) {6}
+        })
+
+	      Method(_CRS, 0 ,Serialized)
+        {
+	        Return(CRS3)
+	      }	//Get I2C0 current resources
+			}	//End Scope Device(I2C0)
+
+			Device(GIP0) {
+				Name(_HID, EISAID("PNP0C08"))	              // Gpio0
+				Name(_UID, 0x10)	                          // Unique ID.
+				Name(LDN, 0x24)	                            // Logical Device Number
+		
+        Method(_STA,0){
+          Return(0x00) 
+        }
+
+			}	//End Scope for Gpio0
+
+
+//7583V111 >>
+
 Scope(\){
 	Name(ECF,Zero)
 	Name(ECCT, 5)

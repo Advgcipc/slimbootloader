@@ -29,7 +29,8 @@ class Board(BaseBoard):
 #//7583V108        self.VERINFO_PROJ_MINOR_VER = 7
 #//7583V109        self.VERINFO_PROJ_MINOR_VER = 8
 #//7583V110        self.VERINFO_PROJ_MINOR_VER = 9
-        self.VERINFO_PROJ_MINOR_VER = 10
+#//7583V111        self.VERINFO_PROJ_MINOR_VER = 10
+        self.VERINFO_PROJ_MINOR_VER = 11
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
