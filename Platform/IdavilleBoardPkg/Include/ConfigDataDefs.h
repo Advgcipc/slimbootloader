@@ -13,5 +13,8 @@
 
 #define PLATFORM_ID_HCC_RP      0x0E
 #define PLATFORM_ID_LCC_RP      0x0F
-
+//D580X001_1 >>
+#define PLATFORM_ID_LCC_SOMD580 0x10
+#define PLATFORM_ID_LCC_SOM5993 0x11
+//D580X001_1 >>
 #endif

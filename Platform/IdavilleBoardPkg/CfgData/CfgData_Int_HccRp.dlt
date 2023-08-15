@@ -15,7 +15,8 @@ GEN_CFG_DATA.PayloadId                    | 'AUTO'
 PLDSEL_CFG_DATA.PldSelGpio.Enable         | 1
 PLDSEL_CFG_DATA.PldSelGpio.PadGroup       | 7
 PLDSEL_CFG_DATA.PldSelGpio.PinNumber      | 8
-PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+#//D580X001_1 PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 0
 
 #
 # GPIO overrides from Base .yaml
@@ -28,3 +29,12 @@ MEMORY_CFG_DATA.GeneralConfig.DimmConfigType | 2
 
 CLOCK_CFG_DATA.SkipClockGenerator       | 0
 
+#SILICON_CFG_DATA.PortUsb20Enable.Usb2Port2                  | 0
+#SILICON_CFG_DATA.PortUsb20Enable.Usb2Port3                  | 0
+
+SILICON_CFG_DATA.SataConfig0.EnableSATA0                  | 0
+SILICON_CFG_DATA.SataConfig0.EnableSATA1                  | 0
+CLOCK_CFG_DATA.ClockGeneratorAddress                      | 0xD0
+
+MISC_CFG_DATA.MiscCfg.Emmc                                | 0
+MISC_CFG_DATA.MiscCfg.EmmcHS400Support                    | 0

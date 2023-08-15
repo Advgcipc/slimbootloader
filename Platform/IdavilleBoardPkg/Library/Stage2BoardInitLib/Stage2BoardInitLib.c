@@ -70,6 +70,231 @@ CONST EFI_ACPI_COMMON_HEADER *mPlatformAcpiTables[] = {
 
 BOOLEAN mTccDsoTuning      = FALSE;
 
+ //D580X001_1 >>
+#include <BiosStringHob.h> 
+
+#include <IndustryStandard/SmBios.h>
+#define TYPE_TERMINATOR_SIZE          2     // Each Type is terminated by 0000 - 2 bytes
+#include "A9610Lib.c"
+extern EFI_GUID  gAhcBiosStringGuid;
+
+//void *
+//FindSmbiosTypePtr (
+//  IN  UINT8   Type
+//  )
+//{
+//  SMBIOS_STRUCTURE              *TypeHdr;
+//  SMBIOS_STRUCTURE              *LastTypeHdr;
+//  SMBIOS_TABLE_ENTRY_POINT      *SmbiosEntry;
+//  UINT8                         *StringPtr;
+//  UINT32                         CurLimit;
+//
+//  LastTypeHdr = NULL;
+//  SmbiosEntry = (SMBIOS_TABLE_ENTRY_POINT *)(UINTN)PcdGet32 (PcdSmbiosTablesBase);
+//  if (SmbiosEntry == NULL) {
+//    return NULL;
+//  }
+//
+//  TypeHdr  = (SMBIOS_STRUCTURE *) (UINTN) SmbiosEntry->TableAddress;
+//  CurLimit = (UINT32) (UINTN) ((UINT8 *) SmbiosEntry + SmbiosEntry->EntryPointLength + sizeof (UINT8) + SmbiosEntry->TableLength);
+//
+//  while ( (UINT32)(UINTN)TypeHdr < CurLimit ) {
+//    if (TypeHdr->Type == Type) {
+//      LastTypeHdr = TypeHdr;
+//    }
+//    //
+//    // Go to the end of strings to find next Type header
+//    //
+//    StringPtr = (UINT8 *) TypeHdr + TypeHdr->Length;
+//    while ( !(StringPtr[0] == 0 && StringPtr[1] == 0) ) {
+//      StringPtr++;
+//    }
+//    TypeHdr = (SMBIOS_STRUCTURE *)(StringPtr + TYPE_TERMINATOR_SIZE);
+//  }
+//
+//  return LastTypeHdr;
+//}
+//
+//EFI_STATUS
+//UpdateSmbiosData (
+//  IN  UINT8     Type,
+//  IN  UINT16    Offset,
+//  IN  UINT8     Width,
+//  IN  UINT8     *Value
+//  )
+//{
+//  UINT8             *TypeHdr;
+//  //
+//  // Find the header to append a string
+//  //
+//  TypeHdr = (UINT8 *) FindSmbiosTypePtr (Type);
+//  if (TypeHdr == NULL) {
+//    return EFI_DEVICE_ERROR;
+//  }
+//
+//  if (Width != 0)
+//    CopyMem ((TypeHdr + Offset), Value, Width);
+//
+//  
+//  return EFI_SUCCESS;
+//}
+//
+//VOID
+//UpdateSmbiosInfo (
+//  VOID
+//  )
+//{
+//  EFI_STATUS        Status;
+//  BOOT_LOADER_VERSION  *VerInfoTbl;
+//
+//  UINT8             MajorVer;
+//  UINT8             MinorVer;
+//  UINT8             BiosReserved;
+//  EFI_GUID          SmbiosUuid = {0x3397e2ee, 0xbe6a, 0x4362, {0xb4, 0x51, 0xf, 0xe6, 0x2a, 0x55, 0xff, 0x1} };
+//// {3397e2ee-be6a-4362-b451-0fe62a55ff01} 
+//
+//  VerInfoTbl    = GetVerInfoPtr ();
+//  MajorVer   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+//  MinorVer   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+//
+//  //  System BIOS Major/Minor Release
+//  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, SystemBiosMajorRelease), 1, &MajorVer);
+//  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, SystemBiosMinorRelease), 1, &MinorVer);
+//
+//  //  Embedded controller firmware major/minor Release
+//  Status = A9610Read_FW_Version (&MajorVer, &MinorVer);
+//  MajorVer = 1;
+//  MinorVer = 1;
+//  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMajorRelease), 1, &MajorVer);
+//  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMinorRelease), 1, &MinorVer);
+//
+//  //  MISC_BIOS_CHARACTERISTICS_EXTENSION.BiosReserved
+//  //  Bit 0 - AcpiIsSupported                    
+//  //  Bit 1 - UsbLegacyIsSupported               
+//  BiosReserved = BIT0 | BIT1;
+//  UpdateSmbiosData (SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, BiosCharacteristics), 1, &BiosReserved);
+//
+//  //  System Information (Type 1) Uuid
+//  UpdateSmbiosData (SMBIOS_TYPE_SYSTEM_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE1, Uuid), sizeof(EFI_GUID), (UINT8*)&SmbiosUuid);
+//
+//
+//}
+
+VOID
+EFIAPI
+BuildBiosStringHob ()
+{
+  EFI_PEI_BIOS_STRING_HOB *BiosStringHob;
+  BOOT_LOADER_VERSION  *VerInfoTbl;
+  CHAR8 PlatformName[10]= {0};
+  VerInfoTbl    = GetVerInfoPtr ();
+
+  BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
+
+  if (BiosStringHob != NULL) {
+    CopyMem (PlatformName, GetPlatformName (), 8);
+
+    AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
+
+    BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+    BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+    BiosStringHob->BIOSFormalVersion  = 'V';
+    
+    AsciiSPrint (BiosStringHob->ProjectBuildDate, 16, "%a",PcdGetPtr (PcdVerInfoBuildDate));
+  }
+
+}
+
+
+VOID
+Stage2BoardInitNotify (
+  IN  BOARD_INIT_PHASE    InitPhase
+)
+{
+  EFI_STATUS            Status;
+
+  switch (InitPhase) {
+  case PreSiliconInit:
+    {
+  	UINT8 Data;
+    Data = 0x0;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+
+    break;
+  case PostSiliconInit:
+    BuildBiosStringHob();
+//    UpdateSmbiosInfo ();
+    break;
+  case PostPciEnumeration:
+//    UpdateSmbiosInfo ();
+
+    if (GetBootMode() == BOOT_ON_S3_RESUME) {
+  	UINT8 Data;
+    Data = 0x01;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+    break;
+  case PrePayloadLoading:
+    break;
+
+  case EndOfStages:
+    {
+  	UINT8 Data;
+    Data = 0x01;
+	  // Notify ACPI is ON.
+	    Status = EcPmcWrite_Protocol(
+	              A9610_CMD_WRITE_SYSTEM, 
+	              A9610_CTRL_NOTIFY_EC_ACPI_MODE, 
+	              A9610_DEVICE_NONE, 
+	              0x01, 
+	              &Data);
+    }
+    break;
+
+  case ReadyToBoot:
+  {
+  //	Set GPIO to System_OK_LED turn on.
+  // GPP_E7, FD6A0000h + AE0h
+  // Bit9 GPIO RX Disable, Bit8 GPIO TX Disable
+  // Bit1 GPIO RX State, Bit0 GPIO TX State
+    UINT32  GPIOlevel;
+    UINT32  GPIOAddr = 0xFDC20B70;
+//    UINT32      *Addr = (UINT32*)((UINTN)0xFDC20B70);
+//    RegVal  =   MMIO_READ32(Addr); //Address = SBREG MMIO base address | GPIO Group Port ID (0xC2) | Pin Offset
+//    MMIO_WRITE32 (Addr, (RegVal | BIT0)); //<<+D580X012_1
+
+    GPIOlevel = MmioRead32( GPIOAddr );
+    GPIOlevel = (GPIOlevel & 0xFFFFFEFE) | 0x1;    // set System_OK LED#
+    MmioWrite32(GPIOAddr, GPIOlevel );
+
+
+  // EC boot count command
+    IoWrite8(0x29A, 0x2F);  // EC boot count
+  }
+
+    break;
+
+  default:
+    break;
+  }
+}
+
+
+//D580X001_1 >>
+
 /**
   Clear SMI sources
 
@@ -201,6 +426,8 @@ BoardInit (
   default:
     break;
   }
+  Stage2BoardInitNotify (InitPhase); //D580X001_1
+
 }
 
 /**

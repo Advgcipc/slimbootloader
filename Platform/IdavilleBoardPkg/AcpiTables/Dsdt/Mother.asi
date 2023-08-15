@@ -99,7 +99,7 @@ Device(XTRA) {
       //IO(Decode16,0x64,0x64,0x01,0x01)
 
       // Leave FED40000-FED47FFF for TPM
-      Memory32Fixed (ReadOnly, 0xFED40000, 0x8000) // ICH9 bios spec section 5.10 - reserved memory address space.
+//D580X001_2      Memory32Fixed (ReadOnly, 0xFED40000, 0x8000) // ICH9 bios spec section 5.10 - reserved memory address space.
 
       //
       // FLASH range

@@ -80,8 +80,8 @@ SMBIOS_TABLE_TYPE0    mBiosInfo = {
   },
   0x0,                                      // System BIOS Major Release
   0x1,                                      // System BIOS Minor Release
-  0xFF,                                     // Embedded controller firmware major Release
-  0xFF                                      // Embedded controller firmware minor Release
+  0x1,                                     // Embedded controller firmware major Release
+  0x11                                      // Embedded controller firmware minor Release
 };
 
 

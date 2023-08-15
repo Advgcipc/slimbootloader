@@ -1,0 +1,40 @@
+## @file
+#
+#  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+#
+# Delta configuration values
+#
+PLATFORMID_CFG_DATA.PlatformId            | 0x0010
+PLAT_NAME_CFG_DATA.PlatformName           | 'SOM-D580'
+GEN_CFG_DATA.PayloadId                    | 'AUTO'
+# PLDSEL is valid only when PayloadId is 'AUTO'
+PLDSEL_CFG_DATA.PldSelGpio.Enable         | 1
+PLDSEL_CFG_DATA.PldSelGpio.PadGroup       | 7
+PLDSEL_CFG_DATA.PldSelGpio.PinNumber      | 8
+#//D580X001_1 PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 0
+
+#
+# GPIO overrides from Base .yaml
+#
+GPIO_CFG_DATA.GpioPinConfig0_GPP_L09    | 0x0350A5A3
+
+PCIE_CFG_DATA.IioRes.Enable             | 0
+
+MEMORY_CFG_DATA.GeneralConfig.DimmConfigType | 2
+
+CLOCK_CFG_DATA.SkipClockGenerator       | 0
+
+#SILICON_CFG_DATA.PortUsb20Enable.Usb2Port2                  | 0
+#SILICON_CFG_DATA.PortUsb20Enable.Usb2Port3                  | 0
+
+SILICON_CFG_DATA.SataConfig0.EnableSATA0                  | 0
+SILICON_CFG_DATA.SataConfig0.EnableSATA1                  | 0
+CLOCK_CFG_DATA.ClockGeneratorAddress                      | 0xD0
+
+MISC_CFG_DATA.MiscCfg.Emmc                                | 0
+MISC_CFG_DATA.MiscCfg.EmmcHS400Support                    | 0

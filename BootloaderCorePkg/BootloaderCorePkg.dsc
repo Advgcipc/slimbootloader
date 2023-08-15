@@ -352,6 +352,10 @@
 !endif
   gPlatformCommonLibTokenSpaceGuid.PcdSourceDebugEnabled  | $(ENABLE_SOURCE_DEBUG)
 
+#//D580X001_1 
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate        | "$(VERINFO_BUILD_DATE)"
+
+
 [PcdsDynamicDefault]
   gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut         | 2
   gPlatformCommonLibTokenSpaceGuid.PcdMeasuredBootHashMask | 0x00000002

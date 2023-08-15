@@ -16,8 +16,10 @@ class Board(IdavilleBoardConfig.Board):
         super(Board, self).__init__(*args, **kwargs)
 
         self.VERINFO_IMAGE_ID     = 'SB_IDVH'
-        self.VERINFO_PROJ_MAJOR_VER = 1
-        self.VERINFO_PROJ_MINOR_VER = 2
+#//D580X001_1        self.VERINFO_PROJ_MAJOR_VER = 1
+#//D580X001_1        self.VERINFO_PROJ_MINOR_VER = 2
+        self.VERINFO_PROJ_MAJOR_VER = 0
+        self.VERINFO_PROJ_MINOR_VER = 1
         self.VERINFO_SVN          = 1
 
         self.BOARD_NAME           = 'idvh'

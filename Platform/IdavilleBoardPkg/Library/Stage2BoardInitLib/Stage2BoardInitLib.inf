@@ -75,6 +75,8 @@
   gLoaderPciRootBridgeInfoGuid
   gIioUdsHobGuid
   gEfiGlobalVariableGuid
+  gAhcBiosStringGuid    #//D580X001_1
+
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
@@ -99,6 +101,8 @@
   gPlatformModuleTokenSpaceGuid.PcdSmramTsegSize
   gPlatformCommonLibTokenSpaceGuid.PcdSerialUseMmio
   gPlatformCommonLibTokenSpaceGuid.PcdSerialRegisterBase
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate  #//D580X001_1
+  
   gPlatformCommonLibTokenSpaceGuid.PcdSerialBaudRate
   gPlatformCommonLibTokenSpaceGuid.PcdSerialRegisterStride
   gPlatformCommonLibTokenSpaceGuid.PcdSerialClockRate

@@ -1,0 +1,37 @@
+Start (hex)    End (hex)    Length (hex)    Area Name
+-----------    ---------    ------------    ---------
+
+00000000       01FFFFFF     02000000        Full Flash Image
+00000000       00000FFF     00001000        Descriptor Region
+00000014       00000017     00000004            FLMAP0 - Flash Map 0 Register
+00000018       0000001B     00000004            FLMAP1 - Flash Map 1 Register
+0000001C       0000001F     00000004            FLMAP2 - Flash Map 2 Register
+00000030       0000003B     0000000C            FCBA - Flash Component Registers
+00000040       00000043     00000004            FLREG0 - Flash Region 0 (Flash Descriptor) Register
+00000080       00000083     00000004            FLMSTR1 - Flash Master 1 (Host CPU/ BIOS)
+00000084       00000087     00000004            FLMSTR2 - Flash Master 2 (Intel (R) ME)
+00000088       0000008B     00000004            FLMSTR3 - Flash Master 3 (GbE)
+00000DF0       00000EFF     00000110            VSCC Table
+00000DF0       00000DF7     00000008                W25Q256JW
+00000F00       00000FFF     00000100            OEM Data
+00001000       01000FFF     01000000        CSE Region
+00001010       00001FFF     00000FF0            CSE Layout Table
+00003000       00210FFF     0020E000        Boot Partition 1
+00004000       0001BFFF     00018000            CSE RBE Partition
+0001C000       0005BFFF     00040000            PMCP
+0005C000       001A0FFF     00145000            CSE BUP Partition
+001A1000       001A1FFF     00001000                OEM KM Partition
+001A2000       001B3FFF     00012000            UIOM Partition
+001B4000       001C3FFF     00010000            NPHY Partition
+001C4000       0020FFFF     0004C000            TBT Partition
+00210000       00210FFF     00001000            PCHC
+00211000       00371FFF     00161000        ME Data Partition
+00370000       00370307     00000308                IFP Overrides Partition
+00372000       007AFFFF     0043E000        Boot Partition 3
+00373000       00721FFF     003AF000            CSE Main Partition
+00722000       0072BFFF     0000A000            IUnit Partition
+0072C000       007ABFFF     00080000            CSE WCOD Partition
+007AC000       007AFFFF     00004000            CSE LOCL Partition
+007B0000       01000FFF     00851000            CSE Padding
+01001000       013FFFFF     003FF000        Required Padding (Region 9)
+01400000       01FFFFFF     00C00000        BIOS Region

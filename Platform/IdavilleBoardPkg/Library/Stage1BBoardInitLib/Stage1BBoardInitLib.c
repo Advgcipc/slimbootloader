@@ -425,6 +425,8 @@ UpdateFspConfig (
       FspmUpd->FspmConfig.PcdFspDebugPrintErrorLevel  = 0;
     }
   }
+//D580X001_2 debug disable BMC port
+    FspmUpd->FspmConfig.PcdPchUsb2Port        = (FspmUpd->FspmConfig.PcdPchUsb2Port) & 0x00FFFFFF;
 
   // Pcie Settings
   PcieCfgData = (PCIE_CFG_DATA *) FindConfigDataByTag (CDATA_PCIE_TAG);
@@ -800,6 +802,12 @@ PlatformFeaturesInit (
       LdrFeatures &= ~FEATURE_VERIFIED_BOOT;
     }
   }
+
+//7583X003_2
+PlatformData->BtGuardInfo.BypassTpmInit = FALSE;
+PlatformData->BtGuardInfo.TpmType = dTpm20;
+//7583X003_2
+
 
   SetFeatureCfg (LdrFeatures);
 }

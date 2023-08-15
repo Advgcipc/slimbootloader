@@ -55,6 +55,8 @@
   gEdkiiFpdtExtendedFirmwarePerformanceGuid     = { 0x3b387bfd, 0x7abc, 0x4cf2, { 0xa0, 0xca, 0xb6, 0xa1, 0x6c, 0x1b, 0x1b, 0x25 } }
   gTccRtctHobGuid                               = { 0x6bddb43d, 0x1782, 0x4d9c, { 0xb6, 0x80, 0xe3, 0xde, 0x45, 0xe0, 0x37, 0x4a } }
   gZeroGuid                                     = { 0x0,        0x0,    0x0,    { 0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0  } }
+  #//D580X001_1
+  gAhcBiosStringGuid                            = { 0xAAAA0056, 0x3341, 0x44b5, { 0x9C, 0x9C, 0x6D, 0x76, 0xF7, 0x67, 0x38, 0xBB } }
 
   #
   # GUID defined in UniversalPayload
@@ -329,3 +331,5 @@
   gPlatformCommonLibTokenSpaceGuid.PcdCpuX2ApicEnabled            | FALSE  | BOOLEAN | 0x20000220
   gPlatformCommonLibTokenSpaceGuid.PcdTccEnabled                  | FALSE  | BOOLEAN | 0x20000221
   gPlatformCommonLibTokenSpaceGuid.PcdFspNoEop                    | FALSE  | BOOLEAN | 0x20000223
+  #//ddd
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate | "02/02/2022" | VOID* | 0x20000222

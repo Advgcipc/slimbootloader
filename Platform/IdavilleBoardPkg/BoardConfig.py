@@ -184,7 +184,7 @@ class Board(BaseBoard):
         self.PLD_RSVD_MEM_SIZE    = 0x00500000
 
         self._CFGDATA_INT_FILE = []
-        self._CFGDATA_EXT_FILE = ['CfgData_Int_LccRp.dlt', 'CfgData_Int_HccRp.dlt']
+        self._CFGDATA_EXT_FILE = ['CfgData_Int_LccRp.dlt', 'CfgData_Int_HccRp.dlt', 'CfgData_Int_HccRp_SOMD580.dlt']
 
     def GetPlatformDsc (self):
         dsc = {}

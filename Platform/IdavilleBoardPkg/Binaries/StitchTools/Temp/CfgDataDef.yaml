@@ -1,0 +1,2435 @@
+## @file
+#
+#  Slim Bootloader CFGDATA Default File.
+#
+#  Copyright (c) 2020 - 2021, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+variable:
+  COND_S0IX_DIS  : ($FEATURES_CFG_DATA.Features.S0ix == 0)
+  COND_PLD_SEL_EN: ($PLDSEL_CFG_DATA.PldSelGpio.Enable == 1)
+
+template:
+  CFGHDR_TMPL: >
+    - CfgHeader    :
+        length       : 0x04
+        value        : {0x01:2b, ((_LENGTH_$(1)_)/4):10b, $(3):4b, $(4):4b, $(2):12b}
+    - CondValue    :
+        length       : 0x04
+        value        : 0x00000000
+
+  MEM_TMPL: >
+    - $ACTION      :
+        page         : MEM_$(1):MEM:"MEM $(1)"
+    - $ACTION      :
+        page         : MEM_$(1)
+
+  USB_PORT_TMPL: >
+    - Usb$(1)Port$(2) :
+        name : Enable USB$(1) port $(2)
+        type : Combo
+        option : $EN_DIS
+        help : >
+               Enable/disable USB$(1) port $(2).
+        length : 1b
+        value : 1
+
+
+  GPIO_TMPL: >
+    - $ACTION      :
+        page         : GIO_$(1)$(2):GIO_$(1):"GPIO $(1)$(2)"
+    - GpioPinConfig0_$(1)$(2) :
+      - $STRUCT      :
+          name         : GPIO $(1)$(2) PIN Config0
+          type         : EditNum, HEX, (0x00000000,0xFFFFFFFF)
+          help         : >
+                         GPIO $(1)$(2) PIN Configuration
+          length       : 0x04
+          value        : $(3)
+      - GPIOPADMode_$(1)$(2) :
+          name         : PadMode
+          type         : Combo
+          option       : 0x0:Hardware Default,0x1:GPIO control of the pad, 0x3:Native function 1, 0x5:Native function 2, 0x7:Native function 3, 0x9:Native function 4
+          help         : >
+                         GPIO PAD Mode. If GPIO is set to one of NativeX modes then following settings are not applicable and can be skipped:-
+                         Interrupt related settings, Host Software Ownership, Output/Input enabling/disabling, Output lock
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 5b
+      - GPIOHostSoftPadOwn_$(1)$(2) :
+          name         : HostSoftPadOwn
+          type         : Combo
+          option       : 0x0:Host Ownership Default(Leave ownership value unmodified), 0x1:Host ownership to ACPI, 0x3:Host ownership to GPIO Driver mode
+          help         : >
+                         GPIO Host Software Pad Ownership. This setting affects GPIO interrupt status registers. Depending on chosen ownership
+                         some GPIO Interrupt status register get updated and other masked:-
+                         - HOST ownership to ACPI - Use this setting if pad is not going to be used by GPIO OS driver.
+                         If GPIO is configured to generate SCI/SMI/NMI then this setting must be used for interrupts to work.
+                         - HOST ownership to GPIO Driver mode - Use this setting only if GPIO pad should be controlled by GPIO OS Driver.
+                         GPIO OS Driver will be able to control the pad if appropriate entry in ACPI exists.
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 2b
+      - GPIODirection_$(1)$(2) :
+          name         : Direction
+          type         : Combo
+          option       : 0x0:DirDefault, 0x9:DirInOut, 0x19:DirInInvOut, 0xB:DirIn, 0x1B:DirInInv, 0x5:DirOut, 0x7:DirNone
+          help         : >
+                         GPIO Host Software Pad Ownership:
+                         - DirDefault = Leave pad direction setting unmodified, - DirInOut = Set pad for both output and input,
+                         - DirInInvOut = Set pad for both output and input with inversion, - DirIn = Set pad for input only,
+                         - DirInInv = Set pad for input with inversion, - DirOut = Set pad for output only,
+                         - DirNone  = Disable both output and input.
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 6b
+      - GPIOOutputState_$(1)$(2) :
+          name         : OutputState
+          type         : Combo
+          option       : 0x0:OutDefault, 0x1:OutLow, 0x3:OutHigh
+          help         : >
+                         GPIO Output State.This field is relevant only if output is enabled:-
+                         - OutDefault = Leave output value unmodified, - OutLow = Set output to low, - OutHigh = Set output to high
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 2b
+      - GPIOInterruptConfig_$(1)$(2) :
+          name         : InterruptConfig
+          type         : Combo
+          option       : >
+                         0x0:IntDefault , 0x1:IntDisable, 0x3:IntNmi , 0x5:IntSmi, 0x9:IntSci, 0x11:IntApic, 0x20:IntLevel, 0x60:IntEdge, 0xA0:IntLvlEdgDis, 0xE0:IntBothEdge,
+                         0x31:IntLevel | IntApic, 0x29:IntLevel | IntSci, 0x25:IntLevel | IntSmi, 0x69:IntEdge | IntSci, 0x71:IntEdge | IntApic, 0x65:IntEdge | IntSmi, 0x60:IntEdge | IntDefault
+          help         : >
+                         GPIO Interrupt Configuration - This setting is applicable only if pad is in GPIO mode and has input enabled.
+                         GPIO_INT_CONFIG allows to choose which interrupt is generated (IOxAPIC/SCI/SMI/NMI) and how it is triggered (edge or level).
+                         Refer to PADCFG_DW0 register description in EDS for details on this settings. Field from GpioIntNmi to GpioIntApic can be OR'ed with
+                         GpioIntLevel to GpioIntBothEdge to describe an interrupt e.g. GpioIntApic | GpioIntLevel.
+                         If GPIO is set to cause an SCI then also GPI_GPE_EN is enabled for this pad.
+                         If GPIO is set to cause an NMI then also GPI_NMI_EN is enabled for this pad.
+                         Not all GPIO are capable of generating an SMI or NMI interrupt.
+                         When routing GPIO to cause an IOxAPIC interrupt care must be taken, as this interrupt cannot be shared and its IRQn number is not configurable.
+                         If GPIO is under GPIO OS driver control and appropriate ACPI GpioInt descriptor exist then use only trigger type setting (from GpioIntLevel to GpioIntBothEdge).
+                         This type of GPIO Driver interrupt doesn't have any additional routing setting required to be set by BIOS. Interrupt is handled by GPIO OS Driver.
+                         - IntDefault = Leave value of interrupt routing unmodified, - IntDisable = Disable IOxAPIC/SCI/SMI/NMI interrupt generation,
+                         - IntNmi = Enable NMI interrupt only, - IntSmi = Enable SMI interrupt only, - IntSci = Enable SCI interrupt only, - IntApic = Enable IOxAPIC interrupt only,
+                         - IntLevel = Set interrupt as level triggered, - IntEdge = Set interrupt as edge triggered, - IntLvlEdgDis = Disable interrupt trigger, - IntBothEdge = Set interrupt as both edge triggered
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 9b
+      - GPIOResetConfig_$(1)$(2) :
+          name         : Power/ResetConfig
+          type         : Combo
+          option       : 0x0:ResetDefault, 0x1:ResetResume, 0x3:HostDeepReset, 0x5:PlatformReset, 0x7:DswReset
+          help         : >
+                         GPIO Power Configuration. This allows to set GPIO Reset type which will be used to reset certain GPIO settings.
+                         - ResetDefault = Leave value of pad reset unmodified, - ResumeReset = Pad setting will reset on DeepSx transition and G3,
+                         - HostDeepReset = Pad settings will reset on:Warm/Cold/Global reset,DeepSx transition,G3,
+                         - PlatformReset = Pad settings will reset on:S3/S4/S5 transition, Warm/Cold/Global reset, DeepSx transition, G3
+                         - DswReset = Pad settings will reset on G3
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 8b
+    - GpioPinConfig1_$(1)$(2) :
+      - $STRUCT      :
+          name         : GPIO $(1)$(2) PIN Config1
+          type         : EditNum, HEX, (0x00000000,0xFFFFFFFF)
+          help         : >
+                         GPIO $(1)$(2) PIN Configuration
+          length       : 0x04
+          value        : $(4)
+      - GPIOElectricalCfg_$(1)$(2) :
+          name         : GPIO ElectricalCfg
+          type         : Combo
+          option       : 0x0:TermDefault, 0x1:TermNone, 0x5:TermNone, 0x9:TermWpd20K, 0x13:TermWpu1K, 0x17:TermWpu2K, 0x15:TermWpu5K, 0x19:TermWpu20K, 0x1B:TermWpu1K2K, 0x1F:TermNative, 0x20:NoTolerance1v8, 0x60:Tolerance1v8
+          help         : >
+                         GPIO Electrical Configuration. Set GPIO termination and Pad Tolerance.(applicable only for some pads):-
+                         - TermDefault = Leave termination setting unmodified, - TermNone = None, - TermWpd5K = 5kOhm weak pull-down, - TermWpd20K = 20kOhm weak pull-down,
+                         - TermWpu1K = 1kOhm weak pull-up, - TermWpu2K = 2kOhm weak pull-up, - TermWpu5K = 5kOhm weak pull-up, - TermWpu20K = 20kOhm weak pull-up, - TermWpu1K2K = 1kOhm & 2kOhm weak pull-up,
+                         - NoTolerance1v8 = Disable 1.8V pad tolerance, Tolerance1v8 = Enable 1.8V pad tolerance
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 9b
+      - GPIOLockConfig_$(1)$(2) :
+          name         : LockConfig
+          type         : Combo
+          option       : 0x0:LockDefault, 0x1:PadConfigLock, 0x3:PadConfigUnlock, 0x5:PadLock , 0xC:OutputStateUnlock, 0xF:PadUnlock
+          help         : >
+                         GPIO Lock Configuration.
+                         - LockDefault = Leave value of pad as-is, - PadConfigLock = Lock Pad configuration,
+                         - PadConfigUnlock = Leave Pad configuration unlocked, - PadLock = Lock both Pad configuration and output control,
+                         - OutputStateUnlock = Leave Pad output control unlocked, PadUnlock = Leave both Pad configuration and output control unlocked
+          condition    : $GPIO_CFG_DATA.GpioPinConfig1_$(1)$(2).GPIOSkip_$(1)$(2) == 0
+          length       : 4b
+      - RxRaw_$(1)$(2) :
+            name         : RxRaw
+            type         : Combo
+            option       : 0x0:Default, 0x1:NoOverride, 0x3:RxDrive 1 internally
+            help         : > This bit determines if the selected pad state is being overridden to '1'.
+            length       : 2b
+      - Reserved1_$(1)$(2) :
+          name         : Reserved1
+          type         : Reserved
+          length       : 1b
+      - PadNum_$(1)$(2)  :
+          name         : PadNum
+          type         : Reserved
+          length       : 8b
+      - GrpIdx_$(1)$(2)  :
+          name         : GrpIdx
+          type         : Reserved
+          length       : 5b
+      - Reserved2_$(1)$(2) :
+          name         : Reserved2
+          type         : Reserved
+          length       : 1b
+      - Hide_$(1)$(2)    :
+          name         : Hide
+          type         : Reserved
+          length       : 1b
+      - GPIOSkip_$(1)$(2) :
+          name         : GPIO Skip
+          type         : Combo
+          option       : $EN_DIS
+          help         : >
+                         ENABLE- Skip GPIO PAD programming (keep the defaults). DISABLE- Program GPIO PAD configuration.
+          order        : 0000.0000
+          length       : 1b
+
+
+
+  BOOT_OPTION_TMPL: >
+    - $ACTION      :
+        page         : OS_$(1):OS:"Boot Option $(1)"
+    - $ACTION      :
+        page         : OS_$(1)
+    - BOOT_OPTION_CFG_DATA_$(1) :
+      - !expand { CFGHDR_TMPL : [ BOOT_OPTION_CFG_DATA_$(1), (0x050 + $(1)), 0, 0 ] }
+      - ImageType_$(1) :
+          name         : Image Type
+          type         : Combo
+          option       : 0:Default, 1:Android, 2:ClearLinux, 3:Acrn, 4:Fastboot, 0x1E:Extra image, 0x9E:PreOS image, 0xFF:Not used
+          help         : >
+                         Specify boot image type.
+                         Extra and PreOS image type indicates this option is not a standalone boot option. Instead, it provides additional information for the previous boot option.
+                         Extra image means load and run extra image before normal OS image. The extra image will return to SBL and SBL will continue run normal OS.
+                         PreOs image means load and run PreOS image before normal OS image. SBL prepares normal OS info and passes to PreOS so the PreOs will not return to SBL.
+                         'Not used' indicates this option will be ignored.
+          length       : 0x01
+          value        : $(2)
+      - BootFlags_$(1) :
+          name         : Boot Flags
+          type         : Combo
+          option       : 0:Normal, 4:PreOS support, 8:Extra image support, 12:PreOS and extra image support, 16:Mender support, 20:PreOS and mender support
+          help         : >
+                         Specify boot flags (options)
+                         When extra image or PreOS image is selected, need config them in next boot option with proper image type.
+                         Extra image means load and run extra image before normal OS image. The extra image will return to SBL and SBL will continue run normal OS.
+                         PreOs image means load and run PreOS image before normal OS image. SBL prepares normal OS info and passes to PreOS so the PreOs will not return to SBL.
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1E
+          length       : 0x01
+          value        : $(3)
+      - Reserved_$(1) :
+          length       : 0x01
+          value        : 0x5A
+      - BootDeviceType_$(1) :
+          name         : Boot Device type
+          type         : Combo
+          option       : 0:SATA, 1:SD, 2:EMMC, 3:UFS, 4:SPI, 5:USB, 6:NVME, 7:MEMORY
+          help         : >
+                         Specify boot device type
+          order        : 0000.0000
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1E
+          length       : 0x01
+          value        : $(4)
+      - BootDeviceInstance_$(1) :
+          name         : Boot Device instance
+          type         : Combo
+          option       : 0:Device 0, 1:Device 1, 2:Device 2, 3:Device 3
+          help         : >
+                         Specify boot device instance when then are multiple instances
+          order        : 0000.0000
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1E
+          length       : 0x01
+          value        : $(5)
+      - HwPart_$(1)  :
+          name         : Hardware Partition
+          type         : Combo
+          option       : 0:User Partition, 1:Boot Partition 1, 2:Boot Partition 2, 3:Boot Partition 3, 4:Boot Partition 4, 5:Boot Partition 5, 6:Boot Partition 6, 7:Boot Partition 7, 255:SATA Auto 255
+          help         : >
+                         Specify hardware partition number.
+                         If boot device type is SPI, the hardware partition refers to SPI flash region- 0-Descriptor, 1-BIOS, 2-ME, 3-GbE, 4-PDR Regions.
+                         If boot device type is SATA, the hardware partition refers to the SATA port number on the system; setting to 255 uses the first detected SATA device.
+                         If boot device type is USB, the hardware partition refers to the order in which the USB block devices are detected when multiple USB block devices are connected.
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1E
+          length       : 0x01
+          value        : $(6)
+      - SwPart_$(1)  :
+          name         : Software Partition
+          type         : EditNum, DEC, (0,255)
+          help         : >
+                         Specify software partition number. A value of 255 indicates raw booting via the absolute LBA instead of a relative LBA
+                         (e.g. relative to a software partition's starting LBA).
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1F
+          length       : 0x01
+          value        : $(7)
+      - FsType_$(1)  :
+          name         : File System Type
+          type         : Combo
+          option       : 0:FAT, 1:EXT2, 2:AUTO, 3:RAW
+          help         : >
+                         Image is loaded from file system instead of raw data
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1E
+          length       : 0x01
+          value        : $(8)
+      - BootImage_$(1) :
+          name         : Normal OS info or LBA address
+          type         : EditText
+          help         : >
+                         Specify file name of normal OS or LBA address (16-byte max length).
+                         For LBA address, please use HEX prefix "#0x". EX- #0x12345678
+          condition    : ($BOOT_OPTION_CFG_DATA_$(1).ImageType_$(1) & 0x1F) < 0x1F
+          length       : 0x10
+          value        : $(9)
+
+
+  SPD_TMPL: >
+    - SpdDataSel$(1)$(2)$(3) :
+        name         : Spd Data MC$(1) CH$(2) DIMM$(3)
+        type         : Combo
+        option       : 0:NONE, 1:SPD0, 2:SPD1
+        help         : >
+                       Select which SPD data should be used for MC$(1) CH$(2) DIMM$(3).SPD0 and SPD1 are associated with configurable SPD data block from MEM SPD. SPD data will be used only when SpdAddressTable SPD Address are marked as 00
+        length       : 0x01
+        value        : $(4)
+
+
+
+
+
+configs:
+  - $ACTION      :
+      page         : PLT::"Platform Settings", MEM::"Memory Settings", SIL::"Silicon Settings", GEN::"General Settings", SEC::"Security Settings", GIO::"GPIO Settings", GFX::"Graphics Settings", DYN::"Dynamic Settings", OS::"OS Boot Options"
+  - Signature    :
+      length       : 0x04
+      value        : {'CFGD'}
+  - HeaderLength :
+      length       : 0x01
+      value        : 0x10
+  - Reserved     :
+      length       : 0x03
+      value        : {0,0,0}
+  - UsedLength   :
+      length       : 0x04
+      value        : _LENGTH_
+  - TotalLength  :
+      length       : 0x04
+      value        : 0x1000
+  - $ACTION      :
+      page         : GEN
+
+
+  - $ACTION      :
+      page         : GEN
+  - GEN_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ GEN_CFG_DATA, 0x010, 0, 0 ] }
+    - DebugPrintLevel :
+        name         : Debug Print Level
+        type         : EditNum, HEX, (0x00000000,0xFFFFFFFF)
+        help         : >
+                       Specify debug print level
+        length       : 0x04
+        value        : 0x8000004F
+    - PayloadId    :
+        name         : Payload ID
+        type         : EditText
+        help         : >
+                       Specify payload ID string. Empty will boot default payload. Otherwise, boot specified payload ID in multi-payload binary.
+        length       : 0x04
+        value        : ''
+    - OsCrashMemorySize :
+        name         : OS Crash Memory Size
+        type         : Combo
+        option       :  0:0MB, 1:4MB, 2:8MB, 3:16MB, 4:32MB, 5:64MB
+        help         : >
+                       Specify reserved memory size for OS to save OS crash data. The reserved memory address should be same across reset.
+        length       : 0x01
+        value        : 0
+    - EnableCrashMode :
+        name         : Enable Crash Mode
+        option       : $EN_DIS
+        help         : >
+                       Enable/Disable Crash Mode. Boot into Crash OS only when crash mode is enabled.
+        length       : 0x01
+        value        : 0
+    - RpmbKeyProvisioning :
+        name         : RpmbKeyProvisioning
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable or disable Rpmb Key Provisioning
+        length       : 0x01
+        value        : 0
+    - VbtImageId   :
+        name         : Platform VBT table
+        type         : Combo
+        option       : 1:VBT Binary 1, 2:VBT Binary 2
+        help         : >
+                       Specify image ID for desired VBT binary
+        length       : 0x04
+        value        : 1
+    - $ACTION      :
+        page         : OS
+    - CurrentBoot  :
+        name         : Current Boot Option
+        type         : Combo
+        option       : 31:AUTO, 0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11, 10:10, 11:11, 12:12, 13:13, 14:14, 15:15
+        help         : >
+                       Set the current boot option. It indicates the boot option index (0-15) to be tried first on the boot flow.
+                       AUTO allows platform to set current boot option using platform specific policy.
+        length       : 0x01
+        value        : 0
+    - BootToShell :
+        name         : Boot to OsLoader shell
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       By default OsLoader payload shell is only available in debug build. Enable BootToShell will make OsLoader Payload
+                       have same behavior with debug build in the release build.
+        length       : 0x01
+        value        : 0
+    - Dummy        :
+        length       : 0x3
+        value        : 0x0
+
+
+
+  - $ACTION      :
+      page         : GIO
+  - GPIO_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ GPIO_CFG_DATA, 0x400, 1, 0 ] }
+    - GPIO_CFG_HDR :
+      - GpioHeaderSize :
+          length       : 0x01
+          value        : _LENGTH_GPIO_CFG_HDR_
+      - GpioBaseTableId :
+          length       : 0x01
+          value        : 0xFF
+      - GpioItemSize :
+          length       : 0x02
+          value        : 8
+      - GpioItemCount :
+          length       : 0x02
+          value        : (_LENGTH_GPIO_CFG_DATA_ - _LENGTH_GPIO_CFG_HDR_ - 8) / 8
+      # Bit start offset within each GPIO entry array to identify a GPIO pin uniquely. EX: GPIO group id + pad id
+      # Offset is 2nd DWORD BIT16 = 1 * 32 + 16 = 48
+      - GpioItemIdBitOff :
+          length       : 0x01
+          value        : 48
+      # Bit length within each GPIO entry array to identify a GPIO pin uniquely.
+      # Length is 2nd DWORD BIT16 to BIT28 = 13
+      - GpioItemIdBitLen :
+          length       : 0x01
+          value        : 13
+      # Bit offset within each GPIO entry array to indicate SKIP a GPIO programming
+      # Offset is 2nd DWORD BIT31 = 63
+      - GpioItemValidBitOff :
+          length       : 0x01
+          value        : 63
+      - GpioItemUnused :
+          length       : 0x01
+          value        : 0
+      # Need 1 bit per GPIO. So this mask byte length needs to be at least (GpioNumber + 7) / 8
+      # Padding can be added to let the whole length aligned at DWORD boundary
+      - GpioBaseTableBitMask :
+          length       : 38
+          value        : {0}
+      - GpioTableData :
+          length       : 0
+          value        : 0
+
+    # GPIO Group GPP_A: TGL-U PCH has 24, TGL-H PCH has 15.
+    - $ACTION      :
+        page         : GIO_GPP_A:GIO:"GPIO GPP_A"
+    - !expand { GPIO_TMPL : [ GPP_A,  00,  0x0350A383,  0x00002019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  01,  0x0350A383,  0x00012019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  02,  0x0350A383,  0x00022019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  03,  0x0350A383,  0x00032019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  04,  0x0350A383,  0x00042019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  05,  0x0350A383,  0x00052009 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  06,  0x0350A383,  0x00062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  07,  0x0350A381,  0x00072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  08,  0x0350A385,  0x00082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  09,  0x0350A385,  0x00092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  10,  0x0550A581,  0x000A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  11,  0x0550E281,  0x000B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  12,  0x0350A383,  0x000C2019 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  13,  0x0350E281,  0x000D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  14,  0x0550A281,  0x000E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  15,  0x0350A381,  0x000F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  16,  0x0350A383,  0x00102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  17,  0x0350A381,  0x00112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  18,  0x0350A383,  0x00122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  19,  0x0350A381,  0x00132001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  20,  0x0350A381,  0x00142001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  21,  0x0350A381,  0x00152001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  22,  0x0350A381,  0x00162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_A,  23,  0x0550A281,  0x00172001 ] }
+
+    # GPIO Group GPP_B: Both TGL-U and TLGL-H PCHs have 24.
+    - $ACTION      :
+        page         : GIO_GPP_B:GIO:"GPIO GPP_B"
+    - !expand { GPIO_TMPL : [ GPP_B,  00,  0x0350A383,  0x01002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  01,  0x0350A383,  0x01012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  02,  0x0534AD81,  0x01022601 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  03,  0x0350A381,  0x01032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  04,  0x0550E281,  0x01042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  05,  0x0350A383,  0x01052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  06,  0x0350A383,  0x01062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  07,  0x0350A383,  0x01072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  08,  0x0350A383,  0x01082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  09,  0x0350A383,  0x01092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  10,  0x0350A383,  0x010A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  11,  0x0150A383,  0x010B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  12,  0x0350A383,  0x010C2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  13,  0x0350A383,  0x010D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  14,  0x0550E285,  0x010E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  15,  0x0350E281,  0x010F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  16,  0x0550E281,  0x01102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  17,  0x0150A281,  0x01112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  18,  0x0550A281,  0x01122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  19,  0x0350A383,  0x01132001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  20,  0x0350A383,  0x01142001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  21,  0x0350A383,  0x01152001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  22,  0x0350A283,  0x01162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_B,  23,  0x0550E281,  0x01172001 ] }
+
+    # GPIO Group GPP_C: Both TGL-U and TLGL-H PCHs have 24.
+    - $ACTION      :
+        page         : GIO_GPP_C:GIO:"GPIO GPP_C"
+    - !expand { GPIO_TMPL : [ GPP_C,  00,  0x0350A383,  0x02002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  01,  0x0350A383,  0x02012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  02,  0x0550E281,  0x02022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  03,  0x0350A383,  0x02032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  04,  0x0350A383,  0x02042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  05,  0x0550E281,  0x02052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  06,  0x0150A383,  0x02062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  07,  0x0150A383,  0x02072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  08,  0x0538AD81,  0x82082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  09,  0x0350A381,  0x82092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  10,  0x0150A281,  0x020A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  11,  0x0150A281,  0x020B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  12,  0x0518AD81,  0x820C2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  13,  0x0550E281,  0x820D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  14,  0x0314AD81,  0x020E2601 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  15,  0x0550E281,  0x020F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  16,  0x0350A383,  0x02102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  17,  0x0350A383,  0x02112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  18,  0x0350A383,  0x02122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  19,  0x0350A383,  0x02132001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  20,  0x0350A381,  0x82142001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  21,  0x0350A381,  0x82152001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  22,  0x0350E281,  0x02162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_C,  23,  0x0314AD81,  0x02172601 ] }
+
+    # GPIO Group GPP_D: TGL-U PCH has 20, TGL-H PCH has 24. Skip 20-23 for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_D:GIO:"GPIO GPP_D"
+    - !expand { GPIO_TMPL : [ GPP_D,  00,  0x0350A383,  0x03002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  01,  0x0350A383,  0x03012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  02,  0x0350A383,  0x03022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  03,  0x0350A383,  0x03032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  04,  0x0350A383,  0x03042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  05,  0x0350A383,  0x03052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  06,  0x0350A383,  0x03062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  07,  0x0350A383,  0x03072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  08,  0x0350A383,  0x03082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  09,  0x0350A38B,  0x0309201F ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  10,  0x0350A28B,  0x030A201F ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  11,  0x0350A38B,  0x030B201F ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  12,  0x0350A28B,  0x030C201F ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  13,  0x0350A381,  0x030D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  14,  0x0350A381,  0x030E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  15,  0x0350A381,  0x030F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  16,  0x0550E281,  0x03102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  17,  0x0350A383,  0x03112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  18,  0x0350A383,  0x03122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  19,  0x0350A381,  0x03132001 ] }
+    - !expand { GPIO_TMPL : [ GPP_D,  20,  0x0350A381,  0x83142001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_D,  21,  0x0350A381,  0x83152001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_D,  22,  0x0350A381,  0x83162001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_D,  23,  0x0350A381,  0x83172001 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_E: TGL-U PCH has 24, TGL-H PCH has 13.
+    - $ACTION      :
+        page         : GIO_GPP_E:GIO:"GPIO GPP_E"
+    - !expand { GPIO_TMPL : [ GPP_E,  00,  0x0350A381,  0x04002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  01,  0x0350A381,  0x04012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  02,  0x0350A381,  0x04022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  03,  0x0518A581,  0x04032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  04,  0x0150A383,  0x04042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  05,  0x0150A383,  0x04052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  06,  0x0550E281,  0x04062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  07,  0x0512AD81,  0x04072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  08,  0x0550E281,  0x04082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  09,  0x0350A383,  0x04092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  10,  0x0350A381,  0x040A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  11,  0x0350A381,  0x040B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  12,  0x0350A381,  0x040C2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  13,  0x0350A381,  0x040D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  14,  0x0350A383,  0x040E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  15,  0x0350A383,  0x040F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  16,  0x0350A385,  0x04102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  17,  0x0538AD81,  0x04112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  18,  0x0350A38B,  0x0412201F ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  19,  0x0350A28B,  0x0413201F ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  20,  0x0350A38B,  0x0414201F ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  21,  0x0350A28B,  0x0415201F ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  22,  0x0550A281,  0x04162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_E,  23,  0x0550E281,  0x04172001 ] }
+
+    # GPIO Group GPP_F: Both TGL-U and TLGL-H PCHs have 24.
+    - $ACTION      :
+        page         : GIO_GPP_F:GIO:"GPIO GPP_F"
+    - !expand { GPIO_TMPL : [ GPP_F,  00,  0x0350A383,  0x05002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  01,  0x0350A383,  0x05012019 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  02,  0x0350A383,  0x05022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  03,  0x0350A383,  0x05032019 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  04,  0x0314AD81,  0x05042601 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  05,  0x0314AD81,  0x05052601 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  06,  0x0350A381,  0x05062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  07,  0x0550E281,  0x05072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  08,  0x0350A381,  0x05082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  09,  0x0550E281,  0x05092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  10,  0x0550E281,  0x050A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  11,  0x0350A381,  0x050B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  12,  0x0350A381,  0x050C2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  13,  0x0350A381,  0x050D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  14,  0x0350A381,  0x050E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  15,  0x0350A381,  0x050F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  16,  0x0350A381,  0x05102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  17,  0x0550E283,  0x05112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  18,  0x0530A483,  0x05122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  19,  0x0350A383,  0x05132001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  20,  0x0550A281,  0x05142001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  21,  0x0550A581,  0x05152001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  22,  0x0350A381,  0x05162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_F,  23,  0x0350A381,  0x05172001 ] }
+
+    # GPIO Group GPP_G: Only in TGL-H PCH (16). Skip all for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_G:GIO:"GPIO GPP_G"
+    - !expand { GPIO_TMPL : [ GPP_G,  00,  0x0350A383,  0x86002019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  01,  0x0350A383,  0x86012019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  02,  0x0500A2E1,  0x86020001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  03,  0x0500E2E1,  0x86030001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  04,  0x0500E2E1,  0x86040001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  05,  0x0350A383,  0x86052009 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  06,  0x0500E2E1,  0x86060001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  07,  0x0500E2E1,  0x86070001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  08,  0x0350A385,  0x86082001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  09,  0x0350A385,  0x86092001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  10,  0x0550A581,  0x860A2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  11,  0x0550E281,  0x860B2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  12,  0x0350A383,  0x860C2019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  13,  0x0350E281,  0x860D2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  14,  0x0550A281,  0x860E2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_G,  15,  0x0550A281,  0x860F2001 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_H: Both TGL-U and TLGL-H PCHs have 24.
+    - $ACTION      :
+        page         : GIO_GPP_H:GIO:"GPIO GPP_H"
+    - !expand { GPIO_TMPL : [ GPP_H,  00,  0x0550E281,  0x07002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  01,  0x0550E281,  0x07012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  02,  0x0350A281,  0x07022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  03,  0x0350A381,  0x07032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  04,  0x0350A383,  0x07042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  05,  0x0350A383,  0x07052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  06,  0x0350A383,  0x07062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  07,  0x0350A383,  0x07072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  08,  0x0350A383,  0x07082001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  09,  0x0350A383,  0x07092001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  10,  0x0350A383,  0x070A2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  11,  0x0350A383,  0x070B2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  12,  0x0550E281,  0x070C2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  13,  0x0550E281,  0x070D2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  14,  0x0550E281,  0x070E2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  15,  0x0550E281,  0x070F2001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  16,  0x0350A383,  0x07102001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  17,  0x0350A283,  0x07112001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  18,  0x0350A383,  0x07122001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  19,  0x0314AD83,  0x07132601 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  20,  0x0350A383,  0x07142001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  21,  0x0350A383,  0x07152001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  22,  0x0350A383,  0x07162001 ] }
+    - !expand { GPIO_TMPL : [ GPP_H,  23,  0x0350A281,  0x07172001 ] }
+
+    # GPIO Group GPP_I: Only in TGL-H PCH (15). Skip all for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_I:GIO:"GPIO GPP_I"
+    - !expand { GPIO_TMPL : [ GPP_I,  00,  0x0350A383,  0x88002019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  01,  0x0350A383,  0x88012019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  02,  0x0350A383,  0x88022019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  03,  0x0350A383,  0x88032019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  04,  0x0350A383,  0x88042019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  05,  0x0350A383,  0x88052009 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  06,  0x0350A383,  0x88062001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  07,  0x0350A381,  0x88072001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  08,  0x051885E1,  0x88080601 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  09,  0x0500E2E1,  0x88090001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  10,  0x0500E2E1,  0x880A0001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  11,  0x0550E281,  0x880B2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  12,  0x0350A383,  0x880C2019 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  13,  0x0350E281,  0x880D2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_I,  14,  0x0550A281,  0x880E2001 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_J: Only in TGL-H PCH (10). Skip all for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_J:GIO:"GPIO GPP_J"
+    - !expand { GPIO_TMPL : [ GPP_J,  00,  0x0500E2E1,  0x89000001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  01,  0x0350A381,  0x89012001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  02,  0x0350A381,  0x89022001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  03,  0x0518A581,  0x89032001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  04,  0x0150A383,  0x89042001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  05,  0x0150A383,  0x89052001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  06,  0x0550E281,  0x89062001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  07,  0x0512AD81,  0x89072001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  08,  0x0500E2E1,  0x89080601 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_J,  09,  0x053005E1,  0x89090601 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_K: Only in TGL-H PCH (12). Skip all for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_K:GIO:"GPIO GPP_K"
+    - !expand { GPIO_TMPL : [ GPP_K,  00,  0x0500E2E1,  0x8A000001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  01,  0x050085E1,  0x8A010001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  02,  0x050085E1,  0x8A020001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  03,  0x0500E2E1,  0x8A030001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  04,  0x0500E2E1,  0x8A040001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  05,  0x050085E1,  0x8A050001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  06,  0x0550E281,  0x8A062001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  07,  0x0512AD81,  0x8A072001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  08,  0x0550E281,  0x8A082001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  09,  0x0350A383,  0x8A092001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  10,  0x050085E1,  0x8A0A0001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_K,  11,  0x0350A381,  0x8A0B2001 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_R: TGL-U PCH has 8, TGL-H PCH has 20. Skip 8-19 for TGL-U.
+    - $ACTION      :
+        page         : GIO_GPP_R:GIO:"GPIO GPP_R"
+    - !expand { GPIO_TMPL : [ GPP_R,  00,  0x0350A383,  0x11002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  01,  0x0350A383,  0x1101201F ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  02,  0x0350A283,  0x1102201F ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  03,  0x0350A383,  0x1103201F ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  04,  0x0350A383,  0x11042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  05,  0x0550A281,  0x11052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  06,  0x0550E281,  0x11062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  07,  0x0350A381,  0x11072001 ] }
+    - !expand { GPIO_TMPL : [ GPP_R,  08,  0x0350A381,  0x91082001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  09,  0x0350A381,  0x91092001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  10,  0x053005E1,  0x910A0001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  11,  0x0350A381,  0x910B2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  12,  0x03188DE1,  0x910C0601 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  13,  0x0350A381,  0x910D2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  14,  0x0350A381,  0x910E2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  15,  0x0350A381,  0x910F2001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  16,  0x0350A381,  0x91102001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  17,  0x0350A381,  0x91112001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  18,  0x0350A381,  0x91122001 ] }   # TGL-H Only. Skip for TGL-U.
+    - !expand { GPIO_TMPL : [ GPP_R,  19,  0x0350A381,  0x91132001 ] }   # TGL-H Only. Skip for TGL-U.
+
+    # GPIO Group GPP_S: Only in TGL-U PCH (8).
+    - $ACTION      :
+        page         : GIO_GPP_S:GIO:"GPIO GPP_S"
+    - !expand { GPIO_TMPL : [ GPP_S,  00,  0x0350A487,  0x12002001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  01,  0x0350A587,  0x12012001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  02,  0x0350A287,  0x12022001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  03,  0x0350A487,  0x12032001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  04,  0x0350A381,  0x12042001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  05,  0x0350A381,  0x12052001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  06,  0x0350A381,  0x12062001 ] }
+    - !expand { GPIO_TMPL : [ GPP_S,  07,  0x0350A381,  0x12072001 ] }
+
+    # GPIO Group GPD: Only in TGL-U PCH (12).
+    - $ACTION      :
+        page         : GIO_GPD:GIO:"GPIO GPD"
+    - !expand { GPIO_TMPL : [ GPD,  00,    0x0750A383,  0x19002019 ] }
+    - !expand { GPIO_TMPL : [ GPD,  01,    0x0750A383,  0x1901201F ] }
+    - !expand { GPIO_TMPL : [ GPD,  02,    0x0750A383,  0x1902201F ] }
+    - !expand { GPIO_TMPL : [ GPD,  03,    0x0750A383,  0x19032019 ] }
+    - !expand { GPIO_TMPL : [ GPD,  04,    0x0750A283,  0x19042001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  05,    0x0750A283,  0x19052001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  06,    0x0750A283,  0x19062001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  07,    0x0750E281,  0x19072001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  08,    0x0750A383,  0x19082001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  09,    0x0750A283,  0x19092001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  10,    0x0750A283,  0x190A2001 ] }
+    - !expand { GPIO_TMPL : [ GPD,  11,    0x0750A283,  0x190B2001 ] }
+
+
+
+  - $ACTION      :
+      page         : PLT
+  - PLATFORMID_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ PLATFORMID_CFG_DATA, 0x0F0, 0, 0 ] }
+    - PlatformId   :
+        name         : Platform ID
+        type         : Combo
+        option       : >
+                       0:Board  0,  1:Board  1,  2:Board  2,  3:Board  3,  4:Board  4,  5:Board  5,  6:Board  6,  7:Board  7,
+                       8:Board  8,  9:Board  9, 10:Board 10, 11:Board 11, 12:Board 12, 13:Board 13, 14:Board 14, 15:Board 15,
+                       16:Board 16, 17:Board 17, 18:Board 18, 19:Board 19, 20:Board 20, 21:Board 21, 22:Board 22, 23:Board 23,
+                       24:Board 24, 25:Board 25, 26:Board 26, 27:Board 27, 28:Board 28, 29:Board 29, 30:Board 30, 31:Board 31
+        help         : >
+                       Select platform ID
+        length       : 0x02
+        value        : 0x0000
+    - PseRsvd      :
+        length       : 0x02
+        value        : 0x0000
+
+  - $ACTION      :
+      page         : PLT
+  - PLAT_NAME_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ PLAT_NAME_CFG_DATA, 0x070, 0, 0 ] }
+    - PlatformName :
+        name         : Platform Name
+        type         : EditText
+        help         : >
+                       Specify the platform name, a maximum of 8 characters
+        length       : 0x8
+        value        : ' '
+
+
+  - $ACTION      :
+      page         : TCC:PLT:"Intel(R) Time Coordinated Computing (Intel(R) TCC)"
+  - $ACTION      :
+      page         : TCC
+  - TCC_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ TCC_CFG_DATA, 0x320, 0, 0 ] }
+    - TccEnable      :
+        name         : Intel(R) TCC Mode
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled
+        help         : >
+                       Enable/Disable Intel(R) Time Coordinated Computing Mode.
+                       When enabled, this will modify system settings to improve real-time performance.
+        length       : 0x1
+        value        : 0x0
+    - TccTuning      :
+        name         : Data Streams Optimizer
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled
+        help         : >
+                       Enable/Disable Data Streams Optimizer (DSO).
+                       Enable will utilize DSO Subregion to tune system. DSO settings supersede Intel(R) TCC Mode settings that overlap between the two.
+        length       : 0x1
+        value        : 0x0
+    - TccSoftSram    :
+        name         : Software SRAM
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled
+        help         : >
+                       Enable/Disable Software SRAM.
+                       Enable will allocate 1 way of LLC; if Cache Configuration subregion is available, it will allocate based on the subregion.
+        length       : 0x1
+        value        : 0x0
+    - TccErrorLog      :
+        name         : Error Log
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled
+        help         : >
+                       Enable or Disable Error Log. Enable will record errors related to Intel(R) TCC and save them to memory.
+        length       : 0x1
+        value        : 0x0
+
+
+
+  - $ACTION      :
+      page         : MEM
+  - MEMORY_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ MEMORY_CFG_DATA, 0x180, 0, 0 ] }
+    - !expand { MEM_TMPL : [ MISC ] }
+    - SpdAddressTable :
+        name         : Spd Address Table
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Specify SPD Address table for CH0D0/CH0D1/CH1D0/CH1D1
+        length       : 0x10
+        value        : { 0xA0, 0xA2, 0, 0, 0, 0, 0, 0, 0xA4, 0xA6, 0, 0, 0, 0, 0, 0 }
+    - !expand { SPD_TMPL : [ 0, 0, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 0, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 1, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 1, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 2, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 2, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 3, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 0, 3, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 0, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 0, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 1, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 1, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 2, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 2, 1 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 3, 0 ,  0x0 ] }
+    - !expand { SPD_TMPL : [ 1, 3, 1 ,  0x0 ] }
+    - DqsMapCpu2DramMc0Ch0 :
+        name         : Dqs Map CPU to DRAM MC 0 CH 0
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 0 Channel 0- board-dependentt
+        length       : 0x02
+        value        : { 0, 1}
+    - DqsMapCpu2DramMc0Ch1 :
+        name         : Dqs Map CPU to DRAM MC 0 CH 1
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 0 Channel 1- board-dependentt
+        length       : 0x02
+        value        : { 1, 0}
+    - DqsMapCpu2DramMc0Ch2 :
+        name         : Dqs Map CPU to DRAM MC 0 CH 2
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 0 Channel 2- board-dependentt
+        length       : 0x02
+        value        : { 0, 1}
+    - DqsMapCpu2DramMc0Ch3 :
+        name         : Dqs Map CPU to DRAM MC 0 CH 3
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 0 Channel 3- board-dependentt
+        length       : 0x02
+        value        : { 1, 0}
+    - DqsMapCpu2DramMc1Ch0 :
+        name         : Dqs Map CPU to DRAM MC 1 CH 0
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 1 Channel 0- board-dependentt
+        length       : 0x02
+        value        : { 1, 0}
+    - DqsMapCpu2DramMc1Ch1 :
+        name         : Dqs Map CPU to DRAM MC 1 CH 1
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 1 Channel 1- board-dependentt
+        length       : 0x02
+        value        : { 0, 1}
+    - DqsMapCpu2DramMc1Ch2 :
+        name         : Dqs Map CPU to DRAM MC 1 CH 2
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 1 Channel 2- board-dependentt
+        length       : 0x02
+        value        : { 0, 1}
+    - DqsMapCpu2DramMc1Ch3 :
+        name         : Dqs Map CPU to DRAM MC 1 CH 3
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Set Dqs mapping relationship between CPU and DRAM, Memory controller 1 Channel 3- board-dependentt
+        length       : 0x02
+        value        : { 1, 0}
+    - DqMapCpu2DramMc0Ch0 :
+        name         : MC0 Dq Byte Map CH0
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 0 chennel 0 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : { 0,  1,  6,  7,  3,  2,  5,  4, 15,  8,  9, 14, 12, 11, 10, 13}
+    - DqMapCpu2DramMc0Ch1 :
+        name         : MC0 Dq Byte Map CH1
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 0 chennel 1 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : { 11, 12,  8, 15,  9, 14, 10, 13, 3,  4,  7,  0,  6,  1,  5,  2}
+    - DqMapCpu2DramMc0Ch2 :
+        name         : MC0 Dq Byte Map CH2
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 0 chennel 2 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : {4,  5,  3,  2,  7,  1,  0,  6, 11, 10, 12, 13,  8,  9, 14, 15}
+    - DqMapCpu2DramMc0Ch3 :
+        name         : MC0 Dq Byte Map CH3
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 0 chennel 3 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : {12, 11,  8, 13, 14, 15,  9, 10,  4,  7,  3,  2,  1,  6,  0,  5}
+    - DqMapCpu2DramMc1Ch0 :
+        name         : MC1 Dq Byte Map CH0
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 1 chennel 0 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : { 11, 10,  9,  8, 12, 13, 15, 14, 4,  5,  6,  7,  3,  2,  0,  1}
+    - DqMapCpu2DramMc1Ch1 :
+        name         : MC1 Dq Byte Map CH1
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 1 chennel 1 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : {0,  7,  1,  6,  3,  5,  2,  4, 9,  8, 10, 11, 14, 15, 13, 12}
+    - DqMapCpu2DramMc1Ch2 :
+        name         : MC1 Dq Byte Map CH2
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 1 chennel 2 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : {4,  5,  6,  1,  3,  2,  7,  0, 10, 13, 12, 11, 14,  9, 15,  8}
+    - DqMapCpu2DramMc1Ch3 :
+        name         : MC1 Dq Byte Map CH3
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Memory controller 1 chennel 3 LPDDR4 DQ swizzling between CPU and DRAM
+        length       : 0x10
+        value        : {10, 12,  9, 15,  8, 11, 13, 14, 3,  4,  1,  2,  6,  0,  5,  7}
+    - DqPinsInterleaved :
+        name         : Dqs Pins Interleaved Setting
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Indicates DqPinsInterleaved setting- board-dependent
+        length       : 0x01
+        value        : 0x0
+    - RcompResistor :
+        name         : RcompResistor settings
+        type         : EditNum, HEX, (0x00, 0xFFFF)
+        help         : >
+                       Indicates  RcompResistor settings- Board-dependent
+        length       : 0x02
+        value        : 0x0
+    - RcompTarget  :
+        name         : RcompTarget settings
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       RcompTarget settings- board-dependent
+        length       : 0x05
+        value        : { 0, 0, 0, 0, 0 }
+    - SmbusAddressTable :
+        name         : Smbus Address Table
+        type         : EditNum, HEX, (0x00,0xFFFFFFFF)
+        help         : >
+                       Specify the reserved SMBUS address table
+        length       : 0x04
+        value        : { 0xA2, 0xA0, 0xA2, 0xA0 }
+    - PlatformMemorySize :
+        name         : Platform Reserved Memory Size
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFF)
+        help         : >
+                       The minimum platform memory size required to pass control to post-memory init
+        length       : 0x08
+        value        : 0x5976000
+    - X2ApicOptOut :
+        name         : State of X2APIC_OPT_OUT bit in the DMAR table
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       0=Disable/Clear, 1=Enable/Set
+        length       : 0x1
+        value        : 0x0
+    - DmaControlGuarantee :
+        name         : State of DMA_CONTROL_GUARANTEE bit in the DMAR table
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       0=Disable/Clear, 1=Enable/Set
+        length       : 0x1
+        value        : 0x0
+    - MrcFastBoot  :
+        name         : MRC Fast Boot
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable the MRC fast path thru the MRC
+        length       : 0x01
+        value        : 0x1
+    - RmtPerTask   :
+        name         : Rank Margin Tool per Task
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       This option enables the user to execute Rank Margin Tool per major training step in the MRC.
+        length       : 0x01
+        value        : 0x0
+    - IedSize      :
+        name         : Intel Enhanced Debug
+        type         : Combo
+        option       : 0 :Disable, 0x400000 :Enable
+        help         : >
+                       Intel Enhanced Debug (IED)- 0=Disabled, 0x400000=Enabled and 4MB SMRAM occupied
+        length       : 0x04
+        value        : 0x00000000
+    - TsegSize     :
+        name         : Tseg Size
+        type         : Combo
+        option       : 0x0400000:4MB, 0x00800000:8MB, 0x01000000:16MB
+        help         : >
+                       Size of SMRAM memory reserved. 0x400000 for Release build and 0x1000000 for Debug build
+        length       : 0x04
+        value        : 0x00800000
+    - MmioSize     :
+        name         : MMIO Size
+        type         : EditNum, HEX, (0,0xC00)
+        help         : >
+                       Size of MMIO space reserved for devices. 0=Auto, non-Zero=size in MB
+        length       : 0x02
+        value        : 0x0
+    - SmbusEnable  :
+        name         : Enable SMBus
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable SMBus controller.
+        length       : 0x01
+        value        : 0x01
+    - TxtDprMemoryBase :
+        name         : Txt Dpr Memory Base
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFF)
+        help         : >
+                       Base Address of Txt Dpr
+        length       : 0x08
+        value        : 0x400000
+    - TxtDprMemorySize :
+        name         : Txt Dpr Memory Size
+        type         : EditNum, HEX, (0x00,0xFFFFFFFF)
+        help         : >
+                       Size of Txt Dpr
+        length       : 0x04
+        value        : 0x400000
+    - BiosAcmBase  :
+        name         : ACM Base
+        type         : EditNum, HEX, (0x00,0xFFFFFFFF)
+        help         : >
+                       Base Address of ACM
+        length       : 0x04
+        value        : 0xFF6C0000
+    - UserBd       :
+        name         : Board Type
+        type         : Combo
+        option       : 0:Mobile/Mobile Halo, 1:Desktop/DT Halo, 5:ULT/ULX/Mobile Halo, 7:UP Server
+        help         : >
+                       MrcBoardType, Options are 0=Mobile/Mobile Halo, 1=Desktop/DT Halo, 5=ULT/ULX/Mobile Halo, 7=UP Server
+        length       : 0x01
+        value        : 0x05
+    - RealtimeMemoryTiming :
+        name         : Realtime Memory Timing
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       When enabled, it will allow the system to perform realtime memory timing changes after MRC_DONE.
+        length       : 0x01
+        value        : 0x0
+    - EnableC6Dram :
+        name         : C6DRAM power gating feature
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       This policy indicates whether or not BIOS should allocate PRMRR memory for C6DRAM power gating feature.- 0- Don't allocate any PRMRR memory for C6DRAM power gating feature.- 1- Allocate PRMRR memory for C6DRAM power gating feature.
+        length       : 0x01
+        value        : 0x00
+    - CpuRatio     :
+        name         : CPU ratio value
+        type         : EditNum, HEX, (0x00, 0x3F)
+        help         : >
+                       CPU ratio value. Valid Range 0 to 63
+        length       : 0x01
+        value        : 0x00
+    - BootFrequency :
+        name         : Boot frequency
+        type         : Combo
+        option       : 0:0, 1:1, 2:2
+        help         : >
+                       Sets the boot frequency starting from reset vector.- 0- Maximum battery performance.- 1- Maximum non-turbo performance.- 2- Turbo performance. @note If Turbo is selected BIOS will start in max non-turbo mode and switch to Turbo mode.
+        length       : 0x01
+        value        : 0x01
+    - ActiveCoreCount :
+        name         : Number of active cores
+        type         : Combo
+        option       : 0:All, 1:1, 2:2, 3:3
+        help         : >
+                       Number of active cores(Depends on Number of cores). 0- All;1- 1 ;2- 2 ;3- 3
+        length       : 0x01
+        value        : 0x00
+    - FClkFrequency :
+        name         : Processor Early Power On Configuration FCLK setting
+        type         : Combo
+        option       : 0:800 MHz, 1:1 GHz, 2:400 MHz, 3:Reserved
+        help         : >
+                       0- 800 MHz (ULT/ULX). 1- 1 GHz (DT/Halo). Not supported on ULT/ULX.- 2- 400 MHz. - 3- Reserved
+        length       : 0x01
+        value        : 0x01
+    - PcieClkSrcUsage :
+        name         : Usage type for ClkSrc
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       0-23- PCH rootport, 0x40-0x43- PEG port, 0x70:LAN, 0x80- unspecified but in use (free running), 0xFF- not used
+        length       : 0x10
+        value        : { 0x40, 0x02, 0x03, 0x08, 0x70, 0x07, 0x04, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 }
+    - PcieClkSrcClkReq :
+        name         : ClkReq-to-ClkSrc mapping
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Number of ClkReq signal assigned to ClkSrc
+        length       : 0x10
+        value        : { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F }
+    - DmiGen3RootPortPreset :
+        name         : DMI Gen3 Root port preset values per lane
+        type         : EditNum, HEX, (0x00, 0xFFFFFFFFFFFFFFFF)
+        help         : >
+                       Used for programming DMI Gen3 preset values per lane. Range- 0-9, 8 is default for each lane
+        length       : 0x8
+        value        : {0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8, 0x8}
+    - DmiGen3EndPointPreset :
+        name         : DMI Gen3 End port preset values per lane
+        type         : EditNum, HEX, (0x00, 0xFFFFFFFFFFFFFFFF)
+        help         : >
+                       Used for programming DMI Gen3 preset values per lane. Range- 0-9, 7 is default for each lane
+        length       : 0x8
+        value        : {0x7, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7}
+    - DmiGen3EndPointHint :
+        name         : DMI Gen3 End port Hint values per lane
+        type         : EditNum, HEX, (0x00, 0xFFFFFFFFFFFFFFFF)
+        help         : >
+                       Used for programming DMI Gen3 Hint values per lane. Range- 0-6, 2 is default for each lane
+        length       : 0x8
+        value        : {0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2}
+    - DmiGen3RxCtlePeaking :
+        name         : DMI Gen3 RxCTLEp per-Bundle control
+        type         : EditNum, HEX, (0x00, 0xFFFF)
+        help         : >
+                       Range- 0-15, 0 is default for each bundle, must be specified based upon platform design
+        length       : 0x4
+        value        : {0x0, 0x0, 0x0, 0x0}
+    - MrcSafeConfig :
+        name         : MRC Safe Config
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable MRC Safe Config
+        length       : 0x01
+        value        : 0x01
+    - SaGv         :
+        name         : SA GV
+        type         : Combo
+        option       : 0:Disabled, 1:FixedPoint0, 2:FixedPoint1, 3:FixedPoint2, 4:FixedPoint3, 5:Enabled
+        help         : >
+                       System Agent dynamic frequency support and when enabled memory will be training at different frequencies. 0:Disabled, 1:FixedPoint0, 2:FixedPoint1, 3:FixedPoint2, 4:FixedPoint3, 5:Enabled
+        length       : 0x01
+        value        : 0x00
+    - DisPgCloseIdleTimeout :
+        name         : Page Close Idle Timeout
+        type         : Combo
+        option       : 0:Enabled, 1:Disabled
+        help         : >
+                       This option controls Page Close Idle Timeout
+        length       : 0x01
+        value        : 0x0
+    - PowerDownMode :
+        name         : Power Down Mode
+        type         : Combo
+        option       : 0x0:No Power Down, 0x1:APD, 0x6:PPD DLL OFF, 0xFF:Auto
+        help         : >
+                       This option controls command bus tristating during idle periods
+        length       : 0x01
+        value        : 0x0
+    - VtdDisable   :
+        name         : Disable VT-d
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       0=Enable/FALSE(VT-d enabled), 1=Disable/TRUE (VT-d disabled)
+        length       : 0x1
+        value        : 0x0
+    - VmxEnable    :
+        name         : Enable or Disable VMX
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable or Disable VMX; 0- Disable; <b>1- Enable</b>.
+        length       : 0x01
+        value        : 0x0
+    - WrcFeatureEnable :
+        name         : WRC Feature
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/Disable WRC (Write Cache) feature of IOP. When feature is enabled, supports IO devices allocating onto the ring and into LLC. WRC is fused on by default.
+        length       : 0x01
+        value        : 0x0
+    - HyperThreading :
+        name         : Hyper Threading Enable/Disable
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable or Disable Hyper Threading; 0- Disable; <b>1- Enable</b>
+        length       : 0x01
+        value        : 0x01
+    - GtClosEnable :
+        name         : Enable Gt CLOS
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       0(Default)=Disable, 1=Enable
+        length       : 0x01
+        value        : 0x0
+    - EnhancedInterleave :
+        name         : Enhanced Interleave support
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Enhanced Interleave support
+        length       : 0x01
+        value        : 0x01
+    - RankInterleave :
+        name         : Rank Interleave support
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Rank Interleave support. NOTE- RI and HORI can not be enabled at the same time.
+        length       : 0x01
+        value        : 0x01
+    - RhPrevention :
+        name         : Enable RH Prevention
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable RH Prevention
+        length       : 0x01
+        value        : 0x00
+    - RhSolution   :
+        condition    : $MEMORY_CFG_DATA.RhPrevention == 1
+        name         : Row Hammer Solution
+        type         : Combo
+        option       : 0:Hardware RHP, 1:2x Refresh
+        help         : >
+                       Type of method used to prevent Row Hammer.
+        length       : 0x01
+        value        : 0x00
+    - RhActProbability :
+        condition    : $MEMORY_CFG_DATA.RhPrevention == 1 or $MEMORY_CFG_DATA.RhSolution == 0
+        name         : RH Activation Probability
+        type         : EditNum, HEX, (0x01, 0xF)
+        help         : >
+                       RH Activation Probability, Probability value is 1/2^(inputvalue)
+        length       : 0x01
+        value        : 0xB
+    - ExitOnFailure :
+        name         : Exit On Failure (MRC)
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Exit On Failure (MRC)
+        length       : 0x01
+        value        : 0x01
+    - ChHashEnable :
+        name         : Ch Hash Support
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/Disable Channel Hash Support. NOTE- ONLY if Memory interleaved Mode
+        length       : 0x01
+        value        : 0x01
+    - ChHashInterleaveBit :
+        name         : Ch Hash Interleaved Bit
+        type         : Combo
+        option       : 0:BIT6, 1:BIT7, 2:BIT8, 3:BIT9, 4:BIT10, 5:BIT11, 6:BIT12, 7:BIT13
+        help         : >
+                       Select the BIT to be used for Channel Interleaved mode. NOTE- BIT7 will interlave the channels at a 2 cacheline granularity, BIT8 at 4 and BIT9 at 8
+        length       : 0x01
+        value        : 0x02
+    - ChHashMask   :
+        name         : Ch Hash Mask
+        type         : EditNum, HEX, (0x0001, 0x3FFF)
+        help         : >
+                       Set the BIT(s) to be included in the XOR function. NOTE BIT mask corresponds to BITS [19:6}.
+        length       : 0x02
+        value        : 0x30CC
+    - CkeRankMapping :
+        name         : Cke Rank Mapping
+        type         : EditNum, HEX, (0x0, 0xFF)
+        help         : >
+                       Bits [7:4] - Channel 1, bits [3:0] - Channel 0. Bit [i] specifies which rank CKE[i] goes to.
+        length       : 0x01
+        value        : 0xAA
+    - RemapEnable  :
+        name         : Memory Remap
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Memory Remap
+        length       : 0x01
+        value        : 0x01
+    - DisableDimmChannel0 :
+        name         : Channel A DIMM Control
+        type         : Combo
+        option       : 0:Enable both DIMMs, 1:Disable DIMM0, 2:Disable DIMM1, 3:Disable both DIMMs
+        help         : >
+                       Channel A DIMM Control Support - Enable or Disable Dimms on Channel A.
+        length       : 0x01
+        value        : 0x00
+    - DisableDimmChannel1 :
+        name         : Channel B DIMM Control
+        type         : Combo
+        option       : 0:Enable both DIMMs, 1:Disable DIMM0, 2:Disable DIMM1, 3:Disable both DIMMs
+        help         : >
+                       Channel B DIMM Control Support - Enable or Disable Dimms on Channel B.
+        length       : 0x01
+        value        : 0x00
+    - ScramblerSupport :
+        name         : Scrambler Support
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       This option enables data scrambling in memory.
+        length       : 0x01
+        value        : 0x1
+    - McParity     :
+        name         : McParity
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       CMI/MC Parity Control
+        length       : 0x01
+        value        : 0x01
+    - Ibecc        :
+        name         : Ibecc
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       In-Band ECC Support
+        length       : 0x01
+        value        : 0x00
+    - IbeccParity  :
+        condition    : $MEMORY_CFG_DATA.Ibecc != 0
+        name         : IbeccParity
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       In-Band ECC Parity Control
+        length       : 0x01
+        value        : 0x01
+    - IbeccOperationMode :
+        condition    : $MEMORY_CFG_DATA.Ibecc != 0
+        name         : IbeccOperationMode
+        type         : Combo
+        option       : 0:Protect base on address range, 1:Non-protected, 2:All protected
+        help         : >
+                       In-Band ECC Operation Mode
+        length       : 0x01
+        value        : 0x02
+    - IbeccProtectedRegionEnable :
+        condition    : $MEMORY_CFG_DATA.Ibecc != 0
+        name         : IbeccProtectedRegionEnable
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       In-Band ECC Protected Region Enable
+        length       : 0x8
+        value        : { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+    - IbeccProtectedRegionBase :
+        condition    : $MEMORY_CFG_DATA.Ibecc != 0
+        name         : IbeccProtectedRegionBases
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        struct       : UINT16
+        help         : >
+                       IBECC Protected Region Bases
+        length       : 0x10
+        value        : {0:0W,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+    - IbeccProtectedRegionMask :
+        condition    : $MEMORY_CFG_DATA.Ibecc != 0
+        name         : IbeccProtectedRegionMasks
+        type         : EditNum, HEX, (0x00,0x3FFF)
+        struct       : UINT16
+        help         : >
+                       IBECC Protected Region Masks. Max value this can have is 0x3FFF
+        length       : 0x10
+        value        : {0:0W,  0x3FFF, 0x3FFF, 0x3FFF, 0x3FFF, 0x3FFF, 0x3FFF, 0x3FFF, 0x3FFF }
+    - IbeccErrorInj :
+        name         : IbeccErrorInj
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       In-Band ECC Error Injection NOTE- For Debug or Development purposes only! Disable this option for production systems.
+        length       : 0x01
+        value        : 0x00
+    - PchTraceHubMode :
+        name         : PCH Trace Hub Mode
+        type         : Combo
+        option       : 0:Disable, 1:Target Debugger Mode, 2:Host Debugger Mode
+        help         : >
+                       Select 'Host Debugger' if Trace Hub is used with host debugger tool or 'Target Debugger' if Trace Hub is used by target debugger software or 'Disable' trace hub functionality.
+        length       : 0x01
+        value        : 0x0
+    - PlatformDebugConsent :
+        name         : Platform Debug Consent
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled (DCI OOB+[DbC]), 2:Enabled (DCI OOB), 3:Enabled (USB3 DbC), 4:Enabled (XDP/MIPI60), 5:Enabled (USB2 DbC), 6:Enable (2-wire DCI OOB), 7:Manual
+        help         : >
+                       To 'opt-in' for debug, please select 'Enabled' with the desired debug probe type. Enabling this BIOS option may alter the default value of other debug-related BIOS options.\Manual- Do not use Platform Debug Consent to override other debug-relevant policies, but the user must set each debug option manually, aimed at advanced users.\nNote- DCI OOB (aka BSSB) uses CCA probe;[DCI OOB+DbC] and [USB2 DbC] have the same setting.
+        length       : 0x01
+        value        : 0x0
+    - DciEn        :
+        name         : DCI Enable
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Determine if to enable DCI debug from host
+        length       : 0x01
+        value        : 0x0
+    - !expand { MEM_TMPL : [ Training ] }
+    - RMT          :
+        name         : Rank Margin Tool
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable Rank Margin Tool.
+        length       : 0x01
+        value        : 0x01
+    - BdatEnable   :
+        name         : Generate BIOS Data ACPI Table
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Generate BDAT for MRC RMT or SA PCIe data. Disable (Default)- Do not generate it
+        length       : 0x01
+        value        : 0x00
+    - BdatTestType :
+        name         : BdatTestType
+        type         : Combo
+        option       : 0:Rank Margin Tool, 1:Margin2D
+        help         : >
+                       Indicates the type of Memory Training data to populate into the BDAT ACPI table.
+        length       : 0x1
+        value        : 0x00
+    - RMC          :
+        name         : Retrain Margin Check
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Retrain Margin Check
+        length       : 0x01
+        value        : 0x00
+    - MEMTST       :
+        name         : Memory Test
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Memory Test
+        length       : 0x01
+        value        : 0x00
+    - ECT          :
+        name         : Early Command Training
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enables/Disable Early Command Training
+        length       : 0x01
+        value        : 0x01
+    - UsbTcPortEnPreMem :
+        name         : TCSS USB Port Enable
+        type         : EditNum, HEX, (0x0,0x003F)
+        help         : >
+                       Bitmap for per port enabling
+        length       : 0x01
+        value        : 0xF
+    - TmeEnable    :
+        name         : Total Memory Encryption Enable
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Total Memory Encryption enabling
+        length       : 0x01
+        value        : 0x00
+    - ConfigTdpLevel :
+        name         : Configuration for boot TDP selection
+        type         : EditNum, HEX, (0x00, 0xFF)
+        help         : >
+                       Configuration for boot TDP selection; <b>0- TDP Nominal</b>; 1- TDP Down; 2- TDP Up;0xFF - Deactivate
+        length       : 0x01
+        value        : 0x00
+    - Dummy        :
+        length       : 0x01
+        value        : 0x0
+
+
+
+
+  - $ACTION      :
+      page         : MEM_SPD:MEM:"MEM SPD"
+  - $ACTION      :
+      page         : MEM_SPD
+  - MEM_SPD0_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ MEM_SPD0_CFG_DATA, 0x8F0, 0, 0 ] }
+    - MemorySpdPtr0 :
+        name         : Memory SPD Data 0
+        type         : Table
+        option       : >
+                       0:1:HEX, 1:1:HEX, 2:1:HEX, 3:1:HEX, 4:1:HEX, 5:1:HEX, 6:1:HEX, 7:1:HEX,
+                       8:1:HEX, 9:1:HEX, A:1:HEX, B:1:HEX, C:1:HEX, D:1:HEX, E:1:HEX, F:1:HEX
+        help         : >
+                       Pointer to SPD data in Memory
+        length       : 0x200
+        value        : { 0x23, 0x10, 0x11, 0x0e, 0x15, 0x21, 0x95, 0x08, 0x00, 0x40, 0x00, 0x00, 0x02, 0x21, 0x00, 0x00, 0x48, 0x00, 0x05, 0xff, 0x92, 0x55, 0x00, 0x00, 0x8c, 0x00, 0x90, 0xa8, 0x90, 0x90, 0x06, 0xd0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x55, 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+
+  - MEM_SPD1_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ MEM_SPD1_CFG_DATA, 0x8F1, 0, 0 ] }
+    - MemorySpdPtr1 :
+        name         : Memory SPD Data 1
+        type         : Table
+        option       : >
+                       0:1:HEX, 1:1:HEX, 2:1:HEX, 3:1:HEX, 4:1:HEX, 5:1:HEX, 6:1:HEX, 7:1:HEX,
+                       8:1:HEX, 9:1:HEX, A:1:HEX, B:1:HEX, C:1:HEX, D:1:HEX, E:1:HEX, F:1:HEX
+        help         : >
+                       Pointer to SPD data in Memory
+        length       : 0x200
+        value        : { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+
+
+
+
+
+  - $ACTION      :
+      page         : SIL
+  - SILICON_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ SILICON_CFG_DATA, 0x200, 0, 0 ] }
+    - InterruptRemappingSupport :
+        name         : InterruptRemappingSupport
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       InterruptRemappingSupport
+        length       : 0x01
+        value        : 0x1
+    - DisplayFusaConfigEnable :
+        name         : Fusa Display Configuration
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Fusa (Functional Safety) Enable Fusa Feature on Display, 0- Disable, 1- Enable
+        length       : 0x01
+        value        : 0x01
+    - GraphicFusaConfigEnable :
+        name         : Fusa Graphics Configuration
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Fusa (Functional Safety) Enable Fusa Feature on Graphics, 0- Disable, 1- Enable
+        length       : 0x01
+        value        : 0x01
+    - OpioFusaConfigEnable :
+        name         : Fusa Opio Configuration
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Fusa (Functional Safety) Enable Fusa Feature on Opio, 0- Disable, 1- Enable
+        length       : 0x01
+        value        : 0x01
+    - PsfFusaConfigEnable :
+        name         : Fusa Psf Configuration
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Fusa (Functional Safety) Enable Fusa Feature on Psf, 0- Disable, 1- Enable
+        length       : 0x01
+        value        : 0x1
+    - PchTsnEnable :
+        name         : Enable PCH TSN
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        condition    : $(COND_S0IX_DIS)
+        help         : >
+                       Enable/disable TSN Ports on the PCH.
+        length       : 0x02
+        value        : { 0x0, 0x0 }
+    - PchTsnLinkSpeed :
+        name         : TSN Link Speed
+        type         : Combo
+        option       :   0: Reserved, 1: Reserved, 2: 38.4Mhz 2.5Gbps, 3: 38.4Mhz 1Gbps
+        help         : >
+                       Set TSN Link Speed.
+        length       : 0x01
+        value        : 0x03
+    - PchTsnMultiVcEnable :
+        name         : Enable TSN Multi-VC
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable Multi Virtual Channels(VC) in TSN.
+        length       : 0x01
+        value        : 0x0
+    - Eist         :
+        name         : Enable or Disable Intel SpeedStep Technology
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable or Disable Intel SpeedStep Technology. 0- Disable; <b>1- Enable</b>
+        length       : 0x01
+        value        : 0x1
+    - Hwp          :
+        name         : Enable or Disable HWP
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable or Disable HWP(Hardware P states) Support. 0- Disable; <b>1- Enable;</b> 2-3:Reserved
+        length       : 0x01
+        value        : 0x01
+    - Cx           :
+        name         : Enable or Disable CPU power states (C-states)
+        type         : Combo
+        option       : $EN_DIS
+        condition    : $(COND_S0IX_DIS)
+        help         : >
+                       Enable or Disable CPU power states (C-states). 0- Disable; <b>1- Enable</b>
+        length       : 0x01
+        value        : 0x01
+    - EnableItbm   :
+        name         : Intel Turbo Boost Max Technology 3.0
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Intel Turbo Boost Max Technology 3.0. 0- Disabled; <b>1- Enabled</b>
+        length       : 0x01
+        value        : 0x00
+    - AcSplitLock  :
+        name         : AC Split Lock
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/Disable #AC check on split lock. <b>0- Disable</b>; 1- Enable.
+        length       : 0x1
+        value        : 0x0
+    - PsfTccEnable :
+        name         : PSF Tcc
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Psf Tcc (Time Coordinated Computing) Enable will decrease psf transaction latency by disable some psf power management features, 0- Disable, 1- Enable
+        length       : 0x01
+        value        : 0x0
+    - PchDmiAspmCtrl :
+        name         : Pch Dmi Aspm Ctrl
+        type         : Combo
+        option       : 0:Disabled, 1:L0s, 2:L1, 3:L0sL1, 4:Auto
+        help         : >
+                       ASPM configuration on the PCH side of the DMI/OPI Link. Default is <b>PchPcieAspmAutoConfig</b>
+        length       : 0x01
+        value        : 0x04
+    - PchLegacyIoLowLatency :
+        name         : PCH Legacy IO Low Latency Enable
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Set to enable low latency of legacy IO. <b>0- Disable</b>, 1- Enable
+        length       : 0x01
+        value        : 0x0
+    - PcieRpAspm   :
+        name         : PCIE RP Aspm
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       The ASPM configuration of the root port (see- PCH_PCIE_ASPM_CONTROL). Default is PchPcieAspmAutoConfig.
+        length       : 0x18
+        value        : { 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4}
+    - PcieRpL1Substates :
+        name         : PCIE RP L1 Substates
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       The L1 Substates configuration of the root port (see- PCH_PCIE_L1SUBSTATES_CONTROL). Default is PchPcieL1SubstatesL1_1_2.
+        length       : 0x18
+        value        : { 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1}
+    - PciePtm      :
+        name         : PCIe PTM enable/disable
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       Enable/disable Precision Time Measurement for PCIE Root Ports.
+        length       : 0x18
+        value        : { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 }
+    - RenderStandby :
+        name         : Enable/Disable IGFX RenderStandby
+        type         : Combo
+        option       : $EN_DIS
+        condition    : $(COND_S0IX_DIS)
+        help         : >
+                       Enable(Default)- Enable IGFX RenderStandby, Disable- Disable IGFX RenderStandby
+        length       : 0x01
+        value        : 0x1
+    - ITbtPcieRootPortEn :
+        name         : Enable/Disable ITBT Root Port
+        type         : EditNum, HEX, (0x00,0xFFFFFFFF)
+        help         : >
+                       Enable/Disable ITBT Root Port
+        length       : 0x04
+        value        : { 0x1, 0x1, 0x1, 0x1 }
+    - TcssPcieRootPortPtmEn :
+        name         : Enable/Disable PTM for TCSS PCIe Root Port
+        type         : EditNum, HEX, (0x00,0xFFFFFFFF)
+        help         : >
+                       Enable/Disable Precision Time Measurement (PTM) for TCSS PCIe Root Ports
+        length       : 0x04
+        value        : { 0x0, 0x0, 0x0, 0x0 }
+    - PmSupport    :
+        name         : Enable/Disable IGFX PmSupport
+        type         : Combo
+        option       : $EN_DIS
+        condition    : $(COND_S0IX_DIS)
+        help         : >
+                       Enable(Default)- Enable IGFX PmSupport, Disable- Disable IGFX PmSupport
+        length       : 0x01
+        value        : 0x1
+    - CpuPcieClockGating :
+        name         : CPU PCIe RootPort Clock Gating
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Describes whether the PCI Express Clock Gating for each root port is enabled by platform modules. 0- Disable; 1- Enable.
+        length       : 0x01
+        value        : 0x1
+    - CpuPcieRpAspm :
+        name         : PCIE RP Aspm
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       The ASPM configuration of the root port (see- CPU_PCIE_ASPM_CONTROL). Default is CpuPcieAspmAutoConfig.
+        length       : 0x4
+        value        : { 0x2, 0x2, 0x2, 0x2}
+    - CpuPcieRpL1Substates :
+        name         : PCIE RP L1 Substates
+        type         : EditNum, HEX, (0x00,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        help         : >
+                       The L1 Substates configuration of the root port (see- CPU_PCIE_L1SUBSTATES_CONTROL). Default is CpuPcieL1SubstatesL1_1_2.
+        length       : 0x4
+        value        : { 0x2, 0x2, 0x2, 0x2}
+    - CpuPcieRpPtmEnabled :
+        name         : PTM for PCIE RP Mask
+        type         : EditNum, HEX, (0x00,0x00FFFFFF)
+        help         : >
+                       Enable/disable Precision Time Measurement for PCIE Root Ports. 0- disable, 1- enable. One bit for each port, bit0 for port1, bit1 for port2, and so on.
+        length       : 0x04
+        value        : { 0x01, 0x01, 0x01, 0x01 }
+    - CpuPcieRpVcEnabled :
+        name         : VC for PCIE RP Mask
+        type         : EditNum, HEX, (0x00,0x00FFFFFF)
+        help         : >
+                       Enable/disable Virtual Channel for PCIE Root Ports. 0- disable, 1- enable. One bit for each port, bit0 for port1, bit1 for port2, and so on.
+        length       : 0x04
+        value        : { 0x01, 0x01, 0x01, 0x01 }
+    - CpuPcieRpMultiVcEnabled :
+        name         : Multi-VC for PCIE RP Mask
+        type         : EditNum, HEX, (0x00,0x00FFFFFF)
+        help         : >
+                       Enable/disable Multiple Virtual Channel for PCIE Root Ports. 0- disable, 1- enable. One bit for each port, bit0 for port1, bit1 for port2, and so on.
+        length       : 0x04
+        value        : { 0x00, 0x00, 0x00, 0x00 }
+    - XdciEnable :
+        name         : xDCI controller
+        type         : Combo
+        option       : $EN_DIS
+        condition    : $(COND_S0IX_DIS)
+        help         : >
+                       Enable/disable to xDCI controller. 0- Disable; 1- Enable.
+        length       : 0x01
+        value        : 0x1
+    - EnableTimedGpio0 :
+        name         : Timed GPIO 0
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable Timed GPIO0    0- Disable; 1- Enable.
+        length       : 0x01
+        value        : 0x0
+    - EnableTimedGpio1 :
+        name         : Timed GPIO 1
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable Timed GPIO1    0- Disable; 1- Enable.
+        length       : 0x01
+        value        : 0x0
+    - EnableTcoTimer :
+        name         : Enable TCO Timer
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable TCO Timer    0- Disable; 1- Enable.
+        length       : 0x01
+        value        : 0x0
+    - EcEnable     :
+        name         : Enable EC Device
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable EC
+        length       : 0x01
+        value        : 0x01
+    - PchHdaEnable :
+        name         : Enable Intel HD Audio (Azalia)
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       0- Disable, 1- Enable (Default) Azalia controller
+        length       : 0x01
+        value        : 0x01
+    - PchHdaDspEnable :
+        name         : Enable HD Audio DSP
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable HD Audio DSP feature.
+        length       : 0x01
+        value        : 0x00
+    - PchHdaAudioLinkDmicEnable :
+        name         : Enable HD Audio DMIC_N
+        type         : EditNum, HEX, (0x00,0xFFFF)
+        help         : >
+                       Enable/disable HD Audio DMIC_N.
+        length       : 0x02
+        value        : { 0x00, 0x00 }
+    - PortUsb20Enable :
+      - $STRUCT      :
+          name         : Enable USB2 Ports
+          length       : 0x02
+      - !expand { USB_PORT_TMPL : [ 2, 0 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 1 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 2 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 3 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 4 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 5 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 6 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 7 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 8 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 9 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 10 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 11 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 12 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 13 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 14 ] }
+      - !expand { USB_PORT_TMPL : [ 2, 15 ] }
+    - Dummy        :
+        length       : 0x1
+        value        : 0x0
+
+  - $ACTION      :
+      page         : GFX
+  - GRAPHICS_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ GRAPHICS_CFG_DATA, 0x300, 0, 0 ] }
+    - IgdDvmt50PreAlloc :
+        name         : Internal Graphics Pre-allocated Memory
+        type         : Combo
+        option       : >
+                       0x00:0MB, 0x01:32MB, 0x02:64MB, 0x03:96MB, 0x04:128MB, 0x05:160MB, 0xF0:4MB, 0xF1:8MB, 0xF2:12MB, 0xF3:16MB, 0xF4:20MB,
+                       0xF5:24MB, 0xF6:28MB, 0xF7:32MB, 0xF8:36MB, 0xF9:40MB, 0xFA:44MB, 0xFB:48MB, 0xFC:52MB, 0xFD:56MB, 0xFE:60MB
+        help         : >
+                       Size of memory preallocated for internal graphics.
+        length       : 0x01
+        value        : 0xFE
+    - ApertureSize :
+        name         : Aperture Size
+        type         : Combo
+        option       : 0:128 MB, 1:256 MB, 2:512 MB
+        help         : >
+                       Select the Aperture Size.
+        length       : 0x01
+        value        : 0x01
+    - InternalGfx  :
+        name         : Internal Graphics
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable/disable internal graphics.
+        length       : 0x01
+        value        : 0x01
+    - PrimaryDisplay :
+        name         : Selection of the primary display device
+        type         : Combo
+        option       : 0:iGFX, 1:PEG, 2:PCIe Graphics on PCH, 3:AUTO, 4:Switchable Graphics
+        help         : >
+                       0=iGFX, 1=PEG, 2=PCIe Graphics on PCH, 3(Default)=AUTO, 4=Switchable Graphics
+        length       : 0x01
+        value        : 0x3
+    - GttSize      :
+        name         : Selection of iGFX GTT Memory size
+        type         : Combo
+        option       : 1:2MB, 2:4MB, 3:8MB
+        help         : >
+                       1=2MB, 2=4MB, 3=8MB
+        length       : 0x02
+        value        : 0x3
+    - Dummy        :
+        length       : 0x02
+        value        : 0x0
+
+  - $ACTION      :
+      page         : PEP::"Power Engine Plugin (PEP) Options"
+  - PEP_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ PEP_CFG_DATA, 0x900, 0, 0 ] }
+    - PepSataContraints :
+        name         : Low Power constraints Configuration for sata
+        type         : Combo
+        option       : 0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3
+        help         : >
+                       0:None, 1:Adapter D0/F1, 2:Raid, 3:Adapter D3
+        length       : 0x01
+        value        : 0x3
+    - PepUart      :
+        name         : Enable/disable Low Power constraints Uart
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable UART, Disable- Disable UART
+        length       : 0x01
+        value        : 0x1
+    - PepPcieStorage :
+        name         : Enable/disable Low Power constraints PcieStorage
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable PcieStorage, Disable- Disable PcieStorage
+        length       : 0x01
+        value        : 0x1
+    - PepI2c0      :
+        name         : Enable/disable Low Power constraints I2C0
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable I2c0, Disable- Disable I2c0
+        length       : 0x01
+        value        : 0x1
+    - PepI2c1      :
+        name         : Enable/disable Low Power constraints I2C1
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable I2c1, Disable- Disable I2c1
+        length       : 0x01
+        value        : 0x1
+    - PepXhci      :
+        name         : Enable/disable Low Power constraints Xhci
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Xhci, Disable- Disable Xhci
+        length       : 0x01
+        value        : 0x1
+    - PepAudio     :
+        name         : Enable/disable Low Power constraints Audio
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Audio, Disable- Disable Audio
+        length       : 0x01
+        value        : 0x1
+    - PepGfx       :
+        name         : Enable/disable Low Power constraints Gfx
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Gfx , Disable- Disable Gfx
+        length       : 0x01
+        value        : 0x1
+    - PepCpu       :
+        name         : Enable/disable Low Power constraints Cpu
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Cpu , Disable- Disable Cpu
+        length       : 0x01
+        value        : 0x1
+    - PepI2c2      :
+        name         : Enable/disable Low Power constraints I2C2
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable I2c2, Disable- Disable I2c2
+        length       : 0x01
+        value        : 0x1
+    - PepI2c3      :
+        name         : Enable/disable Low Power constraints I2C3
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable I2c3, Disable- Disable I2c3
+        length       : 0x01
+        value        : 0x1
+    - PepI2c4      :
+        name         : Enable/disable Low Power constraints I2C4
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable I2c4, Disable- Disable I2c4
+        length       : 0x01
+        value        : 0x1
+    - PepI2c5      :
+        name         : Enable/disable Low Power constraints I2C5
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable I2c5, Disable(Default)- Disable I2c5
+        length       : 0x01
+        value        : 0x1
+    - PepI2c6      :
+        name         : Enable/disable Low Power constraints I2C6
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable I2c6, Disable(Default)- Disable I2c6
+        length       : 0x01
+        value        : 0x1
+    - PepSpi       :
+        name         : Enable/disable Low Power constraints SPI
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable SPI, Disable- Disable SPI
+        length       : 0x01
+        value        : 0x1
+     - PepIpu       :
+        name         : Enable/disable Low Power constraints Ipu
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Ipu, Disable- Disable Ipu
+        length       : 0x01
+        value        : 0x1
+    - PepCsme      :
+        name         : Enable/disable Low Power constraints Csme
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Csme, Disable- Disable Csme
+        length       : 0x01
+        value        : 0x1
+    - PepGbe       :
+        name         : Enable/disable Low Power constraints Gbe
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Gbe, Disable- Disable Gbe
+        length       : 0x01
+        value        : 0x1
+    - PepPeg0Storage :
+        name         : Enable/disable Low Power constraints Peg0Storage
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Peg0Storage, Disable- Disable Peg0Storage
+        length       : 0x01
+        value        : 0x1
+    - PepThc0      :
+        name         : Enable/disable Low Power constraints Thc0
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Thc0, Disable(Default)- Disable Thc0
+        length       : 0x01
+        value        : 0x0
+    - PepThc1      :
+        name         : Enable/disable Low Power constraints Thc1
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Thc1, Disable(Default)- Disable Thc1
+        length       : 0x01
+        value        : 0x0
+    - PepTcss      :
+        name         : Enable/disable Low Power constraints Tcss
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Tcss , Disable- Disable Tcss
+        length       : 0x01
+        value        : 0x1
+    - PepGna       :
+        name         : Enable/disable Low Power constraints Gna
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(Default)- Enable Gna , Disable- Disable Gna
+        length       : 0x01
+        value        : 0x1
+    - PepVmd       :
+        name         : Enable/disable Low Power constraints Vmd
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Vmd , Disable(Default)- Disable Vmd
+        length       : 0x01
+        value        : 0x0
+    - PepPcieDg    :
+        name         : Enable/disable Low Power constraints PcieDg
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable PcieDg , Disable(Default)- Disable PcieDg
+        length       : 0x01
+        value        : 0x0
+    - PepOverride  :
+        name         : Enable/disable Low Power constraints PepOverride
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable PepOverride  , Disable(Default)- Disable PepOverride
+        length       : 0x01
+        value        : 0x0
+    - PepPcieRp3   :
+        name         : Enable/disable Low Power constraints PcieRp3
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable PcieRp3  , Disable(Default)- Disable PcieRp3
+        length       : 0x01
+        value        : 0x0
+    - PepPcieRp5   :
+        name         : Enable/disable Low Power constraints PcieRp5
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable PcieRp5  , Disable(Default)- Disable PcieRp5
+        length       : 0x01
+        value        : 0x0
+    - PepPcieRp9   :
+        name         : Enable/disable Low Power constraints PcieRp9
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable(- Enable PcieRp9  , Disable(Default)- Disable PcieRp9
+        length       : 0x01
+        value        : 0x0
+    - PepPeg0      :
+        name         : Enable/disable Low Power constraints Peg0
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Peg0  , Disable(Default)- Disable Peg0
+        length       : 0x01
+        value        : 0x0
+    - PepEmmc      :
+        name         : Enable/disable Low Power constraints Emmc
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       Enable- Enable Emmc  , Disable(Default)- Disable Emmc
+        length       : 0x01
+        value        : 0x0
+    - Dummy        :
+        length       : 0x01
+        value        : 0x0
+
+
+
+  - $ACTION         :
+    page              : PLDSEL:GEN:"GPIO Payload Selection"
+  - $ACTION         :
+    page              : PLDSEL
+  - PLDSEL_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ PLDSEL_CFG_DATA, 0x011, 0, 0 ] }
+    - PldSelGpio      :
+      - $STRUCT         :
+        name            : GPIO pin for switching payload
+        struct          : PAYLOAD_SEL_GPIO_PIN
+        help            : >
+                          Specify GPIO PIN number to read and switch payloads
+        length          : 0x04
+      - PadGroup        :
+        name            : Pad Group
+        type            : Combo
+        option          : >
+                          0x00:GPP_A, 0x01:GPP_B, 0x02:GPP_C, 0x03:GPP_D, 0x04:GPP_E, 0x05:GPP_F, 0x06:GPP_G, 0x07:GPP_H,
+                          0x08:GPP_I, 0x09:GPP_J, 0x0A:GPP_K, 0x11:GPP_R, 0x12:GPP_S, 0x13:GPP_T, 0x14:GPP_U, 0x19:GPD
+        help            : >
+                          Specify GPIO Pad Group
+        condition       : $(COND_PLD_SEL_EN)
+        length          : 8bD
+        value           : 0
+      - PinNumber       :
+        name            : Pin Number
+        type            : EditNum, DEC, (0,23)
+        help            : >
+                          Specify GPIO Pin Number (0-23) on the selected Group
+        condition       : $(COND_PLD_SEL_EN)
+        length          : 8bD
+        value           : 0
+      - Enable          :
+        name            : Enable GPIO Payload Selection when PayloadId is 'AUTO'
+        type            : Combo
+        option          : $EN_DIS
+        help            : >
+                          Enable GPIO Payload Selection when PayloadId is 'AUTO'
+        length          : 1bD
+        value           : 0
+      - PinPolarity     :
+        name            : Pin Polarity
+        type            : Combo
+        option          : 0:Active High, 1:Active Low
+        help            : >
+                          GPIO Pin Polarity to trigger Payload switching
+                          When pin polarity matches the value, OS Loader will be used. Otherwise, UEFI Payload is selected.
+        condition       : $(COND_PLD_SEL_EN)
+        length          : 1bD
+        value           : 0
+      - Rsvd1           :
+        name            : Reserved
+        type            : Reserved
+        length          : 14bD
+        value           : 0
+
+
+  - $ACTION      :
+      page         : FEATURES:PLT:"Features"
+  - $ACTION      :
+      page         : FEATURES
+  - FEATURES_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ FEATURES_CFG_DATA, 0x310, 0, 0 ] }
+    - Features     :
+      - $STRUCT      :
+          name         : PlatformFeatures
+          struct       : FEATURES_DATA
+          length       : 0x04
+          value        : 0x0000000B
+      - Acpi         :
+          name         : ACPI Enable
+          type         : Combo
+          option       : $EN_DIS
+          help         : >
+                         Enable/Disable ACPI feature. 1:ACPI Enabled (default), 0:ACPI Disabled
+          length       : 1b
+      - MeasuredBoot :
+          name         : MeasuredBoot Enable
+          type         : Combo
+          option       : $EN_DIS
+          help         : >
+                         Enable/Disable MeasuredBoot feature. 1:MeasuredBoot Enabled (default), 0:MeasuredBoot Disabled
+          length       : 1b
+      - S0ix         :
+          name         : S0ix (Low Power S0 Idle) Enable
+          type         : Combo
+          option       : $EN_DIS
+          help         : >
+                         Enable/Disable S0ix feature. 1:S0ix Enabled, 0:S0ix Disabled
+          length       : 1b
+      - FusaEnable   :
+          name         : Fusa Enable
+          type         : Combo
+          option       : $EN_DIS
+          help         : >
+                         Fusa Enabled feature. 1:Enabled (default), 0:Disabled
+          length       : 1b
+      - Rsvd         :
+          name         : Reserved
+          type         : Reserved
+          help         : >
+                         reserved bits
+          length       : 28b
+
+
+
+
+
+  - $ACTION      :
+      page         : DYN
+  - DYNAMIC_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ DYNAMIC_CFG_DATA, 0x600, 0, 0 ] }
+    - MrcTrainingEnforcement :
+        name         : MRC Training Enforcement
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       When enabled, it enforces memory training even if consistent memory parameters are available
+        length       : 0x01
+        value        : 0x0
+    - Recalibration :
+        name         : Recalibration
+        type         : Combo
+        option       : $EN_DIS
+        help         : >
+                       When enabled, it triggers recalibration
+        length       : 0x01
+        value        : 0x0
+    - Dummy        :
+        length       : 0x02
+        value        : 0x0
+
+
+
+
+  - $ACTION      :
+      page         : OS
+  - !expand { BOOT_OPTION_TMPL : [ 0 ,   0    ,  16 ,    5   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_os' ] }
+  - !expand { BOOT_OPTION_TMPL : [ 1 , 0x1F   ,  16 ,    5   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_rtcm' ] }
+  - !expand { BOOT_OPTION_TMPL : [ 2 ,   0    ,  16 ,    6   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_os' ] }
+  - !expand { BOOT_OPTION_TMPL : [ 3 , 0x1F   ,  16 ,    6   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_rtcm' ] }
+  - !expand { BOOT_OPTION_TMPL : [ 4 ,   0    ,  16 ,    0   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_os' ] }
+  - !expand { BOOT_OPTION_TMPL : [ 5 , 0x1F   ,  16 ,    0   ,   0   ,    0  ,     1 ,     1 , '/boot/sbl_rtcm' ] }
+
+
+
+  - $ACTION      :
+      page         : PLT
+  - CAPSULE_INFO_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ CAPSULE_INFO_CFG_DATA, 0x080, 0, 0 ] }
+    - DevType      :
+        name         : DevType
+        type         : Combo
+        option       : 0:SATA, 1:SD, 2:EMMC, 3:UFS, 4:SPI, 5:USB, 6:NVME, 7:MAX
+        help         : >
+                       Specify boot device
+        length       : 0x01
+        value        : 5
+    - DevInstance  :
+        name         : Boot Device instance
+        type         : Combo
+        option       : 0:Device 0, 1:Device 1, 2:Device 2, 3:Device 3
+        help         : >
+                       Specify boot device instance when then are multple instances
+        order        : 0000.0000
+        length       : 0x01
+        value        : 0
+    - Reserved     :
+        length       : 0x03
+        value        : 0
+    - HwPart       :
+        name         : Hardware Partition
+        type         : Combo
+        option       : 0:User Partition, 1:Boot Partition 1, 2:Boot Partition 2
+        help         : >
+                       Specify hardware partition number
+        length       : 0x01
+        value        : 0
+    - SwPart       :
+        name         : Software Partition
+        type         : EditNum, INT, (0,127)
+        help         : >
+                       Specify software partition number
+        length       : 0x01
+        value        : 0
+    - FsType       :
+        name         : File System Type
+        type         : Combo
+        option       : 0:FAT, 1:EXT2, 2:AUTO, 3:RAW
+        help         : >
+                       Image is loaded from file system instead of raw data
+        length       : 0x01
+        value        : 2
+    - FileName     :
+        name         : Capsule File Name
+        type         : EditText
+        help         : >
+                       Specify file name of capsule image  (16-byte max length)
+        length       : 0x10
+        value        : 'FwuImage.bin'
+    - LbaAddr      :
+        name         : LBA address for capsule image)
+        type         : EditNum, HEX, (0,0xFFFFFFFF)
+        help         : >
+                       specify LBA address where to find capsule image
+        length       : 0x04
+        value        : 0
+
+
+
+
+  - $ACTION      :
+      page         : PSD:SEC:"PSD"
+  - $ACTION      :
+      page         : PSD
+  - PSD_CFG_DATA :
+    - !expand { CFGHDR_TMPL : [ PSD_CFG_DATA, 0x800, 0, 0 ] }
+    - EnablePsd    :
+        name         : Platform Security Discovery (PSD)
+        type         : Combo
+        option       : 0:Disabled, 1:Enabled
+        help         : >
+                       Enable/Disable Platform Security Discovery (PSD)
+        length       : 0x04
+        value        : 0x1
+

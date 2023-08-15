@@ -13,6 +13,7 @@
 //
 Name(SS1,0)
 Name(SS2,0)
-Name(SS3,1)
+//D580X001_2 Name(SS3,1)
+Name(SS3,0)
 Name(SS4,1)
 

@@ -42,6 +42,73 @@ AddSmbiosTypeString (
 
   return EFI_SUCCESS;
 }
+//D580X001_1
+#define TYPE_TERMINATOR_SIZE          2     // Each Type is terminated by 0000 - 2 bytes
+
+void *
+GetSmbiosTypePtr (
+  IN  SMBIOS_TYPE_STRINGS  *Dest,
+  IN  UINT8   Type
+  )
+{
+  SMBIOS_STRUCTURE              *TypeHdr;
+  SMBIOS_STRUCTURE              *LastTypeHdr;
+  SMBIOS_TABLE_ENTRY_POINT      *SmbiosEntry;
+  UINT8                         *StringPtr;
+  UINT32                         CurLimit;
+
+  LastTypeHdr = NULL;
+  SmbiosEntry = (SMBIOS_TABLE_ENTRY_POINT *)Dest;
+  if (SmbiosEntry == NULL) {
+    return NULL;
+  }
+
+  TypeHdr  = (SMBIOS_STRUCTURE *) (UINTN) SmbiosEntry->TableAddress;
+  CurLimit = (UINT32) (UINTN) ((UINT8 *) SmbiosEntry + SmbiosEntry->EntryPointLength + sizeof (UINT8) + SmbiosEntry->TableLength);
+
+  while ( (UINT32)(UINTN)TypeHdr < CurLimit ) {
+    if (TypeHdr->Type == Type) {
+      LastTypeHdr = TypeHdr;
+    }
+    //
+    // Go to the end of strings to find next Type header
+    //
+    StringPtr = (UINT8 *) TypeHdr + TypeHdr->Length;
+    while ( !(StringPtr[0] == 0 && StringPtr[1] == 0) ) {
+      StringPtr++;
+    }
+    TypeHdr = (SMBIOS_STRUCTURE *)(StringPtr + TYPE_TERMINATOR_SIZE);
+  }
+
+  return LastTypeHdr;
+}
+
+
+EFI_STATUS
+UpdateSmbiosTypeData (
+  SMBIOS_TYPE_STRINGS  *Dest,
+  IN  UINT8     Type,
+  IN  UINT16    Offset,
+  IN  UINT8     Width,
+  IN  UINT8     *Value
+  )
+{
+  UINT8             *TypeHdr;
+  //
+  // Find the header to append a string
+  //
+  TypeHdr = (UINT8 *) GetSmbiosTypePtr (Dest, Type);
+  if (TypeHdr == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  if (Width != 0)
+    CopyMem ((TypeHdr + Offset), Value, Width);
+
+  
+  return EFI_SUCCESS;
+}
+//D580X001_1 >>
 
 /**
   Initialize necessary information for Smbios
@@ -72,6 +139,63 @@ InitializeSmbiosInfo (
     //
     // SMBIOS_TYPE_BIOS_INFORMATION
     //
+
+//D580X001_1  >>
+  switch (GetPlatformId ()) {
+    case PLATFORM_ID_LCC_SOMD580:
+    {
+      CHAR8 PlatformName[10]= {0};
+      UINT8             MajorVer;
+      UINT8             MinorVer;
+
+      if (VerInfoTbl != NULL) {
+        CopyMem (PlatformName, GetPlatformName (), 8);
+      } else {
+        AsciiSPrint (PlatformName, 10, "%a\0", "Unknown");
+      }
+
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        1, "Advantech Corp.");
+
+        AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
+          "%a00%cS060%c%d%02d\0",
+          PlatformName,
+          VerInfoTbl->ImageVersion.BldDebug ? '1' : '0',
+          VerInfoTbl->ImageVersion.ProjMajorVersion ? 'V' : 'X',
+          VerInfoTbl->ImageVersion.ProjMajorVersion,
+          VerInfoTbl->ImageVersion.ProjMinorVersion);
+
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        2, TempStrBuf);
+      
+      AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), 
+        "%a",PcdGetPtr (PcdVerInfoBuildDate));
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
+        3, TempStrBuf);
+
+      MajorVer = 2;
+      MinorVer = 0;
+      UpdateSmbiosTypeData (TempSmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMajorRelease), 1, &MajorVer);
+      UpdateSmbiosTypeData (TempSmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, OFFSET_OF(SMBIOS_TABLE_TYPE0, EmbeddedControllerFirmwareMinorRelease), 1, &MinorVer);
+
+  //
+  // SMBIOS_TYPE_BASEBOARD_INFORMATION
+  //
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        1, "Advantech Corp.");
+      AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),"%a\0", PlatformName);
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        2, TempStrBuf);
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        3, "A201-1");
+      AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+        4, "1234567");
+      }
+
+      break;
+    default:
+//D580X001_1  >>
+
     AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
       1, VENDOR_NAME);
     if (VerInfoTbl != NULL) {
@@ -97,6 +221,10 @@ InitializeSmbiosInfo (
     AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
       3, __DATE__);
 
+//D580X001_1  >>
+       break;
+   }
+//D580X001_1  >>
     //
     // SMBIOS_TYPE_SYSTEM_INFORMATION
     //
