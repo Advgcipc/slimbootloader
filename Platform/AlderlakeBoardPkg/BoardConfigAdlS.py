@@ -201,7 +201,8 @@ class Board(BaseBoard):
         #   the ImageId field in the VBT container.
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
-        self._MULTI_VBT_FILE      = {1:'Vbt.dat'}
+#//C350X001_2        self._MULTI_VBT_FILE      = {1:'Vbt.dat'}
+        self._MULTI_VBT_FILE      = {1:'Vbt.bin', 2:'Vbt.dat'}
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE
         self._generated_cfg_file_prefix = 'Autogen_'

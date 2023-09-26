@@ -23,6 +23,10 @@
 #include <Library/ConfigDataLib.h>
 #include <Library/PchInfoLib.h>
 #include <Library/TcoTimerLib.h>
+//C350X001_1
+#include <PchAccess.h>
+#include <Library/TimerLib.h>
+//C350X001_1
 
 #define UCODE_REGION_BASE   FixedPcdGet32(PcdUcodeBase)
 #define UCODE_REGION_SIZE   FixedPcdGet32(PcdUcodeSize)
@@ -119,6 +123,138 @@ EarlyPlatformDataCheck (
   }
 }
 
+//C350X001_1
+typedef struct _SIO_INIT_TABLE{
+    UINT16      Index16;
+    UINT8       Value8;
+    UINT16      Data16;
+    UINT8       Data8;
+} SIO_INIT_TABLE;
+
+#define SIO_LDN_PMC0	      0xc
+#define SIO_LDN_PMC1	      0xd
+#define SIO_LDN_CAN0	      0x18
+#define SIO_LDN_CAN1	      0x19
+#define SIO_LDN_I2C0	      0x20
+#define SIO_LDN_I2C1	      0x21
+#define SIO_LDN_SMBUS0	    0x22
+#define SIO_LDN_SMBUS1	    0x23
+#define SIO_LDN_GPIO0	      0x24
+#define SIO_LDN_PMCMB	      0xe
+#define SIO_LDN_EC	        0xf
+#define SIO_LDN_UART1	      0x2
+#define SIO_LDN_UART2	      0x3
+
+
+#define SIO_CONFIG_INDEX	  0x299
+#define SIO_CONFIG_DATA	    0x29A
+#define SIO_CONFIG_ENTER	  0x87
+#define SIO_CONFIG_EXIT	    0xAA
+#define SIO_LDN_ACTIVATE	  0x1
+#define SIO_LDN_DEACTIVATE  0x0
+#define SIO_LDN_SELECT	    0x7
+#define SIO_ACTIVATE_REG    0x30
+#define SIO_BASE1_HI_REG    0x60
+#define SIO_BASE1_LO_REG    0x61
+#define SIO_BASE2_HI_REG    0x62
+#define SIO_BASE2_LO_REG    0x63
+#define SIO_IRQ1_REG      	0x70
+#define SIO_IRQ2_REG      	0x72
+#define SIO_DMA1_REG      	0x74
+#define SIO_DMA2_REG      	0x75 
+#define SIO_PMC1_INDEX     	0x2F2
+#define SIO_PMC1_DATA     	0x2F6
+#define SIO_UART1_BASE     	0x3F8
+#define SIO_UART2_BASE     	0x2F8
+
+#define SIO_I2C0_IRQ      	6
+#define SIO_I2C0_BASE     	0x280
+#define SIO_GPIO0_BASE     	0x2C0
+
+SIO_INIT_TABLE SioInitTable1[]= {
+  {SIO_CONFIG_INDEX, SIO_CONFIG_ENTER,  SIO_CONFIG_INDEX, SIO_CONFIG_ENTER},
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_PMC0},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_PMC1},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_INDEX & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_INDEX >> 8)},
+  {SIO_CONFIG_INDEX, SIO_BASE2_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_DATA & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE2_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_DATA >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_UART1},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART1_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART1_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_UART2},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART2_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART2_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_I2C0},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_I2C0_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_I2C0_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_IRQ1_REG,      SIO_CONFIG_DATA,  SIO_I2C0_IRQ},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_GPIO0},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_GPIO0_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_GPIO0_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_IRQ1_REG,      SIO_CONFIG_DATA,  SIO_I2C0_IRQ},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_CONFIG_EXIT,   SIO_CONFIG_INDEX, SIO_CONFIG_EXIT}
+};
+
+#define R_PCH_DMI_PCR_LPCLGIR1                   0x2730                       ///< LPC Generic I/O Range 2
+#define R_PCH_DMI_PCR_LPCLGIR2                   0x2734                       ///< LPC Generic I/O Range 2
+#define R_PCH_DMI_PCR_LPCLGIR3                   0x2738                       ///< LPC Generic I/O Range 3
+#define R_PCH_DMI_PCR_LPCLGIR4                   0x273C                       ///< LPC Generic I/O Range 2
+
+/**
+  Enable UART in SIO chip.
+
+**/
+VOID
+EarlySioInit (
+  VOID
+)
+{
+    UINT8                 Idx;
+    UINT32                LpcBaseAddr;
+    SIO_INIT_TABLE        *pSioTbl = SioInitTable1;
+    UINT32            PciData32;
+
+    // Enable SIO decoding
+    LpcBaseAddr = MM_PCI_ADDRESS (DEFAULT_PCI_BUS_NUMBER_PCH, PCI_DEVICE_NUMBER_PCH_ESPI, PCI_FUNCTION_NUMBER_PCH_ESPI, 0);
+
+    PciData32 = MmioRead32 (LpcBaseAddr+0x80);
+    PciData32 = 0x3F030010;
+    MmioWrite32 (LpcBaseAddr+0x80,  PciData32);
+
+    MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOD),(UINT16) PciData32);
+    MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOE), (UINT16) (PciData32>> 16));
+
+    
+    PciData32 = MmioRead32 (LpcBaseAddr+0x80);
+    
+    PciData32 = MmioRead32 (LpcBaseAddr+0x88);
+    PciData32 = 0x00FC0201;
+    MmioWrite32 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCLGIR2), PciData32);
+    MmioWrite32 (LpcBaseAddr+0x88,  PciData32);
+    
+
+    for  (Idx = 0; Idx < sizeof(SioInitTable1)/sizeof(SIO_INIT_TABLE); Idx ++) {
+      MicroSecondDelay (10 * 10);
+      IoWrite8 (pSioTbl->Index16, pSioTbl->Value8 );
+      IoWrite8 (pSioTbl->Data16, pSioTbl->Data8 );
+      pSioTbl = pSioTbl+1;
+    }
+}
+//C350X001_1
+
 /**
   Board specific hook points.
 
@@ -157,6 +293,8 @@ BoardInit (
       }
       ConfigureGpio (CDATA_NO_TAG, 2, (UINT8 *)(UartGpioTable + DebugPort * 2));
     }
+
+    EarlySioInit ();  //C350X001_1
 
     PlatformHookSerialPortInitialize ();
     SerialPortInitialize ();

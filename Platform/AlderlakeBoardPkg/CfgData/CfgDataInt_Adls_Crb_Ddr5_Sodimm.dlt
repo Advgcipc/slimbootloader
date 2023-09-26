@@ -51,6 +51,9 @@ PLDSEL_CFG_DATA.PldSelGpio.Enable      | 1
 PLDSEL_CFG_DATA.PldSelGpio.PadGroup    | 5
 PLDSEL_CFG_DATA.PldSelGpio.PinNumber   | 3
 
+#//C350X001_2 EFIPayload
+PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+
 SILICON_CFG_DATA.EnableItbm              | 0x1
 
 POWER_CFG_DATA.TdcEnable | {0x1, 0x1, 0x0, 0x0, 0x0}
