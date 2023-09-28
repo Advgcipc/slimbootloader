@@ -455,7 +455,8 @@ InitializeBmcVideo (
       return;
     }
 
-    Status = AspeedGraphicsInit (PciDevice, &Timings[0]);
+//5993X001_1    Status = AspeedGraphicsInit (PciDevice, &Timings[0]);
+    Status = AspeedGraphicsInit (PciDevice, &Timings[1]);
     if (!EFI_ERROR (Status)) {
       ZeroMem (&GopMode, sizeof (EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE));
       ZeroMem (&GopModeInfo, sizeof (EFI_GRAPHICS_OUTPUT_MODE_INFORMATION));

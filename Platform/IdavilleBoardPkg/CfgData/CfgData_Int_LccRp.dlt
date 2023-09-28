@@ -16,7 +16,10 @@ GEN_CFG_DATA.PayloadId                    | 'AUTO'
 PLDSEL_CFG_DATA.PldSelGpio.Enable         | 1
 PLDSEL_CFG_DATA.PldSelGpio.PadGroup       | 7
 PLDSEL_CFG_DATA.PldSelGpio.PinNumber      | 8
-PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+#//5993X001_3 :default set to EFI payload
+#PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 1
+
+PLDSEL_CFG_DATA.PldSelGpio.PinPolarity    | 0
 
 #
 # Following pins are not host-owned.
@@ -42,3 +45,14 @@ PCIE_CFG_DATA.IioRes.LowMmioBase    | { 0:0D,    0x90000000,    0xB4000000,    0
 PCIE_CFG_DATA.IioRes.LowMmioLimit   | { 0:0D,    0xB3FFFFFF,    0xD7FFFFFF,    0xFB7FFFFF, 0, 0, 0, 0, 0xFBFFFFFF }
 PCIE_CFG_DATA.IioRes.HighMmioBase   | { 0:0Q, 0x20000000000, 0x21000000000, 0x22000000000, 0, 0, 0, 0,          0 }
 PCIE_CFG_DATA.IioRes.HighMmioLimit  | { 0:0Q, 0x20FFFFFFFFF, 0x21FFFFFFFFF, 0x22FFFFFFFFF, 0, 0, 0, 0,          0 }
+
+#//5993X001_2
+PCIE_CFG_DATA.BifurcationPcie0     | 6
+PCIE_CFG_DATA.BifurcationPcie1     | 9
+PCIE_CFG_DATA.BifurcationPcie2     | 8
+
+
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H08.GPIOSkip_GPP_H08       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H09.GPIOSkip_GPP_H09       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H10.GPIOSkip_GPP_H10       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H11.GPIOSkip_GPP_H11       | 1           

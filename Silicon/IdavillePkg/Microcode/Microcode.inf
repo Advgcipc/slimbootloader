@@ -14,6 +14,7 @@
   VERSION_STRING       = 1.0
 
 [Sources]
+  M10606C0_FD000220.mcb
   m_10_606c1_01000230.mcb
 
 [UserExtensions.SBL."CloneRepo"]
