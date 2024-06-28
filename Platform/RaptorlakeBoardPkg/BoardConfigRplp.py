@@ -280,13 +280,15 @@ class Board(BaseBoard):
         #   the ImageId field in the VBT container.
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
-        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat'}
+#//6884X001        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat'}
+        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat', 3:'VbtAdlP.bin'}
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE
         self._generated_cfg_file_prefix = 'Autogen_'
 
         self._CFGDATA_INT_FILE = []
-        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Lpddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Crb_Ddr5.dlt']
+#//6884X001        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Lpddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Crb_Ddr5.dlt']
+        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Lpddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Crb_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5_SOM_6884.dlt']
 
     def PlatformBuildHook (self, build, phase):
         global fv_dir

@@ -429,6 +429,8 @@ BoardInit (
       // Configure TSN GPIO table if TSN is enabled.
       if (SiCfgData->PchTsnEnable == 1) {
         switch (GetPlatformId ()) {
+//6884X001
+          case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
           case PLATFORM_ID_ADL_P_LP5_RVP:
           case PLATFORM_ID_ADL_P_DDR5_RVP:
             DEBUG ((DEBUG_WARN, "TSN GPIO: No ADL-P GPIO table available currently...\n"));

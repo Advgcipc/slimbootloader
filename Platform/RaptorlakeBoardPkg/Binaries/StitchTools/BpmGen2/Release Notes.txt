@@ -1,0 +1,101 @@
+February 22, 2022
+Fixed issue with IBB overlap resolution involving excluded regions. Flash to memory was not mapped correctly.
+
+February 16, 2022
+Fixed minor issue with IBB flags not saving correctly.
+
+February 15, 2022
+Removed invalid struct "Version 2.4" from Key Manifest. This was spill-over from BPM struct version increment.
+Added Linux binary file to release package.
+
+January 31, 2022
+Fixed a minor issue with generating KM signature internally. If you receieve error
+"Invalid or unrecognized private key" please update to this version.
+
+September 20, 2021
+Added memory stride size to TXT element. BPMH v2.4 is required.
+
+August 17, 2021
+Minor change to CNBS structure
+Fixed issue with Generic RSA Keys
+
+August 13, 2021
+Incremented Struct Versions for BPM Header, PCD Element, and IBB Element
+Added multiple IBB Flags
+Added Communication NEM Buffer Segment to PCD
+
+June 3, 2021
+Added an additional FIT address check when doing -REMAP. Tool will also check offset 0x40 from REMAP offset.
+Tool can also leverage FRBA (client) structure to determine flash base remapping.
+
+May 26, 2021
+Updated IBBFlags to support SPIRAL algorithm for certain client platforms
+Fixed a bug in Linux version around OBB hashing.
+
+February 23, 2021
+Updated IBBFlags. Bit 5 now denotes "Force (MK)TME" option. Please refer to CBnT Spec for more details.
+
+September 20, 2020
+Added -REMAP functionalty for specific client platforms (see BpmGen2 User Guide.pdf)
+Added RPM package for RHEL-based systems
+
+September 11, 2020
+Added Linux package for Debian-based systems.
+
+July 6, 2020
+Enabled larger hashes for Key Manifest fuses. Please refer to your platform's architecture documents to determine
+if you have enough fuse space in your PCH.
+
+June 10, 2020
+Minor fix for CLI bug.
+
+May 18, 2020
+Hotfix for OBB source parsing issue.
+
+May 8, 2020
+Fixed issue with Bpm Struct 0x22. Txt Struct version would incorrectly be set to 0x21.
+
+February 7, 2020
+Fixed a bug with TXT Memory Scrubbing Policy not being loaded correctly from BpDef files.
+PFR as recovery option added to TXT element.
+Fixed Key Manifest Public Key hash issue. Hash was unintentionally assigned to signature hash variable.
+Added the ability to specify a minimum SVN version for S-ACM (anti-rollback).
+
+January 8, 2020
+Key manifest generation was not supporting SHA384 for KM signature. This now works correctly.
+
+December 3, 2019
+When segments were split, flags were not being applied to split segments correctly. This has now been fixed.
+
+August 20, 2019
+Added ability to manually specify cache type.
+
+August 14, 2019
+Added ability to manually specify IBB segments, as well as denote if a segment is Non-Hashed.
+
+April 8, 2019
+Added the ability to hash entire FVs instead of individual FFS for OBB hashing.
+Added PFR Element to Boot Policy Manifest
+Key Usage Bit 4 now denotes PFR Root Key
+
+January 29, 2019
+Enabled KM signing with RSAPSS.
+
+May 16, 2018
+Changed how the BpmGen2 tool processes BIOS Info Table - Now ignors "Exclude from FIT"
+Added ability to specify SHA384 and SHA512 as the KM Public Key Hash
+
+Jan 24, 2018
+Added check to make sure IBB segments are 64-byte aligned
+Force DMA Protection and TPM Start from Locality 3 flags to be set for v2.x
+Added check for DMA Protection ranges for IBB coverage
+Added verification of IBB Hash calculation for INFO operation
+Added check for elements' structure versions when displaying BPM
+
+Changes Dec 6, 2017:
+Fixed revision levels in PCD Element
+Updating FIT Type B and C records with actual KM and BPM sizes
+Updated FIT checksum after modifying FIT records
+Added new operations for SDEV manifest genertion (HashFile, SignFile, GetPubKey)
+Forced DMA Protection and TPM Loclity 3 Init flags to always be set for 2.1
+Fixed bug where zero length ACM caused all segments to be excluded and tool crash

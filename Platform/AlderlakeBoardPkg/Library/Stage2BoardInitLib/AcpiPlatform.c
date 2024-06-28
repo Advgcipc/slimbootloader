@@ -893,6 +893,8 @@ PlatformUpdateAcpiGnvs (
   PchNvs->CnviBtCore         = FspsConfig->CnviBtCore;
   PchNvs->CnviBtAudioOffload = FspsConfig->CnviBtAudioOffload;
   switch (GetPlatformId ()) {
+//6884X001
+    case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
     case PLATFORM_ID_ADL_P_DDR5_RVP:
     PchNvs->CnviBtAudioOffload = 0x1;
   }
@@ -1108,6 +1110,8 @@ PlatformUpdateAcpiGnvs (
     PlatformNvs->PcieSlot1PowerEnableGpio = GPIO_VER4_S_GPP_E1;
     PlatformNvs->PcieSlot2RpNumber = 5;
     break;
+//6884X001
+  case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
   case PLATFORM_ID_ADL_P_DDR5_RVP:
     PlatformNvs->PcieSlot1WakeGpio = 0;
     PlatformNvs->PcieSlot1PowerEnableGpio = GPIO_VER2_LP_GPP_A22;

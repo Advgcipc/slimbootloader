@@ -658,6 +658,8 @@ DEBUG_CODE_END();
     case PLATFORM_ID_ADL_P_LP5_RVP:
       ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemAdlPLp5Rvp) / sizeof (mGpioTablePreMemAdlPLp5Rvp[0]), (UINT8*)mGpioTablePreMemAdlPLp5Rvp);
       break;
+//6884X001
+    case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
     case PLATFORM_ID_ADL_P_DDR5_RVP:
       ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemAdlPDdr5Rvp) / sizeof (mGpioTablePreMemAdlPDdr5Rvp[0]), (UINT8*)mGpioTablePreMemAdlPDdr5Rvp);
       break;
@@ -729,7 +731,8 @@ DEBUG_CODE_END();
 
       // Program range above max memory 1MB uncachable
       AsmCpuid (CPUID_VIR_PHY_ADDRESS_SIZE, &VirPhyAddressSize.Uint32, NULL, NULL, NULL);
-      DEBUG ((DEBUG_ERROR, "VirPhyAddressSize.Uint32 = %llx", VirPhyAddressSize.Uint32));
+//6884X001      DEBUG ((DEBUG_ERROR, "VirPhyAddressSize.Uint32 = %llx", VirPhyAddressSize.Uint32));
+      DEBUG ((DEBUG_INFO, "CPUID_VIR_PHY_ADDRESS_SIZE = %x\n", VirPhyAddressSize.Uint32));
       MsrBase.Uint64 = GetMemoryInfo (EnumMemInfoTouum);
       MsrBase.Bits.Type = MTRR_CACHE_UNCACHEABLE;
       AsmWriteMsr64 (MsrIdx,  MsrBase.Uint64);

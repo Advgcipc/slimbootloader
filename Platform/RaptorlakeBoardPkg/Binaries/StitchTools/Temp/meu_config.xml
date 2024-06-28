@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MeuConfig version="2.5" >
+    <PathVars label="Path Variables">
+        <WorkingDir value="./" label="$WorkingDir" help_text="Path for environment variable $WorkingDir" />
+        <SourceDir value="./" label="$SourceDir" help_text="Path for environment variable $SourceDir" />
+        <DestDir value="./" label="$DestDir" help_text="Path for environment variable $DestDir" />
+        <UserVar1 value="./" label="$UserVar1" help_text="Path for environment variable $UserVar1" />
+        <UserVar2 value="./" label="$UserVar2" help_text="Path for environment variable $UserVar2" />
+        <UserVar3 value="./" label="$UserVar3" help_text="Path for environment variable $UserVar3" />
+    </PathVars>
+    <SigningConfig label="Signing Configuration">
+        <SigningTool value="OpenSSL" value_list="Disabled,,OpenSSL" label="Signing Tool" help_text="Select tool to be used for signing, or disable signing." />
+        <SigningToolPath value="" label="Signing Tool Path" help_text="Provide the path to your signing tool executable, such as /usr/bin/openssl or C:\OpenSSL-Win32\bin\openssl.exe" />
+        <PrivateKeyPath value="$WorkingDir\private.pem" label="Private Key Path" help_text="Path to private RSA key (in PEM format) to be used for signing. Key is required if using OpenSSL." />
+    </SigningConfig>
+    <CompressionConfig label="Compression Configuration">
+        <LzmaToolPath value="" label="LZMA Tool Path" help_text="Path to lzma tool executable." />
+    </CompressionConfig>
+</MeuConfig>

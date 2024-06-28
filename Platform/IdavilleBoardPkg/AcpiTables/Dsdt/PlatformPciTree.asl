@@ -458,7 +458,7 @@ Scope (\_SB) {
       Name(_UID, 0x00)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -522,14 +522,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00060000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -545,16 +545,26 @@ Scope (\_SB) {
       // UART #0 on PCH
       Device (UAR0) {
         Name(_ADR, 0x001A0000)
+        Method(_STA, 0){
+                 Return(0x0B)
+         }
       }
 
       // UART #1 on PCH
       Device (UAR1) {
         Name(_ADR, 0x001A0001)
+        Method(_STA, 0){
+                 Return(0x0B)
+        }
       }
 
       // UART #2 on PCH
       Device (UAR2) {
         Name(_ADR, 0x001A0002)
+        Method(_STA, 0){
+                 Return(0x0B)
+        }
+
       }
 
       // HECI #1 on PCH
@@ -632,7 +642,7 @@ Scope (\_SB) {
       Name(_UID, 0x01)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -664,14 +674,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00020000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -696,14 +706,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00030000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -721,14 +731,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00040000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -753,14 +763,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00050000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -793,7 +803,7 @@ Scope (\_SB) {
       Name(_UID, 0x02)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -814,14 +824,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00040000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -839,14 +849,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00050000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -873,7 +883,7 @@ Scope (\_SB) {
       Name(_UID, 0x03)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -882,21 +892,24 @@ Scope (\_SB) {
                            Package() { 0x0004FFFF, 2, 0, 18 },
                            Package() { 0x0004FFFF, 3, 0, 19 }})
       }
-      #include "IioRootBridge.asi"
+//      #include "IioRootBridge.asi"
+      Method(_STA, 0){
+                 Return(0)
+       }
 
       // Virtual RootPort connected to the CPK
       Device (VP3A) {
 
         Name(_ADR, 0x00040000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -937,7 +950,7 @@ Scope (\_SB) {
       Name(_UID, 0x05)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -970,14 +983,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00020000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -1003,14 +1016,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00030000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -1036,14 +1049,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00040000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -1069,14 +1082,14 @@ Scope (\_SB) {
 
         Name(_ADR, 0x00050000)
         //
-        // Power Resources for Wake – returns a list of dependent power resources for waking.
+        // Power Resources for Wake - returns a list of dependent power resources for waking.
         //
         Method (_PRW, 0)
         {
           Return (Package (0x02) {0x09, 0x04})
         }
         //
-        // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+        // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
         //
         Method (_PRT, 0)
         {
@@ -1108,7 +1121,7 @@ Scope (\_SB) {
       Name(_UID, 0x32)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {
@@ -1159,7 +1172,7 @@ Scope (\_SB) {
       Name(_UID, 0x33)
 
       //
-      // _PRT Pci Routing Table – returns a list of PCI interrupt mappings.
+      // _PRT Pci Routing Table - returns a list of PCI interrupt mappings.
       //
       Method (_PRT, 0)
       {

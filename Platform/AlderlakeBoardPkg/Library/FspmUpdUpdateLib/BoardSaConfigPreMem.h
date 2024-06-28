@@ -184,6 +184,24 @@ GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mRplPDdr5SODimmCrbDisplayDdiConfig[16]
   DdiDdcEnable,    // DDI Port 3 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
   DdiDdcEnable     // DDI Port 4 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
 };
-
+//6884X001
+GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mRplPDdr5SODimmCrbDisplayDdiConfigSOM6884[16] = {
+                                                                               DdiPortDisabled,      // DDI Port A Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
+                                                                               DdiPortDisabled, // DDI Port B Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
+                                                                               DdiHpdEnable,    // DDI Port A HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdDisable,   // DDI Port B HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdDisable,   // DDI Port C HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdEnable,    // DDI Port 1 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdEnable,    // DDI Port 2 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdEnable,    // DDI Port 3 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdDisable,   // DDI Port 4 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiDdcEnable,    // DDI Port A DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDisable,      // DDI Port B DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDisable,      // DDI Port C DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDdcEnable,    // DDI Port 1 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDdcEnable,    // DDI Port 2 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDdcEnable,    // DDI Port 3 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDisable       // DDI Port 4 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+};
 
 #endif // _BOARD_SA_CONFIG_PRE_MEM_H_

@@ -576,6 +576,12 @@ UpdateFspConfig (
     DEBUG((DEBUG_INFO, "PLATFORM_ID_RPL_P_DDR5_CRB board Id %x .....\n", PlatformId));
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mRplPDdr5SODimmCrbDisplayDdiConfig, sizeof(mRplPDdr5SODimmCrbDisplayDdiConfig));
     break;
+//6884X001
+  case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
+    DEBUG((DEBUG_INFO, "PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884 board Id %x .....\n", PlatformId));
+    CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mRplPDdr5SODimmCrbDisplayDdiConfigSOM6884, sizeof(mRplPDdr5SODimmCrbDisplayDdiConfigSOM6884));
+    break;
+
   default:
     DEBUG((DEBUG_INFO, "DDI Init: Unsupported board Id %x .....\n", PlatformId));
     break;
@@ -627,6 +633,8 @@ UpdateFspConfig (
         Fspmcfg->DdiPortBDdc = 1;
         break;
       case PLATFORM_ID_ADL_P_DDR5_RVP:
+//6884X001
+      case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
         Fspmcfg->DdiPortAConfig = 0x1;
         Fspmcfg->DdiPortBHpd = 0x1;
         Fspmcfg->PrmrrSize = 0x200000;
@@ -723,6 +731,8 @@ UpdateFspConfig (
         case PLATFORM_ID_ADL_P_LP4_RVP:
         case PLATFORM_ID_ADL_P_LP5_RVP:
         case PLATFORM_ID_ADL_P_DDR5_RVP:
+//6884X001
+        case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
         case PLATFORM_ID_ADL_P_UPXI12:
         case PLATFORM_ID_ADL_N_UP7EN50:
           Fspmcfg->PchIshEnable       = 1;
