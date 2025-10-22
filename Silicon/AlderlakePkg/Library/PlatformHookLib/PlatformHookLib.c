@@ -123,8 +123,20 @@ LegacySerialPortInitialize (
   Data16 = PciRead16 (eSPIBaseAddr + R_LPC_CFG_IOE);
   Data16 |= B_LPC_CFG_IOE_CBE;
   Data16 |= B_LPC_CFG_IOE_CAE;
+//6884V101_2
+  Data16 |= B_LPC_CFG_IOE_ME1;
+  Data16 |= BIT12;//B_LPC_CFG_IOE_SE
+
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOE), Data16);
   PciWrite16 (eSPIBaseAddr + R_LPC_CFG_IOE, Data16);
+
+//6884V101_2
+{
+  UINT32            Data32 = 0x00FC0201;;
+
+  MmioWrite32 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCLGIR3), Data32);
+  PciWrite32 (eSPIBaseAddr + R_ESPI_CFG_ESPI_LGIR1 + 8, Data32);
+}
 
   return RETURN_SUCCESS;
 }
@@ -143,6 +155,9 @@ PlatformHookSerialPortInitialize (
   if (DebugPort >= PCH_MAX_SERIALIO_UART_CONTROLLERS) {
     LegacySerialPortInitialize ();
   } else {
+//6884V101_2
+    LegacySerialPortInitialize ();
+
     BarAddress = LPSS_UART_TEMP_BASE_ADDRESS(DebugPort);
     PciAddress = mUartMmPciOffset[DebugPort] + (UINTN)PcdGet64(PcdPciExpressBaseAddress);
     MmioWrite32 (PciAddress + R_SERIAL_IO_CFG_BAR0_LOW,  BarAddress);

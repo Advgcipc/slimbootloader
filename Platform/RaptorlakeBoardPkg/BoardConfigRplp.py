@@ -27,7 +27,8 @@ class Board(BaseBoard):
 
         self.VERINFO_IMAGE_ID     = 'SB_RPLP'
         self.VERINFO_PROJ_MAJOR_VER = 1
-        self.VERINFO_PROJ_MINOR_VER = 4
+#//6884V101_1        self.VERINFO_PROJ_MINOR_VER = 4
+        self.VERINFO_PROJ_MINOR_VER = 1
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -105,8 +106,12 @@ class Board(BaseBoard):
         self.ENABLE_SMBIOS        = 1
         self.ENABLE_CSME_UPDATE   = 1
 
+#//6884V101_7
+        self.ENABLE_EMMC_HS400    = 0
+
         # CSME update library is required to enable this option and will be available as part of CSME kit
-        self.BUILD_CSME_UPDATE_DRIVER   = 0
+#//6884V101_7        self.BUILD_CSME_UPDATE_DRIVER   = 0
+        self.BUILD_CSME_UPDATE_DRIVER   = 1
 
         self.STAGE1A_XIP          = 1
         self.STAGE1B_XIP          = 1
@@ -249,7 +254,8 @@ class Board(BaseBoard):
         self.NON_VOLATILE_SIZE    = 0x001000
         self.SLIMBOOTLOADER_SIZE  = (self.TOP_SWAP_SIZE + self.REDUNDANT_SIZE) * 2 + \
                                     self.NON_REDUNDANT_SIZE + self.NON_VOLATILE_SIZE
-        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFF) & ~0xFFFFF)
+#//6884V101_7        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFF) & ~0xFFFFF)
+        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFFF) & ~0xFFFFFF)
         self.PLD_HEAP_SIZE        = 0x09000000
         self.PLD_STACK_SIZE       = 0x00020000
         self.PLD_RSVD_MEM_SIZE    = 0x00500000
@@ -283,16 +289,19 @@ class Board(BaseBoard):
         #   the ImageId field in the VBT container.
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
-        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat', 3:'Vbt_rplp_rki.dat'}
+#//6884V101_4        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat', 3:'Vbt_rplp_rki.dat'}
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE
         self._generated_cfg_file_prefix = 'Autogen_'
 
+#//6884V101_1
         self._CFGDATA_INT_FILE = []
         self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5.dlt',
                                   self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Lpddr5.dlt',
                                   self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Crb_Ddr5.dlt',
                                   self._generated_cfg_file_prefix + 'CfgDataExt_Rplp_Upx12.dlt',
+                                  self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5_SOM_6884.dlt', 
+                                  self._generated_cfg_file_prefix + 'CfgDataInt_Rplp_Rvp_Ddr5_SOM_6884A2.dlt',
                                   self._generated_cfg_file_prefix + 'CfgDataExt_Rplp_Rki.dlt']
 
     def PlatformBuildHook (self, build, phase):
@@ -375,7 +384,8 @@ class Board(BaseBoard):
         ]
 
         if self.BUILD_CSME_UPDATE_DRIVER:
-            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(SILICON_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+#//6884V101_7            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(SILICON_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Platform/$(BOARD_PKG_NAME_OVERRIDE)/Binaries/Sbl32/MeFwUpdateLib.inf')
 
         if self.FUSA_SUPPORT:
             dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('CrashLogLib|Silicon/RaptorlakePkg/Library/FusaCrashLogLib/FusaCrashLogLib.inf')

@@ -145,4 +145,60 @@ GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp[] =
   {GPIO_VER2_LP_GPP_A7,  {GpioPadModeGpio, GpioHostOwnGpio,  GpioDirOut,  GpioOutLow,  GpioIntDefault,  GpioPlatformReset,  GpioTermNone }}, // SRCCLK_OEB7
 };
 
+
+GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp_SOM_6884[] =
+{
+  // NC
+  {GPIO_VER2_LP_GPP_A13, {GpioPadModeGpio, GpioHostOwnAcpi, GpioDirOut, GpioOutLow,  GpioIntDefault, GpioPlatformReset, GpioTermNone }}, 
+};
+
+/*
+PMCALERT:B11
+CPURST:B13
+SMB:C0-C1
+SMB_ALT:C2
+SML0:C3-C4
+SML0_ALT:C5
+SML0:C6-C7
+SML0_ALT:B23
+ESPI: A0-A10,A23
+PANEL: F11-F18
+GSPI: E10-13
+LAN_WAKE: D2
+LANPHT_EN: D11
+GPIO: D17-D18 PU
+
+UART0: H10-H11 F0
+I2C0: H6-H7 F0
+C10 Gate: H18
+
+GPD0-GPD1:PU
+
+NC:
+GPD6
+GPD9
+A13
+
+B5-B8
+B12
+
+D0-D3
+D7
+D2
+D3
+
+D13-H16
+D14
+D15
+D16
+
+E8
+E17
+E6
+E2
+
+F20-F21 
+H3
+H7-H8 H4-H5
+*/
 #endif // _ALDER_LAKE_P_DDR5_CRB_PREMEM_GPIO_TABLE_H_

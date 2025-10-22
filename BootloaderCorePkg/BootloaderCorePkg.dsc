@@ -368,6 +368,8 @@
   gPlatformModuleTokenSpaceGuid.PcdS3DebugEnabled         | $(S3_DEBUG)
 !endif
   gPlatformCommonLibTokenSpaceGuid.PcdSourceDebugEnabled  | $(ENABLE_SOURCE_DEBUG)
+#//6884V101_3
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate    | "$(VERINFO_BUILD_DATE)"
 
 [PcdsDynamicDefault]
   gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut         | 2
