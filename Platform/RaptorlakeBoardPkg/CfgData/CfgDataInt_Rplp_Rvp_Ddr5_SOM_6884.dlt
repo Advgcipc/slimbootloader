@@ -10,10 +10,12 @@
 
 
 #
-# Delta configuration values for platform ID 0x0012
+# Delta configuration values for platform ID 0x001D
 #
-PLATFORMID_CFG_DATA.PlatformId           | 0x001F
-PLAT_NAME_CFG_DATA.PlatformName          | 'RPLPDDR5'
+#//6884V101_1 PLATFORMID_CFG_DATA.PlatformId           | 0x001F
+#//6884V101_1 PLAT_NAME_CFG_DATA.PlatformName          | 'RPLPDDR5'
+PLATFORMID_CFG_DATA.PlatformId           | 0x001D
+PLAT_NAME_CFG_DATA.PlatformName          | 'SOM-6884'
 GEN_CFG_DATA.PayloadId                   | ''
 FEATURES_CFG_DATA.Features.S0ix          | 0x0
 GEN_CFG_DATA.BootToShell                 | 1

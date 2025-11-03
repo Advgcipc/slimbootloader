@@ -1,15 +1,22 @@
-@set BIOS_NAME=6884000
+@set BIOS_NAME=688400S
 @set BIOS_DEBUG=1
 @set BIOS_FEATURE=08
-@set BIOS_VERSION=0X001
+@set BUILD_NUMBER=22
+::self.VERINFO_PROJ_MAJOR_VER;self.VERINFO_PROJ_MINOR_VER;
+@set BIOS_VERSION=0V101
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-@set PLATFORM_ID_DEBUGUART=AA00FF1F
+::struct {UINT8 PlatformId : 5;UINT8  Reserved1  : 3;UINT8  DebugUart;UINT8 Reserved3;UINT8 Marker;} STITCH_DATA;
+:: PlatformId ==> SOM-6884A2:0x1E;SOM-6884:0x1D ;; DebugUart ==> SOC UART0:0; SIO UART0:0xFF;SIO UART1:0xFE      
+@set PLATFORM_ID_DEBUGUART=AA00FF1D
 @set PLATFORM_TYPE=rplp
 @set PLATFORM_PACKAGE=RaptorlakeBoardPkg
 @set BUILD_PY_FILE=BuildLoader.py
 @set STITCH_PY_FILE=Platform/%PLATFORM_PACKAGE%/Script/StitchLoader.py
+@set STITCH_PY_FILE1=Platform/%PLATFORM_PACKAGE%/Script/StitchLoader1.py
 @set SBL_SOURCE_BINFILE=Outputs/%PLATFORM_TYPE%/SlimBootloader.bin
-@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/68840000060V201.bin
+@set SBL_STITCH_BINFILE=Outputs/%PLATFORM_TYPE%/SlimBootloaderStitch.bin
+::@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/68840000060V201.bin
+@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/68840000060V201_TS512.bin
 
 
 @IF "%1"=="" goto EnvSet
@@ -33,30 +40,42 @@
 @set OPENSSL_PATH=C:\Openssl
 @set PYTHON_HOME=C:\Python36
 @set NASM_PREFIX=C:\Nasm\
-@set SBL_KEY_DIR=%CD%\..\sblKeys\
+@set SBL_KEY_DIR=%CD%\sblKeys\
 @set IASL_PREFIX=C:\ASL\
 @set BASE_TOOLS_PATH=%CD%\BaseTools
-
+::change windows page code 
+:: 0x80E2 at 5736,5737,5738,5759 $(SBL_DIR)\MdePkg\Include\Register\Intel\ArchitecturalMsr.h
+@chcp 65001
 
 @call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
 
 @goto Exit
 
 :BuildKey
-python BootloaderCorePkg\Tools\GenerateKeys.py -k ..\sblKeys
+python BootloaderCorePkg\Tools\GenerateKeys.py -k %SBL_KEY_DIR%
 @goto Exit
 
 :BuildSource
-git clone git@github.com:Advgcipc/slimbootloader.git
+cd..
+::git clone git@github.com:Advgcipc/slimbootloader.git
+git clone https://github.com/slimbootloader/slimbootloader.git
+cd slimbootloader
+git checkout e9f9845d
+
+:: robocopy /s %CD%\..\AdvantechSBL\ %CD%\
 @goto Exit
 
 :BuildStitchSlim
 @goto BuildSlim
 :BuildSlimend
 @goto BuildStitch
+:BuildStitchend
+@goto BuildFirmwareUpdate
 
 
 :BuildSlim
+:: @robocopy /s %CD%\..\AdvantechSBL\ %CD%\
+
 @IF "%2"=="-r" set BIOS_DEBUG=0
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 @IF "%2"=="-r" goto BuildSlimR
@@ -79,6 +98,7 @@ python %BUILD_PY_FILE% build %PLATFORM_TYPE% -r -p "OsLoader.efi:LLDR:Lz4;UEFIPA
 @goto Exit
 
 :BuildStitch
+:: @robocopy /s %CD%\..\AdvantechSBL\ %CD%\
 @IF "%2"=="-r" set BIOS_DEBUG=0
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 
@@ -86,12 +106,13 @@ python %BUILD_PY_FILE% build %PLATFORM_TYPE% -r -p "OsLoader.efi:LLDR:Lz4;UEFIPA
 
 @IF "%2"=="-r" goto BuildStitchR
 python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE%  -p %PLATFORM_ID_DEBUGUART%
-
+@IF "%1"=="-a" goto BuildFirmwareUpdate
 @goto StitchEnd
 
 :BuildStitchR
 python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE%  -p %PLATFORM_ID_DEBUGUART%
 
+@IF "%1"=="-a" goto BuildFirmwareUpdate
 @goto StitchEnd
 
 :BuildStitchBootGuard
@@ -104,18 +125,24 @@ python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build
 
 
 :BuildFirmwareUpdate
-@echo BuildFirmwareUpdate todo
+@title Build Firmware Update Image
+@set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
+@set PAYLOAD_FILE1=Platform\%PLATFORM_PACKAGE%\Binaries\StitchTools\Temp1\MeRegionFile.bin
+:@set PAYLOAD_FILE2=Build\BootloaderCorePkg\RELEASE_VS2022\IA32\CsmeUpdateDriver.efi
+@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
+@IF "%2"=="-r" goto BuildFirmwareUpdateRelease
+:@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2022\IA32\CsmeUpdateDriver.efi
+@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
+:BuildFirmwareUpdateRelease
+:@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
+@set FWU_KEY=D:\SBL\sblKeys\FirmwareUpdateTestKey_Priv_RSA3072.pem 
+@set FWU_OUTPUTFILE=Build\FwuImage.bin
+@set PAYLOAD_FILE0=%SBL_STITCH_BINFILE%
 
-::@title Build Firmware Update Image
-::
-::@set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
-::@set PAYLOAD_FILE0=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\BiosRegion.bin
-::@set PAYLOAD_FILE1=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\MeRegionFile.bin
-::@set PAYLOAD_FILE2=Platform\TigerlakeBoardPkg\Binaries\Sbl32\CsmeUpdateDriver.efi
-::@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
-::@set FWU_OUTPUTFILE=Build\FwuImage.bin
+python %STITCH_PY_FILE1% -s %SBL_SOURCE_BINFILE% -o %SBL_STITCH_BINFILE%  -p %PLATFORM_ID_DEBUGUART%
 
-::python %BASE_PY_FILE% -p BIOS %PAYLOAD_FILE0% -p CSME %PAYLOAD_FILE1% -p CSMD %PAYLOAD_FILE2% -k %FWU_KEY% -o %FWU_OUTPUTFILE% -v
+python %BASE_PY_FILE% -p BIOS %PAYLOAD_FILE0% -p CSMD %PAYLOAD_FILE2% -k %FWU_KEY% -o %FWU_OUTPUTFILE% -v
+
 @goto Exit
 
 
@@ -128,6 +155,7 @@ python BuildLoader.py clean
 @goto Exit
 
 :HelpMsg
+@echo "%WORKSPACE%"
 @echo "Slim Boot Loader Setup & Build Environment
 @echo "      -g      Get Slim Boot Loader Source
 @echo "      -c      Clean Slim Boot Loader

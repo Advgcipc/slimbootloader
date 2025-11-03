@@ -14,7 +14,7 @@
   LIBRARY_CLASS                  = MeFwUpdateLib
 
 [Binaries]
-  LIB|MeFwUpdateLib.lib
+  LIB|FwUpdateEfiLib.lib
   
 [LibraryClasses]
 

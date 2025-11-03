@@ -24,7 +24,7 @@ Abstract:
 #define FPT_PARTITION_NAME_ISHC         0x43485349
 #define FPT_PARTITION_NAME_IUNP         0x504E5549
 #define FPT_PARTITION_NAME_LOCL         0x4C434F4C
-#define FPT_PARTITION_NAME_WCOD         0x444f4357
+#define FPT_PARTITION_NAME_WCOD         0x444F4357
 #define FPT_PARTITION_NAME_IOMP         0x504D4F49
 #define FPT_PARTITION_NAME_NPHY         0x5948504E
 #define FPT_PARTITION_NAME_TBTP         0x50544254
@@ -34,6 +34,8 @@ Abstract:
 #define FPT_PARTITION_NAME_PPHY         0x59485050
 #define FPT_PARTITION_NAME_GBST         0x54534247
 #define FPT_PARTITION_NAME_PSEP         0x50455350
+#define FPT_PARTITION_NAME_ADSP         0x50534441
+#define FPT_PARTITION_NAME_OPIM         0x4D49504F
 
 #define MFT_PART_INFO_EXT_UPDATE_ACTION_NONE         0
 #define MFT_PART_INFO_EXT_UPDATE_ACTION_HOST_RESET   1
@@ -49,6 +51,8 @@ Abstract:
 #define FWU_FW_TYPE_SLIM 2
 #define FWU_FW_TYPE_CONSUMER 3
 #define FWU_FW_TYPE_CORPORATE 4
+#define FWU_FW_TYPE_LITE 5
+#define FWU_FW_TYPE_AUTOMOTIVE 6
 
 #define FWU_PCH_SKU_INVALID 0
 #define FWU_PCH_SKU_H 1
@@ -170,7 +174,9 @@ UINT32 FwuOemId(OUT _UUID *OemId);
                       FWU_FW_TYPE_SLIM 2
                       FWU_FW_TYPE_CONSUMER 3
                       FWU_FW_TYPE_CORPORATE 4
- 
+                      FWU_FW_TYPE_LITE 5
+                      FWU_FW_TYPE_AUTOMOTIVE 6
+
   @retval SUCCESS  If succeeded. Error code otherwise.
 **/
 UINT32 FwuFwType(OUT UINT32 *FwType);
@@ -186,7 +192,9 @@ UINT32 FwuFwType(OUT UINT32 *FwType);
                             FWU_FW_TYPE_SLIM 2
                             FWU_FW_TYPE_CONSUMER 3
                             FWU_FW_TYPE_CORPORATE 4
- 
+                            FWU_FW_TYPE_LITE 5
+                            FWU_FW_TYPE_AUTOMOTIVE 6
+
   @return SUCCESS  If succeeded. Error code otherwise.
 **/
 UINT32 FwuFwTypeFromBuffer(IN  UINT8 *Buffer,
@@ -274,7 +282,7 @@ UINT32 FwuCheckCompatibilityFromBuffer(IN  UINT8 *Buffer,
   Get version of a specific partition, from the flash image.
 
   @param[in]  PartitionId  ID of partition. If the FW version of CSE is needed,
-                           use FTPR partition ID: FPT_PARTITION_NAME_FTPR.
+                           use bup partition ID: FPT_PARTITION_NAME_FTPR/FPT_PARTITION_NAME_RBEP.
   @param[out] Major        Major number of version. Caller allocated.
   @param[out] Minor        Minor number of version. Caller allocated.
   @param[out] HotFix       Hotfix number of version. Caller allocated.
@@ -294,7 +302,7 @@ UINT32 FwuPartitionVersionFromFlash(IN  UINT32 PartitionId,
   @param[in]  Buffer        Buffer of Update Image read from Update Image file.
   @param[in]  BufferLength  Length of the buffer in bytes.
   @param[in]  PartitionId   ID of partition. If the FW version of CSE is needed,
-                            use FTPR partition ID: FPT_PARTITION_NAME_FTPR.
+                            use bup partition ID: FPT_PARTITION_NAME_FTPR/FPT_PARTITION_NAME_RBEP.
   @param[out] Major         Major number of version. Caller allocated.
   @param[out] Minor         Minor number of version. Caller allocated.
   @param[out] HotFix        Hotfix number of version. Caller allocated.
@@ -324,16 +332,16 @@ UINT32 FwuPartitionVendorIdFromFlash(IN  UINT32 PartitionId,
 /**
   Get the the current image from the flash - Restore Point Image, and save it to buffer.
 
-  @param[out] buffer        Buffer of the saved Restore Point Image.
+  @param[out] Buffer        Buffer of the saved Restore Point Image.
                             Allocated by the function, only in case of SUCCESS. NULL otherwise.
                             Caller should free the buffer
                             using FreePool() in EFI.
-  @param[out] bufferLength  Length of the buffer in bytes.
+  @param[out] BufferLength  Length of the buffer in bytes.
 
   @retval SUCCESS  If succeeded. Error code otherwise.
 **/
-UINT32 FwuSaveRestorePointToBuffer(OUT UINT8 **buffer,
-                                   OUT UINT32 *bufferLength);
+UINT32 FwuSaveRestorePointToBuffer(OUT UINT8 **Buffer,
+                                   OUT UINT32 *BufferLength);
 
 /**
   Set ISH configuration file.
@@ -360,5 +368,18 @@ UINT32 FwuSetIshConfig(IN  UINT8 *Buffer,
 **/
 UINT32 FwuGetIshPdtVersion(OUT UINT8 *PdtVersion,
                            OUT UINT8 *VdvVersion);
+
+/**
+* @brief Get the recovery image from the FW using DMA buffer.
+*
+* @param[in]  DmaBuffer        DMA-able buffer for the recovery image. The buffer should be pre-allocated by the caller.
+* @param[in]  DmaBufferLength  Length of the buffer in bytes.
+* @param[out] ImageLength      Length of the recovery image that was written in the buffer.
+*
+* @return SUCCESS  If succeeded. Error code otherwise.
+*/
+UINT32 FwuGetRecoveryImageToDmaBuffer(IN  EFI_PHYSICAL_ADDRESS DmaBuffer,
+                                      IN  UINT32               DmaBufferLength,
+                                      OUT UINT32              *ImageLength);
 
 #endif // __FWUPDATELIB_H__

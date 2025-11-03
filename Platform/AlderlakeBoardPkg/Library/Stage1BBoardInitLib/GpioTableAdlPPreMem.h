@@ -109,4 +109,12 @@ GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp[] =
   {GPIO_VER2_LP_GPP_A7,  {GpioPadModeGpio, GpioHostOwnGpio,  GpioDirOut,  GpioOutLow,  GpioIntDefault,  GpioPlatformReset,  GpioTermNone }}, // SRCCLK_OEB7
 };
 
+//6884V101_1+>>
+GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp_SOM_6884[] =
+{
+  // NC
+  {GPIO_VER2_LP_GPP_A13, {GpioPadModeGpio, GpioHostOwnAcpi, GpioDirOut, GpioOutLow,  GpioIntDefault, GpioPlatformReset, GpioTermNone }}, 
+};
+//<<+6884V101_1
+
 #endif // _ALDER_LAKE_P_DDR5_CRB_PREMEM_GPIO_TABLE_H_

@@ -105,7 +105,8 @@ class Board(BaseBoard):
         self.ENABLE_CSME_UPDATE   = 1
 
         # CSME update library is required to enable this option and will be available as part of CSME kit
-        self.BUILD_CSME_UPDATE_DRIVER   = 0
+#//6884V101_1        self.BUILD_CSME_UPDATE_DRIVER   = 0
+        self.BUILD_CSME_UPDATE_DRIVER   = 1
 
         self.STAGE1A_XIP          = 1
         self.STAGE1B_XIP          = 1
@@ -369,7 +370,8 @@ class Board(BaseBoard):
         ]
 
         if self.BUILD_CSME_UPDATE_DRIVER:
-            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(SILICON_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+#//6884V101_1            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Silicon/$(SILICON_PKG_NAME)/Library/MeFwUpdateLib/MeFwUpdateLib.inf')
+            dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('MeFwUpdateLib|Platform/$(BOARD_PKG_NAME_OVERRIDE)/Binaries/Sbl32/MeFwUpdateLib.inf')
 
         if self.FUSA_SUPPORT:
             dsc['LibraryClasses.%s' % self.BUILD_ARCH].append ('CrashLogLib|Silicon/RaptorlakePkg/Library/FusaCrashLogLib/FusaCrashLogLib.inf')

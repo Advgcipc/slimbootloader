@@ -115,14 +115,15 @@ EFI_STATUS
 
 
 // FW Update Lib uses this address to read FW STS Registers
-//#define EFI_PCI_ADDRESS(bus, dev, func, reg) \
-//    ((UINT64) ((((UINTN) bus) << 24) + (((UINTN) dev) << 16) + (((UINTN) func) << 8) + ((UINTN) reg)))
+// #define EFI_PCI_ADDRESS(bus, dev, func, reg) \
+//    ((UINT64) ((((UINTN) bus) << 24) | (((UINTN) dev) << 16) | (((UINTN) func) << 8) | ((UINTN) reg)))
 //#define ME_BUS  0
 //#define ME_DEV  22
 //#define ME_FUNC 0
 //address = EFI_PCI_ADDRESS(ME_BUS, ME_DEV, ME_FUNC, 0);
 
 // prototype taken from MdePkg\Include\Protocol\PciRootBridgeIo.h
+// Count - in DWORDs.
 typedef
 EFI_STATUS
 (*FWU_PCI_READ_CB) (

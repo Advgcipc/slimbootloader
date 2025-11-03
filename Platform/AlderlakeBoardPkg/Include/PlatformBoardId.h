@@ -38,8 +38,12 @@ Defines Platform BoardIds
 #define BoardIdAdlPDdr5Rvp                            0x12
 #define PLATFORM_ID_ADL_P_DDR5_RVP                    0x12
 //6884X001
-#define BoardIdAdlPDdr5RvpSOM6884                     0x12
-#define PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884           0x1F
+//6884V101_1  #define BoardIdAdlPDdr5RvpSOM6884                     0x12
+//6884V101_1  #define PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884           0x1F
+//6884V101_1  +>>
+#define PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884           0x1D
+#define PLATFORM_ID_ADL_P_LP5_RVP_SOM_6884A2          0x1E
+//<<+6884V101_1 
 
 #define BoardIdAdlPLp5Rvp                             0x13
 #define PLATFORM_ID_ADL_P_LP5_RVP                     0x13
