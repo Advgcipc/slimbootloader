@@ -784,7 +784,7 @@ DEBUG_CODE_END();
 //6884V101_1
     case PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884:
     case PLATFORM_ID_ADL_P_LP5_RVP_SOM_6884A2:
-      ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemAdlPDdr5Rvp_SOM_6884) / sizeof (mGpioTablePreMemAdlPDdr5Rvp_SOM_6884[0]), (UINT8*)mGpioTablePreMemAdlPDdr5Rvp_SOM_6884);
+      ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemAdlPDdr5Rvp_SOM6884) / sizeof (mGpioTablePreMemAdlPDdr5Rvp_SOM6884[0]), (UINT8*)mGpioTablePreMemAdlPDdr5Rvp_SOM6884); //6884A2V102_5
       break;
 
     case PLATFORM_ID_ADL_P_DDR5_RVP:

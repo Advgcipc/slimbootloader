@@ -531,3 +531,11 @@
                      This policy will enable/disable VCCST and also decides if message would be replayed in S4/S5
       length       : 0x01
       value        : 0x01
+  - PchHdaEnable :
+      name         : Enable Intel HD Audio (Azalia)
+      type         : Combo
+      option       : $EN_DIS
+      help         : >
+                     //6884A3V103_1 - 0- Disable, 1- Enable (Default) Azalia controller
+      length       : 0x01
+      value        : 0x01

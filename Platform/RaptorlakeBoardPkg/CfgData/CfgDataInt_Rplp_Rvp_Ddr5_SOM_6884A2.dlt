@@ -126,6 +126,9 @@ SILICON_CFG_DATA.PtmEnabled           | { 0x1, 0x1, 0x1, 0x1}
 SILICON_CFG_DATA.EnableTimedGpio0     | 0x1
 SILICON_CFG_DATA.EnableTimedGpio1     | 0x1
 SILICON_CFG_DATA.PchIshI2cEnable      | {0x01, 0x01, 0x00}
+#//6884A2V102_3+>>
+SILICON_CFG_DATA.PchHdaEnable         | 0x1
+#//<<+6884A2V102_3
 
 POWER_CFG_DATA.MaxRatio             | 0x4
 POWER_CFG_DATA.TdcEnable            | {0x1, 0x1, 0x0, 0x0, 0x0}

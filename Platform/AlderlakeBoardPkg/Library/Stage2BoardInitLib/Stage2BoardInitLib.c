@@ -620,7 +620,8 @@ Stage2BoardInitNotify (
 //    MmioWrite32(0xFD6A0AE0, GPIOlevel );
 
     // Set GPIO to System_OK_LED turn on.GPP_F17_SYSTEM_OK
-    GpioSetOutputValue ( GPIO_VER2_LP_GPP_F17, 0);
+//6884A2V102_2      GpioSetOutputValue ( GPIO_VER2_LP_GPP_F17, 0);
+    MmioWrite32(0xFD6A0990, (MmioRead32(0xFD6A0990)&(~0x00001D01))|0x200); //6884A2V102_2
 
     // EC boot count command
     IoWrite8(A9610_CONFIG_DATA, A9610_SYSTEM_BOOT_COUNT);

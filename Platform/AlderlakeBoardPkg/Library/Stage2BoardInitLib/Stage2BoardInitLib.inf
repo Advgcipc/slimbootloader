@@ -34,6 +34,9 @@
 #//6884V101_6
   A9610Lib.h
   A9610Lib.c
+#//6884A2V102_3+>>
+  HdaVerbTable.h
+#//<<+6884A2V102_3
 
 [Packages]
   MdePkg/MdePkg.dec

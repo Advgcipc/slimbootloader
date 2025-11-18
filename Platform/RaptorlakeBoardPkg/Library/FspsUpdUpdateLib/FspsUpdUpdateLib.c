@@ -38,6 +38,8 @@
 #include <Library/TpmLib.h>
 #include <Library/FusaConfigLib.h>
 #include <GpioPinsVer2Lp.h>
+#include "HdaVerbTable.h"                     //6884A2V102_3
+#include <Library/MemoryAllocationLib.h>      //6884A2V102_3
 
 #define CPU_PCIE_DT_HALO_MAX_ROOT_PORT     3
 #define CPU_PCIE_ULT_ULX_MAX_ROOT_PORT     3
@@ -410,6 +412,10 @@ UpdateFspConfig (
   EFI_STATUS                  Status;
   VBIOS_VBT_STRUCTURE         *VbtPtr;
   EFI_PLATFORM_FIRMWARE_BLOB  TsnCfgBlob;
+//6884A2V103_1+>>
+  UINT32                      *HdaVerbTablePtr;
+  UINT8                       HdaVerbTableNum;
+//<<+6884A2V103_1
 
   Address              = 0;
   FspsUpd              = (FSPS_UPD *) FspsUpdPtr;
@@ -668,6 +674,21 @@ UpdateFspConfig (
 #if !defined(PLATFORM_ADLN)
     FspsConfig->L2QosEnumerationEn = SiCfgData->L2QosEnumerationEn;
 #endif
+//6884A2V102_3+>>
+    DEBUG((DEBUG_INFO,"Update Hda verbtable start\n"));
+    if ((SiCfgData != NULL) && SiCfgData->PchHdaEnable == 1) {
+      HdaVerbTablePtr = (UINT32 *) AllocateZeroPool (4 * sizeof (UINT32));
+      if (HdaVerbTablePtr != NULL) {
+        HdaVerbTableNum = 0;
+        HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &mAzaliaVerbTableDataALC0888;
+        FspsUpd->FspsConfig.PchHdaVerbTablePtr      = (UINT32)(UINTN) HdaVerbTablePtr;
+        FspsUpd->FspsConfig.PchHdaVerbTableEntryNum = HdaVerbTableNum;
+      } else {
+        DEBUG ((DEBUG_ERROR, "UpdateFspConfig Error: Could not allocate Memory for HdaVerbTable\n"));
+      }
+    }
+    DEBUG((DEBUG_INFO,"Update Hda verbtable end\n"));
+//<<+6884A2V102_3
   }
 
   for (Index = 0; Index < 8; Index++) {

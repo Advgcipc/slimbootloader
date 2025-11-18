@@ -26,9 +26,11 @@ class Board(BaseBoard):
         super(Board, self).__init__(*args, **kwargs)
 
         self.VERINFO_IMAGE_ID     = 'SB_RPLP'
-        self.VERINFO_PROJ_MAJOR_VER = 1
+#//6884A2V102_1        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
 #//6884V101_1        self.VERINFO_PROJ_MINOR_VER = 4
-        self.VERINFO_PROJ_MINOR_VER = 1
+#//6884A2V102_1        self.VERINFO_PROJ_MINOR_VER = 1
+        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
+        self.VERINFO_PROJ_MINOR_VER = (int(os.getenv('PROJ_MINOR_VER', '0')))
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -290,6 +292,8 @@ class Board(BaseBoard):
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
 #//6884V101_4        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat', 3:'Vbt_rplp_rki.dat'}
+#//6884A2X002_1+>>
+        self._MULTI_VBT_FILE      = {1:'Vbt_rplp.dat', 2:'Vbt_rplp_crb.dat', 3:'VbtAdlP.bin'}
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE
         self._generated_cfg_file_prefix = 'Autogen_'
