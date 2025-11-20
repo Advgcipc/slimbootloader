@@ -18,6 +18,41 @@
 * Flash ROM   : Winbond W25R256JVEIQ
 
 ### Revision History
+* BIOS Name     : 688400S0080V103.bin
+* BIOS Checksum : B46D
+* BIOS String   : **** SOM-6884 BIOS V1.03 (11/20/2025) ****
+* Release Date  : 2025/11/20
+* Owner         : Lawrence.Guan
+* Requester     : Advantech-SOM
+* Customer      : Advantech-SOM
+
+### Release Description
+
+* No tag:
+    * Add Platform\RaptorlakeBoardPkg\VbtBin\VbtAdlP.bin to resolve build fail.
+
+###  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
+    688400S0080V103.bin  Release mode BIOS
+    FwuImage.bin         Firmware update Image put into USB Root.
+
+### Implement Feature List
+- [x] GPIO setting
+- [x] ClockGen setting
+- [x] BIOSString support
+- [x] SMBIOS support
+- [ ] EC porting
+- [x] Firmware Update function 
+- [ ] Secyrity function
+- [x] ME XML setting
+- [x] USB function
+- [ ] HDA function
+- [x] Display support
+- [ ] PCI Express function
+- [ ] Generic IO decode
+- [x] Debug Features
+
+### Revision History
 * BIOS Name     : 688400S0080V102.bin
 * BIOS Checksum : DECB
 * BIOS String   : **** SOM-6884 BIOS V1.01 (11/18/2025) ****
