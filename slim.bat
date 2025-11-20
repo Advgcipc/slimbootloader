@@ -4,7 +4,7 @@
 @set BUILD_NUMBER=22
 ::self.VERINFO_PROJ_MAJOR_VER;self.VERINFO_PROJ_MINOR_VER;
 @set PROJ_MAJOR_VER=1
-@set PROJ_MINOR_VER=3
+@set PROJ_MINOR_VER=4
 @set BIOS_VERSION=0V%PROJ_MAJOR_VER%0%PROJ_MINOR_VER%
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 ::struct {UINT8 PlatformId : 5;UINT8  Reserved1  : 3;UINT8  DebugUart;UINT8 Reserved3;UINT8 Marker;} STITCH_DATA;
@@ -131,12 +131,10 @@ python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build
 @title Build Firmware Update Image
 @set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
 @set PAYLOAD_FILE1=Platform\%PLATFORM_PACKAGE%\Binaries\StitchTools\Temp1\MeRegionFile.bin
-::No Tag @set PAYLOAD_FILE2=Build\BootloaderCorePkg\RELEASE_VS2022\IA32\CsmeUpdateDriver.efi
-@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
+@IF "%2"==""  @set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
 @IF "%2"=="-r" goto BuildFirmwareUpdateRelease
-::No Tag @set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2022\IA32\CsmeUpdateDriver.efi
-@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
 :BuildFirmwareUpdateRelease
+@set PAYLOAD_FILE2=Build\BootloaderCorePkg\RELEASE_VS2019\IA32\CsmeUpdateDriver.efi
 ::No Tag @set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
 @set FWU_KEY=D:\SBL\sblKeys\FirmwareUpdateTestKey_Priv_RSA3072.pem 
 @set FWU_OUTPUTFILE=Build\FwuImage.bin
