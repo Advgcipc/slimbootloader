@@ -22,6 +22,7 @@
 [Sources]
   FspsUpdUpdateLib.c
   TsnSubRegion.h
+  HdaVerbTable.h   #//6884A2V102_3
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -41,6 +42,7 @@
   WatchDogTimerLib
   TpmLib
   FusaConfigLib
+  MemoryAllocationLib  #//6884A2V102_3
 
 [Pcd]
   gPlatformModuleTokenSpaceGuid.PcdFramebufferInitEnabled

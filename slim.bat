@@ -1,9 +1,11 @@
 @set BIOS_NAME=688400S
-@set BIOS_DEBUG=1
+@set BIOS_DEBUG=0
 @set BIOS_FEATURE=08
 @set BUILD_NUMBER=22
 ::self.VERINFO_PROJ_MAJOR_VER;self.VERINFO_PROJ_MINOR_VER;
-@set BIOS_VERSION=0V101
+@set PROJ_MAJOR_VER=1
+@set PROJ_MINOR_VER=2
+@set BIOS_VERSION=0V%PROJ_MAJOR_VER%0%PROJ_MINOR_VER%
 @set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
 ::struct {UINT8 PlatformId : 5;UINT8  Reserved1  : 3;UINT8  DebugUart;UINT8 Reserved3;UINT8 Marker;} STITCH_DATA;
 :: PlatformId ==> SOM-6884A2:0x1E;SOM-6884:0x1D ;; DebugUart ==> SOC UART0:0; SIO UART0:0xFF;SIO UART1:0xFE      
@@ -17,6 +19,7 @@
 @set SBL_STITCH_BINFILE=Outputs/%PLATFORM_TYPE%/SlimBootloaderStitch.bin
 ::@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/68840000060V201.bin
 @set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/68840000060V201_TS512.bin
+::@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/6884A200060V110_TS512.bin
 
 
 @IF "%1"=="" goto EnvSet
@@ -40,7 +43,7 @@
 @set OPENSSL_PATH=C:\Openssl
 @set PYTHON_HOME=C:\Python36
 @set NASM_PREFIX=C:\Nasm\
-@set SBL_KEY_DIR=%CD%\sblKeys\
+@set SBL_KEY_DIR=%CD%\sblKeys
 @set IASL_PREFIX=C:\ASL\
 @set BASE_TOOLS_PATH=%CD%\BaseTools
 ::change windows page code 
@@ -134,8 +137,7 @@ python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build
 :@set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2022\IA32\CsmeUpdateDriver.efi
 @set PAYLOAD_FILE2=Build\BootloaderCorePkg\DEBUG_VS2019\IA32\CsmeUpdateDriver.efi
 :BuildFirmwareUpdateRelease
-:@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
-@set FWU_KEY=D:\SBL\sblKeys\FirmwareUpdateTestKey_Priv_RSA3072.pem 
+@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
 @set FWU_OUTPUTFILE=Build\FwuImage.bin
 @set PAYLOAD_FILE0=%SBL_STITCH_BINFILE%
 

@@ -109,12 +109,69 @@ GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp[] =
   {GPIO_VER2_LP_GPP_A7,  {GpioPadModeGpio, GpioHostOwnGpio,  GpioDirOut,  GpioOutLow,  GpioIntDefault,  GpioPlatformReset,  GpioTermNone }}, // SRCCLK_OEB7
 };
 
-//6884V101_1+>>
-GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp_SOM_6884[] =
+//6884A2V102_5+>>
+GLOBAL_REMOVE_IF_UNREFERENCED GPIO_INIT_CONFIG mGpioTablePreMemAdlPDdr5Rvp_SOM6884[] =
 {
-  // NC
-  {GPIO_VER2_LP_GPP_A13, {GpioPadModeGpio, GpioHostOwnAcpi, GpioDirOut, GpioOutLow,  GpioIntDefault, GpioPlatformReset, GpioTermNone }}, 
+  {GPIO_VER2_LP_GPP_A14, {GpioPadModeNative2, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DP3_HPD_Q item DisplayDdiPort3 //6884X007_1
+  {GPIO_VER2_LP_GPP_A15, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, // USBOC 23 45
+  {GPIO_VER2_LP_GPP_A16, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, // USBOC 67
+  {GPIO_VER2_LP_GPP_A19, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DP1_HPD_Q item DisplayDdiPort1 //6884X007_1
+  {GPIO_VER2_LP_GPP_A20, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DP2_HPD_Q item DisplayDdiPort2 //6884X007_1
+  {GPIO_VER2_LP_GPP_B11, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //PMCALERT
+  {GPIO_VER2_LP_GPP_B23, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K }}, //SML1ALERT
+  {GPIO_VER2_LP_GPP_C0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SMB_STB_CLK
+  {GPIO_VER2_LP_GPP_C1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SMB_STB_DAT
+  {GPIO_VER2_LP_GPP_C2,  {GpioPadModeGpio,    GpioHostOwnAcpi,    GpioDirInInv,   GpioOutDefault, GpioIntEdge|GpioIntSci, GpioResetDefault, GpioTermDefault, GpioPadConfigUnlock}}, //6884X006_1 //GPI SCI
+  {GPIO_VER2_LP_GPP_C3,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SML0_CLK
+  {GPIO_VER2_LP_GPP_C4,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SML0_DATA
+  {GPIO_VER2_LP_GPP_C5,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SML0ALERT
+  {GPIO_VER2_LP_GPP_C6,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SML1_CLK
+  {GPIO_VER2_LP_GPP_C7,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SML1_DATA
+
+  {GPIO_VER2_LP_GPP_D5,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SRCCLKREQ0
+  {GPIO_VER2_LP_GPP_D6,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SRCCLKREQ1 CLK_PCIE_LAN_C_REQ
+//  {GPIO_VER2_LP_GPP_D8,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //SRCCLKREQ3 SRCCLKREQ0
+  {GPIO_VER2_LP_GPP_D9,  {GpioPadModeNative2, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //DDI3_CTRLCLK
+  {GPIO_VER2_LP_GPP_D10, {GpioPadModeNative2, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDefault, GpioResetDefault, GpioTermDefault}}, //DDI3_CTRLDATA
+  {GPIO_VER2_LP_GPP_D17, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},   // GPI for BIOS default
+  {GPIO_VER2_LP_GPP_D18, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},   // GPI for BIOS 
+
+  {GPIO_VER2_LP_GPP_E1,  {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K }}, //PCH_NMI - EC_NMI
+  {GPIO_VER2_LP_GPP_E3,  {GpioPadModeGpio, GpioHostOwnAcpi,    GpioDirInInv, GpioOutDefault, GpioIntLevel|GpioIntSci,  GpioHostDeepReset,  GpioTermWpu20K, GpioPadConfigUnlock}},  //SPI_TPM_INT_N(CRB) //PIRQA_TPM
+  {GPIO_VER2_LP_GPP_E4,  {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut,    GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K }}, //GPP_A23_Retimer - USB4_RT_ENA
+  {GPIO_VER2_LP_GPP_E5,  {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K }}, //PCH_SMI - EC_SMI
+  {GPIO_VER2_LP_GPP_E7,  {GpioPadModeGpio, GpioHostOwnDefault, GpioDirIn, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermWpu20K }}, //PCH_SCI - EC_SCI
+  {GPIO_VER2_LP_GPP_E9,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //USBOC 01
+  {GPIO_VER2_LP_GPP_E10, {GpioPadModeNative7, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //GSPI0_CS0
+  {GPIO_VER2_LP_GPP_E11, {GpioPadModeNative7, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //GSPI0_CLK_SOC
+  {GPIO_VER2_LP_GPP_E12, {GpioPadModeNative7, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //GSPI0_MISO_SOC
+  {GPIO_VER2_LP_GPP_E13, {GpioPadModeNative7, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //GSPI0_MOSI_SOC
+  {GPIO_VER2_LP_GPP_E14, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //EDP_HPD
+  {GPIO_VER2_LP_GPP_E18, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DDI1_CTRLCLK
+  {GPIO_VER2_LP_GPP_E19, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DDI1_CTRLDATA
+  {GPIO_VER2_LP_GPP_E20, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DDP2_CTRLCLK
+  {GPIO_VER2_LP_GPP_E21, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, //DDI2_CTRLDATA
+//  GPP_F11 - GPP_F16 for LVDS setting
+  {GPIO_VER2_LP_GPP_F11, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+  {GPIO_VER2_LP_GPP_F12, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+  {GPIO_VER2_LP_GPP_F13, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+  {GPIO_VER2_LP_GPP_F14, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+  {GPIO_VER2_LP_GPP_F15, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+  {GPIO_VER2_LP_GPP_F16, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }},
+//  GPP_F17_SYSTEM_OK
+  {GPIO_VER2_LP_GPP_F17, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirDefault, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }}, //SYSTEM_OK
+  {GPIO_VER2_LP_GPP_F18, {GpioPadModeGpio, GpioHostOwnDefault, GpioDirOut, GpioOutLow, GpioIntDis, GpioPlatformReset, GpioTermWpu20K, GpioPadConfigUnlock }}, // TPM_PP
+//  GPP_H6, GPP_H7 (I2C0_SDA, I2C0_SCL) item PchSerialIoI2c
+//  GPP_H10, GPP_H11 (UART0_RXD, UART0TXD) item PchSerialIoUart
+  {GPIO_VER2_LP_GPP_H18, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault, GpioOutDefault, GpioIntDis, GpioPlatformReset, GpioTermNone }}, // PROC_C10_GATE
+//  GPP_R0, GPP_R1, GPP_R2, GPP_R4 (HDA_BCLK, SYNC, SDO, RST ) item PchHdAudioHdaLinkEnable
+//  GPP_R3, GPP_R5 (HDA_SDI0, SDI1)   gPlatformFspPkgTokenSpaceGuid.PchHdaSdiEnable            | * | 0x02 | { 0x01, 0x00}
+// GPIO_VER2_LP_GPD0, GPIO_VER2_LP_GPD1 default Native1 BATLOW, ACPRESENT
+// GPIO_VER2_LP_GPD2 default Native1 LAN_WAKE
+// GPIO_VER2_LP_GPD3, GPIO_VER2_LP_GPD4, GPIO_VER2_LP_GPD5 default Native1 PWRBTN, SLP_S3, SLP_S4
+// GPIO_VER2_LP_GPD10, GPIO_VER2_LP_GPD11 default Native1 SLP_S5, LANPHYPC
 };
-//<<+6884V101_1
+//<<+6884A2V102_5
+
 
 #endif // _ALDER_LAKE_P_DDR5_CRB_PREMEM_GPIO_TABLE_H_

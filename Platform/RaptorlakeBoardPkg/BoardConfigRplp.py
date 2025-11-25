@@ -26,8 +26,11 @@ class Board(BaseBoard):
         super(Board, self).__init__(*args, **kwargs)
 
         self.VERINFO_IMAGE_ID     = 'SB_RPLP'
-        self.VERINFO_PROJ_MAJOR_VER = 1
-        self.VERINFO_PROJ_MINOR_VER = 1
+#//6884A2V102_1        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
+#//6884V101_1        self.VERINFO_PROJ_MINOR_VER = 4
+#//6884A2V102_1        self.VERINFO_PROJ_MINOR_VER = 1
+        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
+        self.VERINFO_PROJ_MINOR_VER = (int(os.getenv('PROJ_MINOR_VER', '0')))
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -248,7 +251,8 @@ class Board(BaseBoard):
         self.NON_VOLATILE_SIZE    = 0x001000
         self.SLIMBOOTLOADER_SIZE  = (self.TOP_SWAP_SIZE + self.REDUNDANT_SIZE) * 2 + \
                                     self.NON_REDUNDANT_SIZE + self.NON_VOLATILE_SIZE
-        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFF) & ~0xFFFFF)
+#//6884V101_7        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFF) & ~0xFFFFF)
+        self.SLIMBOOTLOADER_SIZE  = ((self.SLIMBOOTLOADER_SIZE + 0xFFFFFF) & ~0xFFFFFF)
         self.PLD_HEAP_SIZE        = 0x04000000
         self.PLD_STACK_SIZE       = 0x00020000
         self.PLD_RSVD_MEM_SIZE    = 0x00500000

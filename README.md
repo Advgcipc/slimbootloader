@@ -18,6 +18,41 @@
     Flash ROM   : Winbond W25Q256FV
 
 ### Revision History
+* BIOS Name     : 688400S0080V102.bin
+* BIOS Checksum : D8A6
+* BIOS String   : **** SOM-6884 BIOS V1.02 (11/25/2025) ****
+* Release Date  : 2025/11/25
+* Owner         : Lawrence.Guan
+* Requester     : Advantech-SOM
+* Customer      : Advantech-SOM
+
+### Release Description
+
+* Sync code modification from SOM-6884A2 branch from V101-V104.
+
+###  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
+    688400S0080V104.bin  Release mode BIOS
+    FwuImage.bin         Firmware update Image put into USB Root.
+
+### Implement Feature List
+- [x] GPIO setting
+- [x] ClockGen setting
+- [x] BIOSString support
+- [x] SMBIOS support
+- [ ] EC porting
+- [x] Firmware Update function 
+- [ ] Security function
+- [x] ME XML setting
+- [x] USB function
+- [ ] HDA function
+- [x] Display support
+- [ ] PCI Express function
+- [ ] Generic IO decode
+- [x] Debug Features
+
+
+### Revision History
 * BIOS Name     : 688400S0080V101.bin
 * BIOS Checksum : 259F
 * BIOS String   : **** SOM-6884 BIOS V1.01 (10/21/2025) ****
