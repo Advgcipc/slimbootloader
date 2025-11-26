@@ -568,6 +568,17 @@ GetPlatformPowerState (
 
   return BootMode;
 }
+//6884V105_1+>>
+VOID
+GpioSetGroupDwToGpeDwX (
+  IN GPIO_GROUP                GroupToGpeDw0,
+  IN UINT32                    GroupDwForGpeDw0,
+  IN GPIO_GROUP                GroupToGpeDw1,
+  IN UINT32                    GroupDwForGpeDw1,
+  IN GPIO_GROUP                GroupToGpeDw2,
+  IN UINT32                    GroupDwForGpeDw2
+  );
+//<<+6884V105_1
 
 /**
   Board specific hook points.
@@ -624,6 +635,15 @@ DEBUG_CODE_END();
     PlatformNameInit ();
     SetBootMode (IsFirmwareUpdate() ? BOOT_ON_FLASH_UPDATE : GetPlatformPowerState());
     PlatformFeaturesInit ();
+//6884V105_1+>>
+    if (GetPlatformId () == PLATFORM_ID_ADL_P_DDR5_RVP_SOM_6884 ||
+        GetPlatformId () == PLATFORM_ID_ADL_P_LP5_RVP_SOM_6884A2) 
+    { 
+      DEBUG ((DEBUG_INFO, "GpioSetGroupDwToGpeDwX start\n"));
+      GpioSetGroupDwToGpeDwX (GPIO_VER2_LP_GROUP_GPP_D, 0, GPIO_VER2_LP_GROUP_GPP_E, 0, GPIO_VER2_LP_GROUP_GPP_C, 0);
+      DEBUG ((DEBUG_INFO, "GpioSetGroupDwToGpeDwX end\n"));
+    }
+//<<+6884V105_1
     VariableInitialize ();
     RtcInit ();
     UpdateResetReason ();

@@ -10,8 +10,8 @@ scope (\_SB.PC00.LPCB) {
 
       Include ("LpcDev.asl")
       //Include ("H8S2113Sio.asl")
-      Include ("IteSio.asl")
-
+//6884V105_3      Include ("IteSio.asl")
+      Include ("A9610ECAsl.asl")  //6884V105_3
       If (LEqual(\ECON,1)){
             Include ("EC.ASL")
 
