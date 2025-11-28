@@ -29,8 +29,10 @@ class Board(BaseBoard):
 #//6884A2V102_1        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
 #//6884V101_1        self.VERINFO_PROJ_MINOR_VER = 4
 #//6884A2V102_1        self.VERINFO_PROJ_MINOR_VER = 1
-        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
-        self.VERINFO_PROJ_MINOR_VER = (int(os.getenv('PROJ_MINOR_VER', '0')))
+#//6884V106_2        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJ_MAJOR_VER', '0')))
+#//6884V106_2        self.VERINFO_PROJ_MINOR_VER = (int(os.getenv('PROJ_MINOR_VER', '0')))
+        self.VERINFO_PROJ_MAJOR_VER = 1
+        self.VERINFO_PROJ_MINOR_VER = 6
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
