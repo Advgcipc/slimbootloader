@@ -14,6 +14,7 @@
 #define R_LPC_CFG_IOD                             0x80
 #define N_LPC_CFG_IOD_COMB                        4
 #define V_LPC_CFG_IOD_COMB_2F8                    1
+#define V_LPC_CFG_IOD_COMB_3E8                    7               //6884V106_2
 #define N_LPC_CFG_IOD_COMA                        0
 #define V_LPC_CFG_IOD_COMA_3F8                    0
 #define R_LPC_CFG_IOE                             0x82
@@ -39,5 +40,6 @@
 #define R_PCH_IO_NMI_EN                              0x70
 #define B_PCH_IO_NMI_EN_NMI_EN                       BIT7
 
+#define R_ESPI_CFG_CS1IORE                        0xA0 //6884V106_2
 
 #endif

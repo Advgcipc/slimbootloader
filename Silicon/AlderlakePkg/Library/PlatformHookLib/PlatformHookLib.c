@@ -115,7 +115,8 @@ LegacySerialPortInitialize (
     0);
 
   Data16 = PciRead16 (eSPIBaseAddr + R_LPC_CFG_IOD);
-  Data16 |= (V_LPC_CFG_IOD_COMB_2F8 << N_LPC_CFG_IOD_COMB);
+//6884V106_2  Data16 |= (V_LPC_CFG_IOD_COMB_2F8 << N_LPC_CFG_IOD_COMB);
+  Data16 |= (V_LPC_CFG_IOD_COMB_3E8 << N_LPC_CFG_IOD_COMB);            //6884V106_2
   Data16 |= (V_LPC_CFG_IOD_COMA_3F8 << N_LPC_CFG_IOD_COMA);
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOD), Data16);
   PciWrite16 (eSPIBaseAddr + R_LPC_CFG_IOD, Data16);
@@ -129,6 +130,13 @@ LegacySerialPortInitialize (
 
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOE), Data16);
   PciWrite16 (eSPIBaseAddr + R_LPC_CFG_IOE, Data16);
+
+//6884V106_2+>>
+  Data16 = PciRead16 (eSPIBaseAddr + R_ESPI_CFG_CS1IORE);
+  Data16 |= BIT12;
+  Data16 |= BIT13;
+  PciWrite16 (eSPIBaseAddr + R_ESPI_CFG_CS1IORE, Data16);
+//<<+6884V106_2
 
 //6884V101_2
 {

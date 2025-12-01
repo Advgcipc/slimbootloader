@@ -27,11 +27,33 @@
 - [ ] Security function
 - [x] ME XML setting
 - [x] USB function
-- [ ] HDA function
+- [X] HDA verb table
 - [x] Display support
 - [X] PCI Express function
-- [ ] Generic IO decode
+- [X] Generic IO decode
 - [x] Debug Features
+
+### Revision History
+* BIOS Name     : 688400S0080V106.bin ; FwuImage.bin
+* BIOS Checksum : C7CE ; 9C85
+* BIOS String   : **** SOM-6884 BIOS V1.06 (12/01/2025) ****
+* Release Date  : 2025/12/1
+* Owner         : Lawrence.Guan
+* Requester     : Advantech-SOM
+* Customer      : Advantech-SOM
+
+### Release Description
+
+* 6884V106_1  Support USB OC pin#0, 3 mapping.
+
+* 6884V106_2  Support IT8883.
+
+* No tag: Update "Implement Feature List".
+
+###  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
+    688400S0080V106.bin  Release mode BIOS
+    FwuImage.bin         Firmware update Image put into USB Root.
 
 ### Revision History
 * BIOS Name     : 688400S0080V105.bin ; FwuImage.bin
