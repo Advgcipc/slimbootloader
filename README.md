@@ -17,6 +17,46 @@
 * SuperI/O    : RDC-IS211
 * Flash ROM   : Winbond W25R256JVEIQ
 
+### Implement Feature List
+- [x] GPIO setting
+- [x] ClockGen setting
+- [x] BIOSString support
+- [x] SMBIOS support
+- [X] EC porting
+- [x] Firmware Update function 
+- [ ] Security function
+- [x] ME XML setting
+- [x] USB function
+- [ ] HDA function
+- [x] Display support
+- [X] PCI Express function
+- [ ] Generic IO decode
+- [x] Debug Features
+
+### Revision History
+* BIOS Name     : 688400S0080V105.bin ; FwuImage.bin
+* BIOS Checksum : 43CB ; 17C5
+* BIOS String   : **** SOM-6884 BIOS V1.05 (12/01/2025) ****
+* Release Date  : 2025/12/1
+* Owner         : Lawrence.Guan
+* Requester     : Advantech-SOM
+* Customer      : Advantech-SOM
+
+### Release Description
+
+* 6884V105_1  Program GPE configuration in PMC register.
+    
+* 6884V105_2  Update mRplPDdr5SODimmCrbDisplayDdiConfigSOM6884.
+    
+* 6884V105_3  Add A9610ECAsl.asl to support EC SCI. 
+
+* No tag: Move the "Implement Feature List" section between "Hardware Configuration" and "Revision History".
+
+###  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
+    688400S0080V105.bin  Release mode BIOS
+    FwuImage.bin         Firmware update Image put into USB Root.
+
 ### Revision History
 * BIOS Name     : 688400S0080V104.bin
 * BIOS Checksum : F55E
@@ -36,22 +76,6 @@
     Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
     688400S0080V104.bin  Release mode BIOS
     FwuImage.bin         Firmware update Image put into USB Root.
-
-### Implement Feature List
-- [x] GPIO setting
-- [x] ClockGen setting
-- [x] BIOSString support
-- [x] SMBIOS support
-- [ ] EC porting
-- [x] Firmware Update function 
-- [ ] Secyrity function
-- [x] ME XML setting
-- [x] USB function
-- [ ] HDA function
-- [x] Display support
-- [ ] PCI Express function
-- [ ] Generic IO decode
-- [x] Debug Features
 
 ### Revision History
 * BIOS Name     : 688400S0080V103.bin
