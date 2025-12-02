@@ -1,162 +1,235 @@
-@set BIOS_NAME=758300
-@set BIOS_DEBUG=1
-@set BIOS_FEATURE=S06
-@set BIOS_VERSION=0V111
-@set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
+::
+::  Platform Setting
+::
+@set PROJECT_NAME=7583
+@set PROJECT_EXTNAME=00
+@set PROJECT_PD=S
+
+@set PROJECT_CHIPSET_TYPE=0
+@set PROJECT_FW_TYPE=1
+@set PROJECT_BUILD_TYPE=8
+
+@set PROJECT_TYPE_VER=0V
+@set PROJECT_MAJOR_VER=1
+@set PROJECT_MINOR_VER=12
+
+@set BIOS_NAME=%PROJECT_NAME%%PROJECT_EXTNAME%%PROJECT_PD%
+@set BIOS_FEATURE=%PROJECT_CHIPSET_TYPE%%PROJECT_FW_TYPE%%PROJECT_BUILD_TYPE%
+@set BIOS_VERSION=%PROJECT_TYPE_VER%%PROJECT_MAJOR_VER%%PROJECT_MINOR_VER%
+
+@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
+
+@set INPUT_BIOS_BINFILE=Platform/%PLATFORM_PACKAGE%/Binaries/BiosBin/7583007U060X202.BIN
+@set STITCH_BIOS_IMAGE=Outputs/%PLATFORM_TYPE%/%BIOS_IMAGE%
+::struct {UINT8 PlatformId : 5;UINT8  Reserved1  : 3;UINT8  DebugUart;UINT8 Reserved3;UINT8 Marker;} STITCH_DATA;
+:: PlatformId ==> SOM-7583:0x10 :: DebugUart ==> SOC UART0:0; SIO UART0:0xFF; *SIO UART1:0xFE      
 @set PLATFORM_ID_DEBUGUART=AA00FE10
-::@set PLATFORM_ID_DEBUGUART=AA000210
+@set PLATFORM_TYPE=tgl
+@set PLATFORM_PACKAGE=TigerlakeBoardPkg
+@set PLATFORM_BUILDMODE=IA32
+@set PLATFORM_OPTION=-p
+::  wait for SBL64 for CsmeUpdateDriver
+::@set PLATFORM_OPTION=%PLATFORM_OPTION% -a x64
+
+@set STITCHIFWI_TEMP=
+@set TARGE=DEBUG
+@IF "%2"=="-r" (
+@set TARGE=RELEASE
+@set PROJECT_FW_TYPE=0
+@set PLATFORM_OPTION= -r %PLATFORM_OPTION%
+@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_RELEASE.fd:UEFI:Lzma"
+@set STITCHIFWI_TEMP=-r
+)
+
+@set BUILD_PY_FILE=BuildLoader.py
+@set STITCH_PY_FILE=Platform/%PLATFORM_PACKAGE%/Script/StitchLoader.py
+@set STITCH_PY_FILE1=Platform/%PLATFORM_PACKAGE%/Script/StitchLoader1.py
+@set SBL_SOURCE_BINFILE=Outputs/%PLATFORM_TYPE%/SlimBootloader.bin
+@set SBL_STITCH_BINFILE=Outputs/%PLATFORM_TYPE%/SlimBootloaderStitch.bin
+
+@set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
+@set FWU_BIOS_FILE=%SBL_STITCH_BINFILE%
+@set FWU_CSME_FILE=Platform\%PLATFORM_PACKAGE%\Binaries\StitchTools\Input\MeRegionFile.bin
+::@set FWU_CSMD_FILE=Build\BootloaderCorePkg\%TARGE%_%TOOL_CHAIN%\%PLATFORM_BUILDMODE%\CsmeUpdateDriver.efi
+@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
+
+@set STITCHIFWI_PY_FILE=Platform/%PLATFORM_PACKAGE%/Script/StitchIfwi.py
+@set SOURCE_BIN_FILE=Outputs/%PLATFORM_TYPE%/Stitch_Components.zip
+@set CONFIG_PY_FILE=Platform/%PLATFORM_PACKAGE%/Binaries/StitchTools/Script/StitchIfwiConfig_SOM7583.py
+@set WORK_PATH=Platform/%PLATFORM_PACKAGE%/Binaries/StitchTools
+@set STITCHIFWI_OUTPUTPATH=Outputs/%PLATFORM_TYPE%
+:: Boot guard profile: legacy,vm,fve,fvme
+@set STITCHIFWI_BOOTGUARD_TYPE=legacy
+@set STITCHIFWI_TYPE=tglu_b0
+
+@set BIOS_FEATURE=%PROJECT_CHIPSET_TYPE%%PROJECT_FW_TYPE%%PROJECT_BUILD_TYPE%
+@set BIOS_IMAGE=%BIOS_NAME%%BIOS_FEATURE%%BIOS_VERSION%.bin
+@set STITCH_BIOS_IMAGE=Outputs/%PLATFORM_TYPE%/%BIOS_IMAGE%
+@set STITCHIFWI_BIOS_IMAGE=%BIOS_NAME%%BIOS_FEATURE%%BIOS_VERSION%_IfwiImage.bin
+@set FWU_BIOS_IMAGE=Outputs/%PLATFORM_TYPE%/%BIOS_NAME%%BIOS_FEATURE%%BIOS_VERSION%_FwuImage.bin
+
 
 @IF "%1"=="" goto EnvSet
 @IF "%1"=="-a" goto BuildStitchSlim
 @IF "%1"=="-b" goto BuildSlim
-@IF "%1"=="-g" goto BuildSource
 @IF "%1"=="-s" goto BuildStitch
 @IF "%1"=="-ss" goto BuildStitchBootGuard
 @IF "%1"=="-fwu" goto BuildFirmwareUpdate
+@IF "%1"=="-f" goto BuildFirmwareUpdate
 @IF "%1"=="-c" goto BuildClean
-@IF "%1"=="-k" goto BuildKey
 @IF "%1"=="-?" goto HelpMsg
 @IF "%1"=="-h" goto HelpMsg
 @goto Exit
 
+
+::
+::  Platform Build all
+::
+
+:BuildStitchSlim
+@goto BuildSlim
+:BuildSlimend
+@goto BuildStitch
+:BuildStitchEnd
+@goto BuildFirmwareUpdate
+:BuildFirmwareUpdateEnd
+@goto BuildStitchBootGuard
+:BuildStitchBootGuardEnd
+@goto Exit
+
+
+::
+::  Build Slim BootLoader
+::
+:BuildSlim
+@title %BIOS_IMAGE% - Build Slim BootLoader
+
+python %BUILD_PY_FILE% build %PLATFORM_TYPE% %PLATFORM_OPTION% %PAYLOAD_BINFILE%
+
+@IF "%1"=="-a" goto BuildSlimend
+@goto Exit
+
+
+::
+::  Build Slim BootLoader
+::
+:BuildStitch
+@title %STITCH_BIOS_IMAGE% - Stitch Slim BootLoader
+
+python %STITCH_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o %STITCH_BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
+
+@IF "%1"=="-a" goto BuildStitchEnd
+@goto Exit
+
+
+::
+::  Build Slim BootLoader
+::
+:BuildStitchBootGuard
+@title %STITCHIFWI_BIOS_IMAGE% - Stitch BootGuard Slim BootLoader
+
+python %STITCHIFWI_PY_FILE% -b %STITCHIFWI_BOOTGUARD_TYPE% -w %WORK_PATH% -c %CONFIG_PY_FILE% -s %SOURCE_BIN_FILE% -p %STITCHIFWI_TYPE% -d %PLATFORM_ID_DEBUGUART% -op %STITCHIFWI_OUTPUTPATH% -of %STITCHIFWI_BIOS_IMAGE% %STITCHIFWI_TEMP%
+
+@IF "%1"=="-a" goto BuildStitchBootGuardEnd
+@goto Exit
+
+
+::
+::  Build Slim BootLoader
+::
+:BuildFirmwareUpdate
+@title Build Slim BootLoader FWU Image - %FWU_BIOS_IMAGE%
+
+python %STITCH_PY_FILE1% -s %SBL_SOURCE_BINFILE% -o %SBL_STITCH_BINFILE%  -p %PLATFORM_ID_DEBUGUART%
+::python %BASE_PY_FILE% -p BIOS %FWU_BIOS_FILE% -p CSME %FWU_CSME_FILE% -p CSMD %FWU_CSMD_FILE% -k %FWU_KEY% -o %FWU_BIOS_IMAGE% -v
+
+@IF exist %FWU_CSMD_FILE% (
+python %BASE_PY_FILE% -p BIOS %FWU_BIOS_FILE% -p CSME %FWU_CSME_FILE% -p CSMD %FWU_CSMD_FILE% -k %FWU_KEY% -o %FWU_BIOS_IMAGE% -v
+) else if exist %FWU_CSME_FILE% (
+python %BASE_PY_FILE% -p BIOS %FWU_BIOS_FILE% -p CSME %FWU_CSME_FILE% -k %FWU_KEY% -o %FWU_BIOS_IMAGE% -v
+) else (
+python %BASE_PY_FILE% -p BIOS %FWU_BIOS_FILE% -k %FWU_KEY% -o %FWU_BIOS_IMAGE% -v
+)
+
+@IF "%1"=="-a" goto BuildFirmwareUpdateEnd
+@goto Exit
+
+::
+::  Clean Slim BootLoader
+::
+:BuildClean
+python BuildLoader.py clean
+@goto Exit
+
+::
+::  Setup Platform environment
+::
 :EnvSet
 @title Slim Boot Loader Setting environment
-@IF "OPENSSL_PATH"=="" goto HelpMsg
-
 @set PATH=C:\envs;%ProgramFiles%\Dediprog\SF100;C:\Program Files\Git\cmd;%PATH%
 @set OPENSSL_PATH=C:\Openssl
 @set PYTHON_HOME=C:\Python36
+@set PYTHONIOENCODING=utf8
 @set NASM_PREFIX=C:\Nasm\
-@set SBL_KEY_DIR=%CD%\..\sblKeys\
+@set SBL_KEY_DIR=%CD%\Platform\%PLATFORM_PACKAGE%\Binaries\sblKeys
 @set IASL_PREFIX=C:\ASL\
 @set WORKSPACE=%CD%
 @set PACKAGES_PATH=%CD%
 @set EDK_TOOLS_PATH=%CD%\BaseTools
 @set BASE_TOOLS_PATH=%CD%\BaseTools
 
-
+@IF exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat" (
+@call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
+) else if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat" (
+@call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
+) else if exist "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat" (
+@call "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+) else if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat" (
+@call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat"
+) else if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars32.bat" (
+@set VSCMD_DEBUG=1
 @call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+) else (
+@echo Visual Studio Community 2022, 2019, 2017
+@goto Exit
+)
+:: SBL only support VS2019 @IF %VisualStudioVersion% == 17.0 (@set TOOL_CHAIN=VS2022)
+@IF %VisualStudioVersion% == 17.0 (@set TOOL_CHAIN=VS2019)
+@IF %VisualStudioVersion% == 16.0 (@set TOOL_CHAIN=VS2019)
+@IF %VisualStudioVersion% == 15.0 (@set TOOL_CHAIN=VS2017)
+@IF %VisualStudioVersion% == 14.0 (@set TOOL_CHAIN=VS2015)  
+
+@chcp 65001
   
 @goto Exit
 
-:BuildKey
-python BootloaderCorePkg\Tools\GenerateKeys.py -k ..\sblKeys
-@goto Exit
-
-:BuildSource
-::echo git clone --recurse-submodules https://github.com/Advgcipc/slimbootloader.git
-git clone --recurse-submodules https://github.com/Advgcipc/slimbootloader.git
-@goto Exit
-
-:BuildStitchSlim
-@goto BuildSlim
-:BuildSlimend
-@goto BuildStitch
-
-
-:BuildSlim
-@IF "%2"=="-r" set BIOS_DEBUG=0
-@set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-@IF "%2"=="-r" goto BuildSlimR
-python BuildLoader.py build tgl -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
-@goto BuildEnd
-
-:BuildSlimR
-@IF "%2"=="-r" set BIOS_DEBUG=0
-@set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-python BuildLoader.py build tgl -r -p "OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_RELEASE.fd:UEFI:Lzma"
-@goto BuildEnd
-
-
-:BuildEnd
-@IF "%1"=="-a" goto BuildSlimend
-@goto Exit
-
-:BuildStitch
-@IF "%2"=="-r" goto BuildStitchR
-@title Stitch Boot Loader - Build %BIOS_IMAGE%
-
-@set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchLoader.py
-@set SBL_SOURCE_BINFILE=Outputs/tgl/SlimBootloader.bin
-@set INPUT_BIOS_BINFILE=Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN
-
-python %BASE_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
-@goto StitchEnd
-
-:BuildStitchR
-@IF "%2"=="-r" set BIOS_DEBUG=0
-@set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-@title Stitch Boot Loader - Build %BIOS_IMAGE%
-
-@set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchLoader.py
-@set SBL_SOURCE_BINFILE=Outputs/tgl/SlimBootloader.bin
-@set INPUT_BIOS_BINFILE=Platform/TigerlakeBoardPkg/Binaries/BiosBin/7583000U060V110.BIN
-
-python %BASE_PY_FILE% -i %INPUT_BIOS_BINFILE% -s %SBL_SOURCE_BINFILE% -o Build/%BIOS_IMAGE% -p %PLATFORM_ID_DEBUGUART%
-@goto StitchEnd
-
-
-:BuildStitchBootGuard
-@set BASE_PY_FILE=Platform/TigerlakeBoardPkg/Script/StitchIfwi.py
-@set SOURCE_BIN_FILE=Outputs/tgl/Stitch_Components.zip
-@set CONFIG_PY_FILE=Platform/TigerlakeBoardPkg/Binaries/StitchTools/Script/StitchIfwiConfig_SOM7583.py
-@set WORK_PATH=Platform/TigerlakeBoardPkg/Binaries/StitchTools
-
-@set BIOS_FEATURE=S16
-@IF "%2"=="-r" set BIOS_DEBUG=0
-@set BIOS_IMAGE=%BIOS_NAME%%BIOS_DEBUG%%BIOS_FEATURE%%BIOS_VERSION%.bin
-
-@title Stitch Boot Loader - Build %BIOS_IMAGE%
-python %BASE_PY_FILE% -b vm -w %WORK_PATH% -c %CONFIG_PY_FILE% -s %SOURCE_BIN_FILE% -p tglu_b0 -d %PLATFORM_ID_DEBUGUART% -op Build -of %BIOS_IMAGE%
-@goto StitchEnd
-
-:StitchEnd
-@goto Exit
-
-
-:BuildFirmwareUpdate
-
-@title Build Firmware Update Image
-
-@set BASE_PY_FILE=BootloaderCorePkg\Tools\GenCapsuleFirmware.py
-@set PAYLOAD_FILE0=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\BiosRegion.bin
-@set PAYLOAD_FILE1=Platform\TigerlakeBoardPkg\Binaries\StitchTools\Temp\MeRegionFile.bin
-@set PAYLOAD_FILE2=Platform\TigerlakeBoardPkg\Binaries\Sbl32\CsmeUpdateDriver.efi
-@set FWU_KEY=%SBL_KEY_DIR%\FirmwareUpdateTestKey_Priv_RSA3072.pem 
-@set FWU_OUTPUTFILE=Build\FwuImage.bin
-
-python %BASE_PY_FILE% -p BIOS %PAYLOAD_FILE0% -p CSME %PAYLOAD_FILE1% -p CSMD %PAYLOAD_FILE2% -k %FWU_KEY% -o %FWU_OUTPUTFILE% -v
-@goto Exit
-
-:BuildClean
-python BuildLoader.py clean
-@goto Exit
-
+::
+::  Display Help information
+::
 :HelpMsg
-@echo "Slim Boot Loader Setup & Build Environment
-@echo "      -g      Get Slim Boot Loader Source
-@echo "      -c      Clean Slim Boot Loader
-@echo "      -a      Build & Stitch Slim Boot Loader 
-@echo "      -b      Build Slim Boot Loader 
-@echo "      -s      Stitch Slim Boot Loader
-@echo "      -ss     Stitch BootGuard
-@echo "      -fwu    Build FirmwareUpdate Image
-@echo "      -k      Create SBL Keys
-@echo "      -r      Build Release Mode Slim Boot Loader
-@echo "      -h      Show Help message  
-@echo "      -?      Show Help message  
-@echo " Recommand before rebuild Slim Boot Loader clean it first..
-@echo " Example: Slim -c
-@echo " Build & Stitch Slim Boot Loader 
-@echo " Example: Slim -a 
-@echo " Build & Stitch Slim Boot Loader release mode
-@echo " Example: Slim -a -r
-@echo " Stitch Slim Boot Loader with BootGuard feature
-@echo " Example: Slim -ss
-@echo " Build Firmware Update Image into Build\FwuImage.bin
-@echo " Example: Slim -fwu
+@echo Slim Boot Loader Setup & Build Environment
+@echo       -c      Clean Slim Boot Loader
+@echo       -a      Build & Stitch Slim Boot Loader 
+@echo       -b      Build Slim Boot Loader 
+@echo       -s      Stitch Slim Boot Loader
+@echo       -ss     Stitch BootGuard
+@echo       -fwu    Build FirmwareUpdate Image
+@echo       -f      Build FirmwareUpdate Image
+@echo       -k      Create SBL Keys
+@echo       -r      Build Release Mode Slim Boot Loader
+@echo       -h      Show Help message  
+@echo       -?      Show Help message  
+@echo  Recommand before rebuild Slim Boot Loader clean it first..
+@echo  Example: Slim -c
+@echo  Build & Stitch Slim Boot Loader 
+@echo  Example: Slim -a 
+@echo  Build & Stitch Slim Boot Loader release mode
+@echo  Example: Slim -a -r
+@echo  Stitch Slim Boot Loader with BootGuard feature
+@echo  Example: Slim -ss
+@echo  Build Firmware Update Image into FwuImage.bin
+@echo  Example: Slim -fwu
 
 @goto Exit
 
 :Exit
-@title Slim Boot Loader Setting environment

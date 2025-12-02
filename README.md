@@ -11,6 +11,27 @@
     SuperI/O    : RDC-IS211
     Flash ROM   : Winbond W25R256JVEIQ
 
+
+#  Revision History
+    BIOS Name     : 758300S0080V112.bin;758300S0180V112.bin
+    BIOS Checksum : 3216;1BB9
+    BIOS String   : **** SOM-7583 BIOS V1.12 (12/02/2025) ****
+    Release Date  : 2025/12/02
+    Owner         : Mike.Fan
+    Requester     : Mike.Fan
+    Customer      : Advantech-SOM
+
+#  Release Description
+    7583V112_1      Update default build CSME driver and multi VBT file.
+    7583V112_2      Update build batch file error.
+
+#  Hardware Configuration
+    CPU         : TigerLake-UP3
+    Chipset     : TigerLake-UP3
+    ClockGEN    : ICC
+    SuperI/O    : RDC-IS211
+    Flash ROM   : Winbond W25R256JVEIQ
+
 #  Revision History
     BIOS Name     : 7583000S060V111.bin;7583000S160V111.bin
     BIOS Checksum : C655;DE74

@@ -30,7 +30,8 @@ class Board(BaseBoard):
 #//7583V109        self.VERINFO_PROJ_MINOR_VER = 8
 #//7583V110        self.VERINFO_PROJ_MINOR_VER = 9
 #//7583V111        self.VERINFO_PROJ_MINOR_VER = 10
-        self.VERINFO_PROJ_MINOR_VER = 11
+#//7583V112_1        self.VERINFO_PROJ_MINOR_VER = 11
+        self.VERINFO_PROJ_MINOR_VER = 12
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -141,9 +142,9 @@ class Board(BaseBoard):
         self.ENABLE_CSME_UPDATE   = 1
 
         # CSME update library is required to enable this option and will be available as part of CSME kit
-        self.BUILD_CSME_UPDATE_DRIVER   = 0
+#//7583V112_1        self.BUILD_CSME_UPDATE_DRIVER   = 0
 #//7583V109        self.BUILD_CSME_UPDATE_DRIVER   = 1
-
+        self.BUILD_CSME_UPDATE_DRIVER   = 1
         self.STAGE1B_XIP          = 1
 
         self.STAGE2_FD_BASE       = 0x01000000
@@ -236,7 +237,7 @@ class Board(BaseBoard):
         # Cfg data dlt files for internal boards could also put into external cfg data if want to update cfg data for these platforms
         # for test purpose. Based on the platform id, relevant data is populated for each platform.
         self._CFGDATA_INT_FILE = []
-# SOM7583        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgData_Int_Tglu_Ddr4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglu_DdrLp4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglh_Ddr4.dlt', self._generated_cfg_file_prefix + 'CfgDataExt_Upx11.dlt']
+#//7583X001        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgData_Int_Tglu_Ddr4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglu_DdrLp4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglh_Ddr4.dlt', self._generated_cfg_file_prefix + 'CfgDataExt_Upx11.dlt']
         self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgData_Int_Tglu_Ddr4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglu_DdrLp4.dlt', self._generated_cfg_file_prefix  + 'CfgData_Int_Tglh_Ddr4.dlt', self._generated_cfg_file_prefix + 'CfgDataExt_Upx11.dlt', self._generated_cfg_file_prefix + 'CfgData_Int_Tglu_SOM7583.dlt']
 
         # If mulitple VBT table support is required, list them as:
@@ -246,6 +247,9 @@ class Board(BaseBoard):
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
         #self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt2.dat'}
+#//7583V112_1
+        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt250.dat',3:'Vbtsbl3.dat'}
+
 
     def PlatformBuildHook (self, build, phase):
         if phase == 'pre-build:before':

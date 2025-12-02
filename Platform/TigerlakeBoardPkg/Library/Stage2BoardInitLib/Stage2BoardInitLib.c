@@ -857,6 +857,7 @@ InitializeSmbiosInfo (
   // SMBIOS_TYPE_BASEBOARD_INFORMATION
   //
    switch (GetPlatformId ()) {
+//7583X001
      case BoardIdTglUSOM7583:
 //7583V106_1       AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
 //7583V106_1         1, "Advantech Corp.");
@@ -1079,6 +1080,7 @@ TglULpDdr4GopVbtSpecificUpdate(
   ChildStructPtr[2]->AUX_Channel  = AUX_CHANNEL_B;
   ChildStructPtr[2]->DDCBus       = 0x2;
 }
+//7583X001
 //
 // GOP VBT update for TGL U DDR4
 //
@@ -1121,6 +1123,7 @@ IgdOpRegionPlatformInit (
     case BoardIdTglULp4Type4:
       IgdPlatformInfo.callback = (GOP_VBT_UPDATE_CALLBACK)(UINTN)&TglULpDdr4GopVbtSpecificUpdate;
       break;
+//7583X001
     case BoardIdTglUSOM7583:
       IgdPlatformInfo.callback = (GOP_VBT_UPDATE_CALLBACK)(UINTN)&SOM7583GopVbtSpecificUpdate;
       break;
@@ -1187,6 +1190,7 @@ BoardInit (
             ConfigureGpio (CDATA_NO_TAG, sizeof (mTglHTsnDeviceGpioTable) / sizeof (mTglHTsnDeviceGpioTable[0]), (UINT8*)mTglHTsnDeviceGpioTable);
             break;
           default:
+//7583X001
           case BoardIdTglUSOM7583:
             break;
           case BoardIdTglUDdr4:
@@ -1635,7 +1639,7 @@ UpdateFspConfig (
 
   // Update serial io
   SerialIoPostMemConfig (FspsConfig);
-// SOM7583 >>
+//7583X001 >>
     FspsConfig->SerialIoUartMode[0] = 0;  // Force UART to PCI mode to enable OS to have full control
     FspsConfig->SerialIoUartMode[1] = 0;  // Force UART to PCI mode to enable OS to have full control
 //7583X004_1
@@ -1643,7 +1647,7 @@ UpdateFspConfig (
     FspsConfig->SerialIoUartMode[2] = 1;  //7583X004_1 Force UART to PCI mode to enable OS to have full control
   else 
     FspsConfig->SerialIoUartMode[2] = 0;  //7583X003_1 Force UART to PCI mode to enable OS to have full control
-// SOM7583 >>
+//7583X001 >>
   //
   // Update device interrupt table
   //
@@ -1755,7 +1759,7 @@ UpdateFspConfig (
   // Enable IEH
   FspsConfig->IehMode = 0x1;
 
-// SOM7583 >>  FspsConfig->SerialIoSpiMode[1] = 0x1;
+//7583X001 >>  FspsConfig->SerialIoSpiMode[1] = 0x1;
   FspsConfig->SerialIoSpiMode[1] = 0;
   for (Index = 0; Index < GetPchMaxSerialIoSpiControllersNum (); Index++) {
     for (CsIndex = 0; CsIndex < PCH_MAX_SERIALIO_SPI_CHIP_SELECTS; CsIndex++) {
@@ -3056,7 +3060,7 @@ PlatformUpdateAcpiGnvs (
   PlatformNvs->EnableDigitalThermalSensor   = 0;
   PlatformNvs->Rtd3Support                  = 1;
   PlatformNvs->TenSecondPowerButtonEnable   = 0x9;
-// SOM7583 >>  PlatformNvs->HidEventFilterEnable         = 0x01;
+//7583X001  PlatformNvs->HidEventFilterEnable         = 0x01;
   PlatformNvs->HidEventFilterEnable         = 0x0;
   PlatformNvs->LowPowerS0Idle               = S0IX_STATUS();
 

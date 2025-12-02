@@ -1,0 +1,20 @@
+## @file
+#   A simple, basic, application showing how the Hello application could be
+#   built using the "Standard C Libraries" from StdLib.
+#
+#  Copyright (c) 2010 - 2014, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#  gDefaultdbxFileGuid                = { 0x5740766a, 0x718e, 0x4dc0, { 0x99, 0x35, 0xc3, 0x6f, 0x7d, 0x3f, 0x88, 0x4f } }
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = DBX
+  FILE_GUID                      = 5740766a-718e-4dc0-9935-c36f7d3f884f
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+[Binaries]
+  BIN|MicCorKEKCA2011_2011-06-24.crt|*
+  BIN|MicCorThiParMarRoo_2010-10-05.crt|*
+
+

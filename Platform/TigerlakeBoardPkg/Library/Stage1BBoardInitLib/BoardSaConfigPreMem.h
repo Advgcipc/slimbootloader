@@ -31,6 +31,7 @@ typedef enum {
 //
 // Display DDI settings for TGL-U DDR4
 //
+//7583X001
 GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mSOM7583DisplayDdiConfig[16] = {
                                                                                DdiPortEdp,      // DDI Port A Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
                                                                                DdiPortDisabled, // DDI Port B Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI

@@ -25,7 +25,7 @@ static GPIO_INIT_CONFIG mGpioTablePreMemTglUDdr4[] =
 
 
 
-
+//7583X001
 static GPIO_INIT_CONFIG mGpioTablePreMemSOM7583[] =
 {
     {GPIO_VER2_LP_GPD2,    {GpioPadModeGpio, GpioHostOwnAcpi, GpioDirInInv,  GpioOutDefault,GpioIntLevel|GpioIntSci,GpioHostDeepReset,  GpioTermNone, GpioPadConfigUnlock}},  //LAN_WAKE#

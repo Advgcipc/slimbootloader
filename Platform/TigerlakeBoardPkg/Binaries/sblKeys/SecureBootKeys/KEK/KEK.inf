@@ -1,0 +1,21 @@
+## @file
+#   A simple, basic, application showing how the Hello application could be
+#   built using the "Standard C Libraries" from StdLib.
+#
+#  Copyright (c) 2010 - 2014, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#  gDefaultKEKFileGuid                = { 0x6f64916e, 0x9f7a, 0x4c35, { 0xb9, 0x52, 0xcd, 0x04, 0x1e, 0xfb, 0x05, 0xa3 } }
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = KEK
+  FILE_GUID                      = 6f64916e-9f7a-4c35-b952-cd041efb05a3
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+[Binaries]
+  BIN|Advantech_KEK.cer|*
+  BIN|KEK_MSFTproductionKekCA.cer|*
+  BIN|KEK_MSFTproductionKekCA.2023.cer|*
+
+

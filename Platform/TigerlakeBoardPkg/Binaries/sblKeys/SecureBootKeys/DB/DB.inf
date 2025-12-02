@@ -1,0 +1,24 @@
+## @file
+#   A simple, basic, application showing how the Hello application could be
+#   built using the "Standard C Libraries" from StdLib.
+#
+#  Copyright (c) 2010 - 2014, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#  gDefaultdbFileGuid                 = { 0xc491d352, 0x7623, 0x4843, { 0xac, 0xcc, 0x27, 0x91, 0xa7, 0x57, 0x44, 0x21 } }
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = DB
+  FILE_GUID                      = c491d352-7623-4843-accc-2791a7574421
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+[Binaries]
+  BIN|db_microsoft_option_rom_uefi_ca_2023.cer|*
+  BIN|db_microsoft_uefi_ca_2023.cer|*
+  BIN|db_windows_uefi_ca_2023.cer|*
+  BIN|db_MSFTpreReleaseCandidateWindowsSigningCA.cer|*
+  BIN|db_MSFTproductionWindowsSigningCA2011.cer|*
+  BIN|db_microsoft_uefi_ca_2023.cer|*
+
+

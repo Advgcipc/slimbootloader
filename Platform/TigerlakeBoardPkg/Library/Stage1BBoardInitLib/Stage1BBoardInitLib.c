@@ -448,6 +448,7 @@ UpdateFspConfig (
   case BoardIdTglULp4Type4:
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mTglULpDdr4RowDisplayDdiConfig, sizeof(mTglULpDdr4RowDisplayDdiConfig));
     break;
+//7583X001
   case BoardIdTglUSOM7583:
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mSOM7583DisplayDdiConfig, sizeof(mSOM7583DisplayDdiConfig));
     break;
@@ -901,6 +902,7 @@ DEBUG_CODE_END();
       case 0xF:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemTglHDdr4) / sizeof (mGpioTablePreMemTglHDdr4[0]), (UINT8*)mGpioTablePreMemTglHDdr4);
         break;
+//7583X001
       case BoardIdTglUSOM7583:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemSOM7583) / sizeof (mGpioTablePreMemSOM7583[0]), (UINT8*)mGpioTablePreMemSOM7583);
         break;

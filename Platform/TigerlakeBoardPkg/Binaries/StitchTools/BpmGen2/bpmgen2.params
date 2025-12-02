@@ -54,10 +54,10 @@ TxtInclude:	FALSE
 MinSvn:	0x0
 TxtFlags:	0x0
 // [4:0] = TXT execution profile
-//     00000b ??Use Default based on HW
+//     00000b - Use Default based on HW
 //     00001b - Server Profile
 //     00010b - Client Profile
-// [6:5] = ?œMemory scrubbing??policy
+// [6:5] = Memory scrubbing policy
 //     00b - Trust Verified BIOS
 //     01b - Trust Any BIOS
 //     10b - Trust No BIOS

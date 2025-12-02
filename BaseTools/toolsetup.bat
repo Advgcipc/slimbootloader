@@ -451,7 +451,10 @@ goto end
   pushd .
   cd %BASE_TOOLS_PATH%
   call nmake cleanall
-  del /f /q %BASE_TOOLS_PATH%\Bin\Win32\*.*
+:://7583V112_2  del /f /q %BASE_TOOLS_PATH%\Bin\Win32\*.*
+  if exist %EDK_TOOLS_PATH%\Bin\Win32 (
+    del /f /q %BASE_TOOLS_PATH%\Bin\Win32\*.*
+  )
   popd
   @REM Let CleanAndBuild fall through to IncrementalBuild
 
