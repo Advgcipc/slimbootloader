@@ -34,6 +34,24 @@
 - [x] Debug Features
 
 ### Revision History
+* BIOS Name     : 688400S0080V107.bin ; FwuImage.bin
+* BIOS Checksum : C8E4 ; 9C9F
+* BIOS String   : **** SOM-6884 BIOS V1.07 (12/16/2025) ****
+* Release Date  : 2025/12/16
+* Owner         : Lawrence.Guan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V107_1  Update PcieClkSrcUsage for SOM-6884A2.
+
+###  Release BIOS Information
+    Source Path https://github.com/Advgcipc/slimbootloader.git (Branch:SOM-6884A2)
+    688400S0080V107.bin  Release mode BIOS
+    FwuImage.bin         Firmware update Image put into USB Root.
+
+### Revision History
 * BIOS Name     : 688400S0080V106.bin ; FwuImage.bin
 * BIOS Checksum : C7CE ; 9C85
 * BIOS String   : **** SOM-6884 BIOS V1.06 (12/01/2025) ****
