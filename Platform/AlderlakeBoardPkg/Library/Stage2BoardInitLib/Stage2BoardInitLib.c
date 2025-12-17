@@ -768,7 +768,7 @@ BoardInit (
       } else {
         //Init SIO if EC is not available and S0ix is disabled.
         DEBUG ((DEBUG_INFO, "SioInit\n"));
-        SioInit();
+//6884V108_3        SioInit();
       }
     }
 

@@ -107,6 +107,8 @@ LegacySerialPortInitialize (
 {
   UINTN   eSPIBaseAddr;
   UINT16  Data16;
+//6884V108_3
+  UINT32  Data32 = 0;
 
   eSPIBaseAddr = PCI_LIB_ADDRESS (
     DEFAULT_PCI_BUS_NUMBER_PCH,
@@ -139,12 +141,18 @@ LegacySerialPortInitialize (
 //<<+6884V106_2
 
 //6884V101_2
-{
-  UINT32            Data32 = 0x00FC0201;;
+//6884V108_3{
+//6884V108_3  UINT32            Data32 = 0x00FC0201;
 
+//6884V108_3 - Enable IO port 0x80~0x8F to ESPI CS2
+//  Data32 = 0x000C0081;
+//  PciWrite32 (eSPIBaseAddr + R_ESPI_CFG_ESPI_LGIR1 + 0x20, Data32);
+//  MmioWrite32 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCLGIR1), Data32);
+
+  Data32 = 0x00FC0201;
   MmioWrite32 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCLGIR3), Data32);
   PciWrite32 (eSPIBaseAddr + R_ESPI_CFG_ESPI_LGIR1 + 8, Data32);
-}
+//6884V108_3}
 
   return RETURN_SUCCESS;
 }

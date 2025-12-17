@@ -34,6 +34,30 @@
 - [x] Debug Features
 
 ### Revision History
+* BIOS Name     : 688400S0080V108.bin ; 688400S0180V108.bin
+* BIOS Checksum : BC5E ; A0F5
+* BIOS String   : **** SOM-6884 BIOS V1.08 (12/17/2025) ****
+* Release Date  : 2025/12/17
+* Owner         : Mike.Fan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V108_1  Update slim.bat, batch file and secureboot keys.
+* 6884V108_2  Add stitchifwi support.
+* 6884V108_3  Update CS1 decode setting for LPC port 80.
+* 6884V108_4  Add IT8883 initial table.
+* 6884V108_5  Add "Binaries\VbtBin" path to link VBT file.
+
+### Firmware Update Trigger step
+  
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V108_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
+  Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
+
+
+### Revision History
 * BIOS Name     : 688400S0080V107.bin ; FwuImage.bin
 * BIOS Checksum : C8E4 ; 9C9F
 * BIOS String   : **** SOM-6884 BIOS V1.07 (12/16/2025) ****

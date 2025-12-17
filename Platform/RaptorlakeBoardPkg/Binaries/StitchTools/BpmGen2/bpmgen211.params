@@ -1,0 +1,130 @@
+# FILEHEADER
+FileID: _BPMDEF_
+FileVersion: 1
+ToolVersion: 3
+ToolDate: 20171107
+FileDate: 20171225
+//
+# BPM_DEF
+PlatformRules: Server
+BpmStrutVersion: 0x21
+BpmRevision: 3
+BpmRevocation: 0
+AcmRevocation: 2
+NEMPages: 0x40
+IbbSetCount: 1
+CurrentIbbSet: 0
+//
+# IBB_SET
+IbbSetType: 0:ColdBoot
+IbbSetInclude: TRUE
+PBETValue: 0xF
+MCHBAR: 0x00000000FED10000
+VTD_BAR: 0x00000000FED90000
+DmaProtBase0: 0x0
+DmaProtLimit0: 0x0
+DmaProtBase1: 0x0
+DmaProtLimit1: 0x0
+IbbFlags: 0x0
+// Bit0 : Enable DMA Protection;
+// Bit1 : Issue TPM Start-up from Locality 3;
+// Bit2 : Extend Authority Measurements into the Authority PCR
+// Bit3 : On error: Leave TPM Hierarchies enabled. Cap all PCRs
+// Bit4 : BIOS supports Top Swap
+DmaProtAutoCalc: FALSE
+IbbHashAlgID: 0x0B:SHA256
+IbbEntry: 0xFFFFFFF0
+PostIbbHashAlgID: 0x0B:SHA256
+PostIBBHashSource: Calculate
+PostIbbHashFile:
+IbbSegSource: FIT
+IbbSegFile:
+IbbGuid: 4a4ca1c6-871c-45bb-8801-6910a7aa5807
+ObbHashAlgID: 0x0B:SHA256
+ObbHashSource: Start to IBB
+ObbHashFile: 32Byte.hash
+ObbGuid: 9e21fd93-9c72-4c15-8c4b-e77f1db2d792: Example GUID
+ObbGuid: 7bb28b99-61bb-11d5-9a5d-0090273fc14d: Example GUID 2
+//
+//IntelR TXT/BTG – BpmGen2 Tool User Guide
+//Technology Solutions Enabling IntelR TXT/BtG Tools
+//Page 44
+//
+# TXT_ELEMENT
+TxtInclude: TRUE
+TxtFlags: 0x0
+// [4:0] = TXT execution profile
+// 00000b – Use Default based on HW
+// 00001b - Server Profile
+// 00010b - Client Profile
+// [6:5] = “Memory scrubbing” policy
+// 00b - Trust Verified BIOS (default)
+// 01b – Always trust BIOS to scrub
+// 10b – Always use Backup Policy
+// [7:8] = Backup policy (???)
+// 00b – Default
+// 01b – Force power down memory depletion
+// 10b – Force unbreakable shutdown:
+// [31] = Reset AUX control (1=AUX Reset leaf will delete AUX Index)
+//MemoryDepletion Power Down
+AcpiBase: 0x400
+PwrmBase: 0xFE000000
+PdUseDefault: TRUE
+PdMinutes: 5
+PdSeconds: 0
+PttCmosOffset0: 0x7E
+PttCmosOffset1: 0x7F
+//TXTE Segments
+TxtSegSource: IBB
+TxtSegGuid: 4a4ca1c6-871c-45bb-8801-6910a7aa5807
+TxtSegHashAlgID: 0x0b:SHA256
+//
+# PLATFORM_CONFIG_ELEMENT
+PcdInclude: TRUE
+PdReqLocation: TPM
+// Power down request location for CMOS
+CmosIndexRegister: 0x70
+CmosDataRegister: 0x71
+CmosIndexOffset: 125
+CmosBitFieldWidth: 3
+CmosBitFieldPosition: 0
+//
+# TPM1.2_LOCATION
+TpmIndexHandle: 0x50000004
+TpmByteOffset: 7
+TpmBitFieldWidth: 3
+TpmBitFieldPosition: 0
+//
+# TPM2.0_LOCATION
+TpmIndexHandle: 0x1C10104
+TpmByteOffset: 7
+TpmBitFieldWidth: 3
+TpmBitFieldPosition: 0
+//
+# PTT_LOCATION
+//IntelR TXT/BTG – BpmGen2 Tool User Guide
+//Technology Solutions Enabling IntelR TXT/BtG Tools
+//Page 45
+TpmIndexHandle: 0x1C10104
+TpmByteOffset: 7
+TpmBitFieldWidth: 3
+TpmBitFieldPosition: 0
+//
+# PLATFORM_MANUFACTURERS_ELEMENT
+PmdeInclude: False
+PmdeFile: SamplePmData.bin
+//
+# BPM_SIGNATURE
+BpmSigSource: Internal
+BpmSigHashAlgID: 0x0B:SHA256
+BpmSigKeyType: 0x01:RSA
+BpmSigScheme: 0x14:RSASSA
+BpmKeySizeBits: 2048
+BpmSigPubKey: SamplePublicKeyRsa2048.pem
+BpmSigPrivKey: SamplePrivateKeyRsa2048.pem
+BpmSigBatch: X-Sign.bat SHA256 Rsa2048
+BpmSigData: Data2Sign.bin
+BpmSigDataType: BPM
+BpmSigXSig: X-Sig.bin
+//
+#EOF

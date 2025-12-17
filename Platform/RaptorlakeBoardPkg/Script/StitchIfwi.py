@@ -215,6 +215,8 @@ def main():
     ap.add_argument('-k', dest='key_dir', type=str, required=False, help='specify the path to Sbl Keys directory')
     ap.add_argument('-o', dest='option', default = '', help = "Platform specific stitch option. Format: '-o option1;option2;...' For each option its format is 'parameter:data'. Try -o help for more information")
     ap.add_argument('-op', dest='outpath', default = '', help = "Specify path to write output IFIW and signed bin files")
+#//6884V108_2
+    ap.add_argument('-of', dest='outfile', default = '', help = "Specify write output IFIW and signed bin files")
 
     args = ap.parse_args()
 
@@ -271,7 +273,8 @@ def main():
             shutil.copy(generated_ifwi_1_file, ifwi_1_file_name)
             shutil.copy(generated_ifwi_2_file, ifwi_2_file_name)
 
-    ifwi_file_name = os.path.join(args.outpath,'sbl_ifwi_%s.bin' % (args.platform))
+#//6884V108_2    ifwi_file_name = os.path.join(args.outpath,'sbl_ifwi_%s.bin' % (args.platform))
+    ifwi_file_name = os.path.join(args.outpath,args.outfile)
     shutil.copy(generated_ifwi_file, ifwi_file_name)
 
     generated_signed_sbl =  os.path.join(work_dir, 'Temp', 'SlimBootloader.bin')

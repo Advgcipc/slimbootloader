@@ -192,7 +192,8 @@ InitializeSmbiosInfo (
         1, "Advantech Corp.");
 
         AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
-          "%a00S%c080V%d%02d\0",
+//6884V108_2          "%a00S%c080V%d%02d\0",
+          "%a0%c80V%d%02d\0",
           PlatformName,
           VerInfoTbl->ImageVersion.BldDebug ? '1' : '0',
           VerInfoTbl->ImageVersion.ProjMajorVersion,
