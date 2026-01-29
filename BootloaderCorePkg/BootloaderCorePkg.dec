@@ -20,6 +20,13 @@
 
 [Guids]
   gPlatformModuleTokenSpaceGuid            = { 0x69d13bf0, 0xaf91, 0x4d96, { 0xaa, 0x9f, 0x21, 0x84, 0xc5, 0xce, 0x3b, 0xc0 } }
+#//7533V101_4
+  gAhcBiosStringGuid        = { 0xAAAA0056, 0x3341, 0x44b5, { 0x9C, 0x9C, 0x6D, 0x76, 0xF7, 0x67, 0x38, 0xBB } }
+
+  gAhcSecureBootKeysGuid        = { 0x1ac13ba1, 0x4ed6, 0x4905, {0xb1, 0x51, 0x80, 0x2b, 0xb7, 0x27, 0x11, 0xa1} }
+#// {1ac13ba1-4ed6-4905-b151-802bb72711a1} 
+##define NEW_GUID \
+#  { 0x1ac13ba1, 0x4ed6, 0x4905, {0xb1, 0x51, 0x80, 0x2b, 0xb7, 0x27, 0x11, 0xa1} }
 
 [PcdsFixedAtBuild]
   # These will be patched in the FDF file.
@@ -226,6 +233,26 @@
   gPlatformModuleTokenSpaceGuid.PcdPciResourceIoBase      | 0x00000000 | UINT32 | 0x200001A1
   gPlatformModuleTokenSpaceGuid.PcdPciResourceMem32Base   | 0x00000000 | UINT32 | 0x200001A2
   gPlatformModuleTokenSpaceGuid.PcdPciResourceMem64Base   | 0x0000000000000000  | UINT64     | 0x200001A3
+
+#//7533V101_5
+  gPlatformModuleTokenSpaceGuid.PcdPKKeyAddress                 | 0x00000000 | UINT32 | 0x200001B0
+  gPlatformModuleTokenSpaceGuid.PcdPKKeySize                    | 0x00000000 | UINT32 | 0x200001B1
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeyAddress                | 0x00000000 | UINT32 | 0x200001B2
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeySize                   | 0x00000000 | UINT32 | 0x200001B3
+  gPlatformModuleTokenSpaceGuid.PcdDBKeyAddress                 | 0x00000000 | UINT32 | 0x200001B4
+  gPlatformModuleTokenSpaceGuid.PcdDBKeySize                    | 0x00000000 | UINT32 | 0x200001B5
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeyAddress                | 0x00000000 | UINT32 | 0x200001B6
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeySize                   | 0x00000000 | UINT32 | 0x200001B7
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeyAddress                | 0x00000000 | UINT32 | 0x200001B8
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeySize                   | 0x00000000 | UINT32 | 0x200001B9
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootPKKeyEnabled       | FALSE      | BOOLEAN| 0x200001BB
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKEKKeyEnabled      | FALSE      | BOOLEAN| 0x200001BC
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBKeyEnabled       | FALSE      | BOOLEAN| 0x200001BD
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBXKeyEnabled      | FALSE      | BOOLEAN| 0x200001BE
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBTKeyEnabled      | FALSE      | BOOLEAN| 0x200001BF
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKeysDefaultLoad    | 0x00       | UINT8  | 0x200001C0
+  gPlatformModuleTokenSpaceGuid.PcdPlatformSerialTerminal       | 0x00       | UINT8  | 0x200001C1
+  gPlatformModuleTokenSpaceGuid.PcdPlatformBootDefaultTimeout   | 0x00       | UINT16 | 0x200001C2
 
 [PcdsFeatureFlag]
   # Determine if the Intel GFX device should be enabled or not in system

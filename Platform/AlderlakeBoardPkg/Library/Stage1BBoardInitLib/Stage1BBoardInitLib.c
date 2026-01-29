@@ -795,6 +795,8 @@ DEBUG_CODE_END();
     case PLATFORM_ID_ADL_N_DDR5_CRB:
       ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemAdlNDdr5Crb) / sizeof (mGpioTablePreMemAdlNDdr5Crb[0]), (UINT8*)mGpioTablePreMemAdlNDdr5Crb);
       break;
+//7533V101_4    
+    case PLATFORM_ID_ADL_N_LPDDR5_753300S:
     case PLATFORM_ID_ADL_N_LPDDR5_RVP:
     case PLATFORM_ID_ADL_N_UP2PTWL:
     case PLATFORM_ID_ADL_N_UP7EN50:

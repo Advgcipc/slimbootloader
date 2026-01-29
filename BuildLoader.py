@@ -97,9 +97,23 @@ class BaseBoard(object):
     def __init__(self, *args, **kwargs):
 
         # NOTE: Variables starting with '_' will not be exported to Platform.dsc
-
-
         self.LOGO_FILE              = 'Platform/CommonBoardPkg/Logo/Logo.bmp'
+
+#//7533V101_5
+        self.SECUREBOOT_PK_FILE      = ''
+        self.SECUREBOOT_KEK_FILE     = ''
+        self.SECUREBOOT_KEK_FILE2    = ''
+        self.SECUREBOOT_KEK_FILE1    = ''
+        self.SECUREBOOT_DB_FILE      = ''
+        self.SECUREBOOT_DB_FILE1     = ''
+        self.SECUREBOOT_DB_FILE2     = ''
+        self.SECUREBOOT_DB_FILE3     = ''
+        self.SECUREBOOT_DB_FILE4     = ''
+        self.SECUREBOOT_DB_FILE5     = ''
+        self.SECUREBOOT_DBX_FILE     = ''
+        self.SECUREBOOT_DBX_FILE1    = ''
+        self.SECUREBOOT_DBT_FILE     = ''
+        self.SECUREBOOT_DBT_FILE1    = ''
 
         self._RSA_SIGN_TYPE          = 'RSA2048'
         self._SIGN_HASH              = 'SHA2_256'
@@ -163,6 +177,16 @@ class BaseBoard(object):
         self.ENABLE_SMP_INIT       = 1
         self.ENABLE_FSP_LOAD_IMAGE = 0
         self.ENABLE_SPLASH         = 0
+#//7533V101_5
+        self.SECUREBOOT_KEYS_DEFAULTLOAD    = 0
+        self.SECUREBOOT_PK_KEY_ENABLE       = 0
+        self.SECUREBOOT_KEK_KEY_ENABLE      = 0
+        self.SECUREBOOT_DB_KEY_ENABLE       = 0
+        self.SECUREBOOT_DBX_KEY_ENABLE      = 0
+        self.SECUREBOOT_DBT_KEY_ENABLE      = 0
+        self.PLATFORM_BOOT_TIMEOUT          = 0
+        self.PLATFORM_SERIAL_TERMINAL       = 0
+
         self.ENABLE_FRAMEBUFFER_INIT = 0
         self.ENABLE_PRE_OS_CHECKER = 0
         self.ENABLE_CRYPTO_SHA_OPT  = IPP_CRYPTO_OPTIMIZATION_MASK['SHA256_V8']
@@ -795,6 +819,32 @@ class Build(object):
             extra_cmd.extend ([
                 "<Stage2:__gPcd_BinaryPatch_PcdSplashLogoAddress>, {5E2D3BE9-AD72-4D1D-AAD5-6B08AF921590:0x1C}, @Patch Logo Address",
                 "<Stage2:__gPcd_BinaryPatch_PcdSplashLogoSize>, ([5E2D3BE9-AD72-4D1D-AAD5-6B08AF921590:0x14] & 0xFFFFFF) - 0x1C, @Patch Logo Size",
+            ])
+#//7533V101_5
+        if self._board.SECUREBOOT_PK_KEY_ENABLE:
+            extra_cmd.extend ([
+                "<Stage2:__gPcd_BinaryPatch_PcdPKKeyAddress>, {85254EA7-4759-4FC4-82D4-5EED5FB0A4A0:0x18}, @Patch PKKey",
+                "<Stage2:__gPcd_BinaryPatch_PcdPKKeySize>, ([85254EA7-4759-4FC4-82D4-5EED5FB0A4A0:0x14] & 0xFFFFFF) - 0x18, @Patch PKKey Size",
+            ])
+        if self._board.SECUREBOOT_KEK_KEY_ENABLE:
+            extra_cmd.extend ([
+                "<Stage2:__gPcd_BinaryPatch_PcdKEKKeyAddress>, {6F64916E-9F7A-4C35-B952-CD041EFB05A3:0x18}, @Patch KEKKey",
+                "<Stage2:__gPcd_BinaryPatch_PcdKEKKeySize>, ([6F64916E-9F7A-4C35-B952-CD041EFB05A3:0x14] & 0xFFFFFF) - 0x18, @Patch KEKKey Size",
+            ])
+        if self._board.SECUREBOOT_DB_KEY_ENABLE:
+            extra_cmd.extend ([
+                "<Stage2:__gPcd_BinaryPatch_PcdDBKeyAddress>, {C491D352-7623-4843-ACCC-2791A7574421:0x18}, @Patch DBKey",
+                "<Stage2:__gPcd_BinaryPatch_PcdDBKeySize>, ([C491D352-7623-4843-ACCC-2791A7574421:0x14] & 0xFFFFFF) - 0x18, @Patch DBKey Size",
+            ])
+        if self._board.SECUREBOOT_DBX_KEY_ENABLE:
+            extra_cmd.extend ([
+                "<Stage2:__gPcd_BinaryPatch_PcdDBXKeyAddress>, {5740766A-718E-4DC0-9935-C36F7D3F884F:0x18}, @Patch DBXKey",
+                "<Stage2:__gPcd_BinaryPatch_PcdDBXKeySize>, ([5740766A-718E-4DC0-9935-C36F7D3F884F:0x14] & 0xFFFFFF) - 0x18, @Patch DBXKey Size",
+            ])
+        if self._board.SECUREBOOT_DBT_KEY_ENABLE:
+            extra_cmd.extend ([
+                "<Stage2:__gPcd_BinaryPatch_PcdDBTKeyAddress>, {36C513EE-A338-4976-A0FB-6DDBA3DAFE87:0x18}, @Patch DBTKey",
+                "<Stage2:__gPcd_BinaryPatch_PcdDBTKeySize>, ([36C513EE-A338-4976-A0FB-6DDBA3DAFE87:0x14] & 0xFFFFFF) - 0x18, @Patch DBTKey Size",
             ])
         patch_fv(
             self._fv_dir,

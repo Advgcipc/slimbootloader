@@ -882,8 +882,15 @@ def gen_vbt_file (brd_pkg_name, vbt_dict, vbt_file):
             imageid = bytearray(value_to_bytes(vbt, 4))
         src_path = os.path.join(os.environ['PLT_SOURCE'], 'Platform', brd_pkg_name, 'VbtBin', vbt_dict[vbt])
         if not os.path.exists(src_path):
-            raise Exception ("File '%s' not found !" % src_path)
-        fp  = open(src_path, 'rb')
+#//7533V101_1            raise Exception ("File '%s' not found !" % src_path)
+#//7533V101_1        fp  = open(src_path, 'rb')
+            vbt_path = os.path.join(os.environ['PLT_SOURCE'], 'Platform', brd_pkg_name, 'Binaries',  'VbtBin', vbt_dict[vbt])
+            if not os.path.exists(vbt_path):
+                raise Exception ("File '%s;%s' not found !" % (src_path,vbt_path))
+            else:
+                fp  = open(vbt_path, 'rb')
+        else:
+            fp  = open(src_path, 'rb')
         bin = bytearray(fp.read())
         fp.close()
         # Write image id and length (DWORD aligned) for VBT image

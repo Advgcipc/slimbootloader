@@ -18,6 +18,8 @@
 #include <PchAccess.h>
 #include <IndustryStandard/Pci.h>
 #include <Register/SerialIoUartRegs.h>
+//7533V101_3
+#include <Register/PchRegsLpc.h>
 
 #define MM_PCI_OFFSET(Bus, Device, Function) \
     ( (UINTN)(Bus << 20) +    \
@@ -107,6 +109,7 @@ LegacySerialPortInitialize (
 {
   UINTN   eSPIBaseAddr;
   UINT16  Data16;
+  UINT32  Data32 = 0;
 
   eSPIBaseAddr = PCI_LIB_ADDRESS (
     DEFAULT_PCI_BUS_NUMBER_PCH,
@@ -115,7 +118,8 @@ LegacySerialPortInitialize (
     0);
 
   Data16 = PciRead16 (eSPIBaseAddr + R_LPC_CFG_IOD);
-  Data16 |= (V_LPC_CFG_IOD_COMB_2F8 << N_LPC_CFG_IOD_COMB);
+//7533V101_3  Data16 |= (V_LPC_CFG_IOD_COMB_2F8 << N_LPC_CFG_IOD_COMB);
+  Data16 |= (0x07 << N_LPC_CFG_IOD_COMB);//V_LPC_CFG_IOD_COMB_3E8
   Data16 |= (V_LPC_CFG_IOD_COMA_3F8 << N_LPC_CFG_IOD_COMA);
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOD), Data16);
   PciWrite16 (eSPIBaseAddr + R_LPC_CFG_IOD, Data16);
@@ -123,8 +127,23 @@ LegacySerialPortInitialize (
   Data16 = PciRead16 (eSPIBaseAddr + R_LPC_CFG_IOE);
   Data16 |= B_LPC_CFG_IOE_CBE;
   Data16 |= B_LPC_CFG_IOE_CAE;
+
+//7533V101_3
+  Data16 |= B_LPC_CFG_IOE_ME1;
+  Data16 |= BIT12;//B_LPC_CFG_IOE_SE
+  Data16 |= B_LPC_CFG_IOE_ME2;
+
   MmioWrite16 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCIOE), Data16);
   PciWrite16 (eSPIBaseAddr + R_LPC_CFG_IOE, Data16);
+
+//7533V101_3
+  Data32 = 0x00FC0201;
+  MmioWrite32 (PCH_PCR_ADDRESS (PID_DMI, R_PCH_DMI_PCR_LPCLGIR3), Data32);
+  PciWrite32 (eSPIBaseAddr + R_ESPI_CFG_ESPI_LGIR1 + 8, Data32);
+
+
+//7533V101_3
+//    EarlySioInit1 ();  
 
   return RETURN_SUCCESS;
 }
@@ -140,9 +159,12 @@ PlatformHookSerialPortInitialize (
   UINT8   DebugPort;
 
   DebugPort = GetDebugPort ();
-  if (DebugPort >= PCH_MAX_SERIALIO_UART_CONTROLLERS) {
     LegacySerialPortInitialize ();
-  } else {
+//  if (DebugPort >= PCH_MAX_SERIALIO_UART_CONTROLLERS) {
+//    LegacySerialPortInitialize ();
+//  } else {
+//7533V101_3
+//    LegacySerialPortInitialize ();
     BarAddress = LPSS_UART_TEMP_BASE_ADDRESS(DebugPort);
     PciAddress = mUartMmPciOffset[DebugPort] + (UINTN)PcdGet64(PcdPciExpressBaseAddress);
     MmioWrite32 (PciAddress + R_SERIAL_IO_CFG_BAR0_LOW,  BarAddress);
@@ -161,6 +183,6 @@ PlatformHookSerialPortInitialize (
         (B_SERIAL_IO_MEM_PPR_CLK_UPDATE | (V_SERIAL_IO_MEM_PPR_CLK_N_DIV << 16) |
          (V_SERIAL_IO_MEM_PPR_CLK_M_DIV << 1) | B_SERIAL_IO_MEM_PPR_CLK_EN )
         );
-  }
+//  }
   return RETURN_SUCCESS;
 }

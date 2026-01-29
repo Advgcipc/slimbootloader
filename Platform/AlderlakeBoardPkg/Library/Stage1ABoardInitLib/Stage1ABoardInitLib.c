@@ -25,6 +25,11 @@
 #include <Library/TcoTimerLib.h>
 #include <ConfigDataStruct.h>
 
+//7533V101_3
+#include <PchAccess.h>
+#include <Library/PchPcrLib.h>
+#include <Library/TimerLib.h>
+
 #define UCODE_REGION_BASE   FixedPcdGet32(PcdUcodeBase)
 #define UCODE_REGION_SIZE   FixedPcdGet32(PcdUcodeSize)
 //#define SG1B_REDB_BASE      (UINT32) ((2 * FixedPcdGet32(PcdTopSwapRegionSize)) + FixedPcdGet32(PcdRedundantRegionSize) + FixedPcdGet32(PcdStage1BSize))
@@ -53,12 +58,12 @@ FSPT_UPD TempRamInitParams = {
     .Reserved               = {0},
   },
   .FsptConfig = {
-    .PcdSerialIoUartDebugEnable = 1,
+    .PcdSerialIoUartDebugEnable = 0,
     .PcdSerialIoUartNumber      = FixedPcdGet32 (PcdDebugPortNumber) < PCH_MAX_SERIALIO_UART_CONTROLLERS ? \
                                     FixedPcdGet32 (PcdDebugPortNumber) : 2,
     .PcdSerialIoUartMode        = 4, // SerialIoUartSkipInit, let SBL init UART
 #if defined(PLATFORM_ADLN)
-    .PcdSerialIoUartPowerGating = 1,
+    .PcdSerialIoUartPowerGating = 0,
 #endif
     .PcdSerialIoUartBaudRate    = 115200,
     .PcdPciExpressBaseAddress   = FixedPcdGet32 (PcdPciMmcfgBase),
@@ -71,7 +76,9 @@ FSPT_UPD TempRamInitParams = {
     .PcdSerialIoUartTxPinMux    = 0,
     .PcdSerialIoUartRtsPinMux   = 0,
     .PcdSerialIoUartCtsPinMux   = 0,
-    .PcdLpcUartDebugEnable      = 1,
+    .PcdLpcUartDebugEnable      = 0,
+//    .PcdIsaSerialUartBase       = 1,
+
   },
   .UpdTerminator = 0x55AA,
 };
@@ -93,6 +100,155 @@ CONST GPIO_INIT_CONFIG mAdlpUartGpioTable[] = {
   {GPIO_VER2_LP_GPP_F1,  {GpioPadModeNative2, GpioHostOwnGpio, GpioDirNone,  GpioOutDefault, GpioIntDis, GpioHostDeepReset,  GpioTermNone}},//SERIALIO_UART2_RXD
   {GPIO_VER2_LP_GPP_F2,  {GpioPadModeNative2, GpioHostOwnGpio, GpioDirNone,  GpioOutDefault, GpioIntDis, GpioHostDeepReset,  GpioTermNone}},//SERIALIO_UART2_TXD
 };
+
+//7533V101_3
+typedef struct _SIO_INIT_TABLE{
+    UINT16      Index16;
+    UINT8       Value8;
+    UINT16      Data16;
+    UINT8       Data8;
+} SIO_INIT_TABLE;
+
+#define SIO_LDN_PMC0	      0xc
+#define SIO_LDN_PMC1	      0xd
+#define SIO_LDN_CAN0	      0x18
+#define SIO_LDN_CAN1	      0x19
+#define SIO_LDN_I2C0	      0x20
+#define SIO_LDN_I2C1	      0x21
+#define SIO_LDN_SMBUS0	    0x22
+#define SIO_LDN_SMBUS1	    0x23
+#define SIO_LDN_GPIO0	      0x24
+#define SIO_LDN_PMCMB	      0xe
+#define SIO_LDN_EC	        0xf
+//ddd1 #define SIO_LDN_UART1	      0x2
+//ddd1 #define SIO_LDN_UART2	      0x3
+#define SIO_LDN_UART1	      0x2
+#define SIO_LDN_UART2	      0x3
+
+
+#define SIO_CONFIG_INDEX	  0x299
+#define SIO_CONFIG_DATA	    0x29A
+#define SIO_CONFIG_ENTER	  0x87
+#define SIO_CONFIG_EXIT	    0xAA
+#define SIO_LDN_ACTIVATE	  0x1
+#define SIO_LDN_DEACTIVATE  0x0
+#define SIO_LDN_SELECT	    0x7
+#define SIO_ACTIVATE_REG    0x30
+#define SIO_BASE1_HI_REG    0x60
+#define SIO_BASE1_LO_REG    0x61
+#define SIO_BASE2_HI_REG    0x62
+#define SIO_BASE2_LO_REG    0x63
+#define SIO_IRQ1_REG      	0x70
+#define SIO_IRQ2_REG      	0x72
+#define SIO_DMA1_REG      	0x74
+#define SIO_DMA2_REG      	0x75 
+#define SIO_PMC1_INDEX     	0x2F2
+#define SIO_PMC1_DATA     	0x2F6
+#define SIO_UART1_BASE     	0x3F8
+#define SIO_UART2_BASE     	0x2F8
+
+#define SIO_I2C0_IRQ      	6
+#define SIO_I2C0_BASE     	0x280
+#define SIO_GPIO0_BASE     	0x2C0
+
+#define ECE1200_SIO_CONFIG_INDEX      0x8c
+#define ECE1200_SIO_CONFIG_DATA      0x8d
+#define ECE1200_LDN_ESPI	        0x0
+#define ECE1200_LDN_LPC	          0x1
+#define ECE1200_SIO_CONFIG_ENTER	0x55
+#define ECE1200_SIO_CONFIG_EXIT	  0xaa 
+
+// eSPI Register Set, Logical Device 00h
+#define ECE1200_IOBAR_LS_REG  0x36
+#define ECE1200_IOBAR_MS_REG  0x37
+
+// LPC Register Set, Logical Device 01h
+#define ECE1200_SIRQ_REG      0x40
+
+ 
+#define IT8882_CONFIG_INDEX     0x2E
+#define IT8882_CONFIG_DATA      0x2F
+#define IT8882_LDN_ESPI	        0x0D
+#define IT8882_LDN_SELECT       0x07
+#define IT8882_ACTIVATE_REG     0x30
+#define IT8882_IRQ0_REG         0x70
+#define IT8882_IRQ1_REG         0x71
+#define IT8882_IRQ0_VALUE       0xF8
+#define IT8882_IRQ1_VALUE       0x1C
+#define IT8882_LDN_ACTIVATE	    0x01
+#define IT8882_CONFIG_ENTER	    0x87
+#define IT8882_CONFIG_ENTER1    0x01
+#define IT8882_CONFIG_ENTER2    0x55
+#define IT8882_CONFIG_ENTER3    0x55
+#define IT8882_CONFIG_EXIT	    0x02 
+
+
+SIO_INIT_TABLE SioInitTable[]= {
+  {SIO_CONFIG_INDEX, SIO_CONFIG_ENTER,  SIO_CONFIG_INDEX, SIO_CONFIG_ENTER},
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_PMC0},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_PMC1},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_INDEX & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_INDEX >> 8)},
+  {SIO_CONFIG_INDEX, SIO_BASE2_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_DATA & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE2_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_PMC1_DATA >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_UART1},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART1_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART1_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_UART2},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART2_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_UART2_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_I2C0},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_I2C0_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_I2C0_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_IRQ1_REG,      SIO_CONFIG_DATA,  SIO_I2C0_IRQ},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+
+  {SIO_CONFIG_INDEX, SIO_LDN_SELECT,    SIO_CONFIG_DATA,  SIO_LDN_GPIO0},
+  {SIO_CONFIG_INDEX, SIO_BASE1_LO_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_GPIO0_BASE & 0xFF)},
+  {SIO_CONFIG_INDEX, SIO_BASE1_HI_REG,  SIO_CONFIG_DATA,  (UINT8)(SIO_GPIO0_BASE >> 8)},
+  {SIO_CONFIG_INDEX, SIO_IRQ1_REG,      SIO_CONFIG_DATA,  SIO_I2C0_IRQ},
+  {SIO_CONFIG_INDEX, SIO_ACTIVATE_REG,  SIO_CONFIG_DATA,  SIO_LDN_ACTIVATE},
+
+  {SIO_CONFIG_INDEX, SIO_CONFIG_EXIT,   SIO_CONFIG_INDEX, SIO_CONFIG_EXIT},
+//  IT8882 eSPI to LPC setting
+  {IT8882_CONFIG_INDEX, IT8882_CONFIG_ENTER,  IT8882_CONFIG_INDEX, IT8882_CONFIG_ENTER1},
+  {IT8882_CONFIG_INDEX, IT8882_CONFIG_ENTER2, IT8882_CONFIG_INDEX, IT8882_CONFIG_ENTER3},
+  {IT8882_CONFIG_INDEX, IT8882_LDN_SELECT,    IT8882_CONFIG_DATA,  IT8882_LDN_ESPI},
+  {IT8882_CONFIG_INDEX, IT8882_ACTIVATE_REG,  IT8882_CONFIG_DATA,  IT8882_LDN_ACTIVATE},
+  {IT8882_CONFIG_INDEX, IT8882_IRQ0_REG,      IT8882_CONFIG_DATA,  IT8882_IRQ0_VALUE},
+  {IT8882_CONFIG_INDEX, IT8882_IRQ1_REG,      IT8882_CONFIG_DATA,  IT8882_IRQ1_VALUE},
+  {IT8882_CONFIG_INDEX, IT8882_CONFIG_EXIT,   IT8882_CONFIG_INDEX, IT8882_CONFIG_EXIT},
+
+};
+/**
+
+  Enable UART in SIO chip.
+
+**/
+VOID
+EarlySioInit (
+  VOID
+)
+{
+    UINT8                 Idx;
+    SIO_INIT_TABLE        *pSioTbl = SioInitTable;
+
+    for  (Idx = 0; Idx < sizeof(SioInitTable)/sizeof(SIO_INIT_TABLE); Idx ++) {
+      IoWrite8 (pSioTbl->Index16, pSioTbl->Value8 );
+      IoWrite8 (pSioTbl->Data16, pSioTbl->Data8 );
+      pSioTbl = pSioTbl+1;
+    }
+
+}
 
 /**
   Stitching process might pass some specific platform data to be
@@ -117,6 +273,8 @@ EarlyPlatformDataCheck (
   } else {
     SetDebugPort  (StitchData->DebugUart);
     SetPlatformId (StitchData->PlatformId);
+//ddd
+//    SetDebugPort  (0xFE);
   }
 }
 
@@ -160,6 +318,10 @@ BoardInit (
     }
 
     PlatformHookSerialPortInitialize ();
+//7533V101_3
+    MicroSecondDelay (0x1);
+    EarlySioInit ();  
+
     SerialPortInitialize ();
 
     // Enlarge the code cache region to cover full flash for non-BootGuard case or fast boot case

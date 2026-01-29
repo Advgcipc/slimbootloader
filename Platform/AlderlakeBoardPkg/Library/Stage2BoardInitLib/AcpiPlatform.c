@@ -554,6 +554,10 @@ PlatformUpdateAcpiTable (
       // return EFI_SUCCESS only when PlatformID matches
       if (GetPlatformId () == PLATFORM_ID_ADL_N_DDR5_CRB && Table->OemTableId == SIGNATURE_64('A', 'd', 'l', 'N' ,'_' ,'C' ,'r' ,'b')) {
         Status = EFI_SUCCESS;
+//7533V101_4    
+      } else if (GetPlatformId () == PLATFORM_ID_ADL_N_LPDDR5_753300S && Table->OemTableId == SIGNATURE_64('A', 'd', 'l', 'N' ,'_' ,'R' ,'v' ,'p')) {
+        Status = EFI_SUCCESS;
+
       } else if (GetPlatformId () == PLATFORM_ID_ADL_N_LPDDR5_RVP && Table->OemTableId == SIGNATURE_64('A', 'd', 'l', 'N' ,'_' ,'R' ,'v' ,'p')) {
         Status = EFI_SUCCESS;
       }
@@ -1061,9 +1065,10 @@ PlatformUpdateAcpiGnvs (
     }
   }
   if ((SiCfgData != NULL) && (SiCfgData->EcAvailable == 0)){
-      PlatformNvs->PcdIT8659SIO = 1;
-      PlatformNvs->PcdIT8659HWMON = 1;
-      PlatformNvs->PcdIT8659COM = 1;
+//7533V101_3
+//      PlatformNvs->PcdIT8659SIO = 1;
+//      PlatformNvs->PcdIT8659HWMON = 1;
+//      PlatformNvs->PcdIT8659COM = 1;
   }
     //
     // Intel(R) Dynamic Tuning Technology Devices and trip points
@@ -1269,6 +1274,9 @@ PlatformUpdateAcpiGnvs (
     PlatformNvs->PL1LimitCSValue = 0x1194;
     break;
   case PLATFORM_ID_ADL_N_DDR5_CRB:
+//7533V101_4    
+  case PLATFORM_ID_ADL_N_LPDDR5_753300S:
+  case PLATFORM_ID_ADL_N_LPDDR5_RVP:
     PlatformNvs->PcieSlot1WakeGpio = GPIO_VER2_LP_GPP_A21;
     PlatformNvs->PcieSlot1PowerEnableGpio = GPIO_VER2_LP_GPP_A8;
     PlatformNvs->PcieSlot1RstGpio = GPIO_VER2_LP_GPP_F10;

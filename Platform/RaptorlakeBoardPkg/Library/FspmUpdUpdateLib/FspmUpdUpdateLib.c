@@ -454,6 +454,8 @@ UpdateFspConfig (
     DEBUG((DEBUG_INFO, "PLATFORM_ID_ADL_N_DDR5_CRB board Id %x .....\n", PlatformId));
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mAdlNddr5CrbRowDisplayDdiConfig, sizeof(mAdlNddr5CrbRowDisplayDdiConfig));
     break;
+//7533V101_4    
+  case PLATFORM_ID_ADL_N_LPDDR5_753300S:
   case PLATFORM_ID_ADL_N_LPDDR5_RVP:
     // DP + DP
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mAdlNLpddr5RowDisplayDdiConfig, sizeof(mAdlNLpddr5RowDisplayDdiConfig));
@@ -552,6 +554,8 @@ UpdateFspConfig (
         Fspmcfg->FirstDimmBitMaskEcc = 0x0;
         Fspmcfg->Lp5BankMode = 0x0;
         break;
+//7533V101_4    
+      case PLATFORM_ID_ADL_N_LPDDR5_753300S:
       case PLATFORM_ID_ADL_N_LPDDR5_RVP:
         Fspmcfg->DmiHweq = 0x2;
         Fspmcfg->Lp5CccConfig = 0xff;

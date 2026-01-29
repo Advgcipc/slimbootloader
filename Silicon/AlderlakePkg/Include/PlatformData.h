@@ -15,6 +15,8 @@
 #define VTD_BASEADDRESS_1       0xFED92000
 #define VTD_BASEADDRESS_2       0xFED91000
 
+#pragma pack(1)
+
 typedef struct {
   UINT8               PlatformId : 5;
   UINT8               Reserved1  : 3;
@@ -35,5 +37,8 @@ typedef struct {
   BOOT_GUARD_INFO     BtGuardInfo;
   PLAT_FEATURES       PlatformFeatures;
 } PLATFORM_DATA;
+
+
+#pragma pack()
 
 #endif /* __PLATFORM_DATA_H__ */

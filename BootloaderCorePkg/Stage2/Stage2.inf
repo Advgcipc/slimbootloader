@@ -77,6 +77,8 @@
   IppCryptoPerfLib
   BuildFdtLib
   PlatformHookLib
+#//7533V101_4
+  PrintLib
 
 [Guids]
   gFspReservedMemoryResourceHobGuid
@@ -112,7 +114,10 @@
   gSecureBootInfoGuid
   gUniversalPayloadBaseGuid
   gSmmBaseHobGuid
-
+#//7533V101_4
+  gAhcBiosStringGuid    
+  gEfiGlobalVariableGuid
+ 
 [Pcd]
   gPlatformCommonLibTokenSpaceGuid.PcdMaxLibraryDataEntry
   gPlatformCommonLibTokenSpaceGuid.PcdVerifiedBootEnabled
@@ -164,5 +169,28 @@
   gPlatformCommonLibTokenSpaceGuid.PcdElfSupportEnabled
   gPlatformCommonLibTokenSpaceGuid.PcdFvSupportEnabled
   gPlatformCommonLibTokenSpaceGuid.PcdPe32SupportEnabled
+#//7533V101_1
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate  
+
+#//7533V101_5
+  gPlatformModuleTokenSpaceGuid.PcdPKKeyAddress
+  gPlatformModuleTokenSpaceGuid.PcdPKKeySize
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeyAddress
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeySize
+  gPlatformModuleTokenSpaceGuid.PcdDBKeyAddress
+  gPlatformModuleTokenSpaceGuid.PcdDBKeySize
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeyAddress
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeySize
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeyAddress
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeySize
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootPKKeyEnabled
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKEKKeyEnabled
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBKeyEnabled
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBXKeyEnabled
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBTKeyEnabled
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKeysDefaultLoad
+  gPlatformModuleTokenSpaceGuid.PcdPlatformBootDefaultTimeout
+  gPlatformModuleTokenSpaceGuid.PcdPlatformSerialTerminal
+  
 [Depex]
   TRUE

@@ -392,6 +392,8 @@
   gPlatformCommonLibTokenSpaceGuid.PcdAbSlotSupportEnabled        | TRUE   | BOOLEAN | 0x2000022D
   gPlatformCommonLibTokenSpaceGuid.PcdMultibootSupportEnabled     | TRUE   | BOOLEAN | 0x2000022E
   gPlatformCommonLibTokenSpaceGuid.PcdMultiboot2SupportEnabled    | TRUE   | BOOLEAN | 0x2000022F
+#//7533V101_1
+  gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate            | {0}    | VOID*   | 0x20000240
 
 [PcdsFixedAtBuild]
   gPlatformCommonLibTokenSpaceGuid.PcdFipsSupport     | FALSE      | BOOLEAN | 0x20000226

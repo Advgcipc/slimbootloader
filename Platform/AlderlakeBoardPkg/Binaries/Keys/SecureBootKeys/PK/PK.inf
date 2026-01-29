@@ -1,0 +1,19 @@
+## @file
+#   A simple, basic, application showing how the Hello application could be
+#   built using the "Standard C Libraries" from StdLib.
+#
+#  Copyright (c) 2010 - 2014, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#  gDefaultPKFileGuid                 = { 0x85254ea7, 0x4759, 0x4fc4, { 0x82, 0xd4, 0x5e, 0xed, 0x5f, 0xb0, 0xa4, 0xa0 } }
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = PK
+  FILE_GUID                      = 85254ea7-4759-4fc4-82d4-5eed5fb0a4a0
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+[Binaries]
+  BIN|Advantech_PK.cer|*
+
+

@@ -23,8 +23,10 @@ class Board(BaseBoard):
         super(Board, self).__init__(*args, **kwargs)
 
         self.VERINFO_IMAGE_ID     = 'SB_ASL'
-        self.VERINFO_PROJ_MAJOR_VER = 2
-        self.VERINFO_PROJ_MINOR_VER = 5
+#//7533V001_1        self.VERINFO_PROJ_MAJOR_VER = 2
+#//7533V001_1        self.VERINFO_PROJ_MINOR_VER = 5
+        self.VERINFO_PROJ_MAJOR_VER = (int(os.getenv('PROJECT_MAJOR_VER', '0')))
+        self.VERINFO_PROJ_MINOR_VER = (int(os.getenv('PROJECT_MINOR_VER', '0')))
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -69,7 +71,39 @@ class Board(BaseBoard):
         self.ENABLE_SMM_REBASE    = 4
 
         # 0 - PCH UART0, 1 - PCH UART1, 2 - PCH UART2, 0xFF - EC UART 0x3F8
-        self.DEBUG_PORT_NUMBER = 0x0
+        self.DEBUG_PORT_NUMBER = 0xFE
+
+        # BIT0:Serial  BIT1:USB KB
+        # Support serial port input console by default
+#        self.CONSOLE_IN_DEVICE_MASK  = 0x00000003
+
+        # BIT0:Serial  BIT1:GFX
+#        self.CONSOLE_OUT_DEVICE_MASK = 0x00000003
+
+#//7533V101_5
+        self.SECUREBOOT_KEYS_DEFAULTLOAD = 0
+        self.SECUREBOOT_PK_KEY_ENABLE   = 1
+        self.SECUREBOOT_KEK_KEY_ENABLE  = 1
+        self.SECUREBOOT_DB_KEY_ENABLE   = 1
+        self.SECUREBOOT_DBX_KEY_ENABLE  = 1
+        self.SECUREBOOT_DBT_KEY_ENABLE  = 0
+        self.PLATFORM_BOOT_TIMEOUT      = 0
+        self.PLATFORM_SERIAL_TERMINAL   = 0
+
+#//7533V101_5
+        self.SECUREBOOT_PK_FILE      = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/PK/Advantech_PK.cer'
+        self.SECUREBOOT_KEK_FILE     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/Advantech_KEK.cer'
+        self.SECUREBOOT_KEK_FILE2    = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/KEK_MSFTproductionKekCA.cer'
+        self.SECUREBOOT_KEK_FILE1    = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/KEK_MSFTproductionKekCA.2023.cer'
+        self.SECUREBOOT_DB_FILE      = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_microsoft_option_rom_uefi_ca_2023.cer'
+        self.SECUREBOOT_DB_FILE1     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_microsoft_uefi_ca_2023.cer'
+        self.SECUREBOOT_DB_FILE2     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTpreReleaseCandidateWindowsSigningCA.cer'
+        self.SECUREBOOT_DB_FILE3     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTproductionUEFIsigningCA.cer'
+        self.SECUREBOOT_DB_FILE4     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTproductionWindowsSigningCA2011.cer'
+        self.SECUREBOOT_DB_FILE5     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_windows_uefi_ca_2023.cer'
+        self.SECUREBOOT_DBX_FILE     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBX/MicCorKEKCA2011_2011-06-24.crt'
+        self.SECUREBOOT_DBX_FILE1    = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBX/MicCorThiParMarRoo_2010-10-05.crt'
+        self.SECUREBOOT_DBT_FILE     = 'Platform/AlderlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBT/MsRootCA2010.cer'
 
         self.ENABLE_MULTI_USB_BOOT_DEV = 1
 
@@ -218,14 +252,16 @@ class Board(BaseBoard):
         #   the ImageId field in the VBT container.
         # VbtFileName is the VBT file name. It needs to be located under platform
         #   VbtBin folder.
-        self._MULTI_VBT_FILE      = {1:'VbtAdlNCrb.dat', 2:'VbtAdlNCrbEdp.dat'}
+#//7533V101_1        self._MULTI_VBT_FILE      = {1:'VbtAdlNCrb.dat', 2:'VbtAdlNCrbEdp.dat'}
+        self._MULTI_VBT_FILE      = {1:'VbtAdlNCrb.dat', 2:'VbtAdlNCrbEdp.dat', 3:'VbtAdlN_753300S.dat'}
 
         self.CFG_DATABASE_SIZE    = self.CFGDATA_SIZE
         self._generated_cfg_file_prefix = 'Autogen_'
 
         self._CFGDATA_DEF_FILE = 'CfgDataDefAdln.yaml'
         self._CFGDATA_INT_FILE = []
-        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Adln_Crb_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Adln_Rvp_Lpddr5.dlt']
+#//7533V101_4        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Adln_Crb_Ddr5.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Adln_Rvp_Lpddr5.dlt']
+        self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Adln_753300S.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Adln_Rvp_Lpddr5.dlt']
 
     def PlatformBuildHook (self, build, phase):
         if phase == 'pre-build:before':

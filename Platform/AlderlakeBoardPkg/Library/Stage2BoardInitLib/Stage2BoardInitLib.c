@@ -467,6 +467,8 @@ BoardInit (
     EnableLegacyRegions ();
     ConfigureGpio (CDATA_GPIO_TAG, 0, NULL);
     switch (GetPlatformId ()) {
+//7533V101_4    
+      case PLATFORM_ID_ADL_N_LPDDR5_753300S:
       case PLATFORM_ID_ADL_N_LPDDR5_RVP:
       case PLATFORM_ID_ADL_N_UP7EN50:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePostMemAdlNLpddr5Rvp) / sizeof (mGpioTablePostMemAdlNLpddr5Rvp[0]), (UINT8*)mGpioTablePostMemAdlNLpddr5Rvp);
@@ -503,6 +505,8 @@ BoardInit (
             ConfigureGpio (CDATA_NO_TAG, sizeof (mAdlSTsnDeviceGpioTable) / sizeof (mAdlSTsnDeviceGpioTable[0]), (UINT8*)mAdlSTsnDeviceGpioTable);
             break;
           case PLATFORM_ID_ADL_N_DDR5_CRB:
+//7533V101_4    
+          case PLATFORM_ID_ADL_N_LPDDR5_753300S:
           case PLATFORM_ID_ADL_N_LPDDR5_RVP:
           case PLATFORM_ID_ADL_N_UP7EN50:
             ConfigureGpio (CDATA_NO_TAG, sizeof (mAdlNTsnDeviceGpioTable) / sizeof (mAdlNTsnDeviceGpioTable[0]), (UINT8*)mAdlNTsnDeviceGpioTable);
@@ -569,7 +573,7 @@ BoardInit (
       } else {
         //Init SIO if EC is not available and S0ix is disabled.
         DEBUG ((DEBUG_INFO, "SioInit\n"));
-        SioInit();
+//7533V101_3        SioInit();
       }
     }
 
