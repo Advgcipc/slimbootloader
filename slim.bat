@@ -11,13 +11,14 @@
 
 @set PROJECT_TYPE_VER=0V
 @set PROJECT_MAJOR_VER=1
-@set PROJECT_MINOR_VER=08
+@set PROJECT_MINOR_VER=09
 
 @set BIOS_NAME=%PROJECT_NAME%%PROJECT_EXTNAME%%PROJECT_PD%
 @set BIOS_FEATURE=%PROJECT_CHIPSET_TYPE%%PROJECT_FW_TYPE%%PROJECT_BUILD_TYPE%
 @set BIOS_VERSION=%PROJECT_TYPE_VER%%PROJECT_MAJOR_VER%%PROJECT_MINOR_VER%
 
-@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
+::@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_DEBUG.fd:UEFI:Lzma"
+@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UniversalPayload_DEBUG.elf:UEFI:Lzma"
 
 @set STITCH_BIOS_IMAGE=Outputs/%PLATFORM_TYPE%/%BIOS_IMAGE%
 ::struct {UINT8 PlatformId : 5;UINT8  Reserved1  : 3;UINT8  DebugUart;UINT8 Reserved3;UINT8 Marker;} STITCH_DATA;
@@ -37,7 +38,7 @@
 @set TARGE=RELEASE
 @set PROJECT_FW_TYPE=0
 @set PLATFORM_OPTION= -r %PLATFORM_OPTION%
-@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UEFIPAYLOAD_RELEASE.fd:UEFI:Lzma"
+@set PAYLOAD_BINFILE="OsLoader.efi:LLDR:Lz4;UniversalPayload_RELEASE.elf:UEFI:Lzma"
 @set STITCHIFWI_TEMP=-r
 )
 
@@ -170,8 +171,8 @@ python BuildLoader.py clean
 @title Slim Boot Loader Setting environment
 @set PATH=C:\envs;C:\Program Files\Git\cmd;%PATH%
 
-@set OPENSSL_PATH=C:\Openssl
-@set PYTHON_HOME=C:\Python36
+@set OPENSSL_PATH=C:\Program Files\OpenSSL-Win64\bin
+@set PYTHON_HOME=C:\Python39
 @set PYTHONIOENCODING=utf8
 @set NASM_PREFIX=C:\Nasm\
 @set SBL_KEY_DIR=%CD%\Platform\%PLATFORM_PACKAGE%\Binaries\Keys\sblKeys

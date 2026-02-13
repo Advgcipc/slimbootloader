@@ -22,16 +22,43 @@
 - [x] ClockGen setting
 - [x] BIOSString support
 - [x] SMBIOS support
-- [X] EC porting
+- [x] EC porting
 - [x] Firmware Update function 
-- [ ] Security function
+- [x] Security function
 - [x] ME XML setting
 - [x] USB function
-- [X] HDA verb table
+- [x] HDA verb table
 - [x] Display support
-- [X] PCI Express function
-- [X] Generic IO decode
+- [x] PCI Express function
+- [x] Generic IO decode
 - [x] Debug Features
+
+### Revision History
+* BIOS Name     : 688400S0180V109.bin
+* BIOS Checksum : AB2D
+* BIOS String   : **** SOM-6884 BIOS V1.09 (02/12/2026) ****
+* Release Date  : 2026/02/12
+* Owner         : Lawrence.Guan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V109_1  Resolve build fail caused from git merge.
+
+* 6884V109_2  Support UniversalPayload of ELF format.
+
+* 6884V109_3  Support secure boot settings.
+
+* No tag: 
+*   Merged SOM-6884A2 V108 into commit 0576ef337442c2ba5758e6117a05ba03b6116a7b, producing the resulting commit 97f53a6963c0b140412b0e847a9725a3c347a3a6. Version V109 was built based on this resulting commit.
+
+### Firmware Update Trigger step
+  
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V109_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
+  Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
+
 
 ### Revision History
 * BIOS Name     : 688400S0080V108.bin ; 688400S0180V108.bin

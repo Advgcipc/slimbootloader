@@ -327,6 +327,27 @@
   gPlatformModuleTokenSpaceGuid.PcdPciResourceMem32Base   | $(PCI_MEM32_BASE)
   gPlatformModuleTokenSpaceGuid.PcdPciResourceMem64Base   | $(PCI_MEM64_BASE)
 
+#//6884V109_3+>>
+  gPlatformModuleTokenSpaceGuid.PcdPlatformBootDefaultTimeout    | $(PLATFORM_BOOT_TIMEOUT)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKeysDefaultLoad  | $(SECUREBOOT_KEYS_DEFAULTLOAD)
+  gPlatformModuleTokenSpaceGuid.PcdPlatformSerialTerminal   | $(PLATFORM_SERIAL_TERMINAL)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootPKKeyEnabled   | $(SECUREBOOT_PK_KEY_ENABLE)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootKEKKeyEnabled  | $(SECUREBOOT_KEK_KEY_ENABLE)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBKeyEnabled   | $(SECUREBOOT_DB_KEY_ENABLE)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBXKeyEnabled  | $(SECUREBOOT_DBX_KEY_ENABLE)
+  gPlatformModuleTokenSpaceGuid.PcdSecureBootDBTKeyEnabled  | $(SECUREBOOT_DBT_KEY_ENABLE)
+  gPlatformModuleTokenSpaceGuid.PcdPKKeyAddress             | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdPKKeySize                | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeyAddress            | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdKEKKeySize               | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBKeyAddress             | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBKeySize                | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeyAddress            | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBXKeySize               | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeyAddress            | 0x00000000
+  gPlatformModuleTokenSpaceGuid.PcdDBTKeySize               | 0x00000000
+#//<<+6884V109_3
+
 [PcdsFeatureFlag]
   gPlatformCommonLibTokenSpaceGuid.PcdMinDecompression    | FALSE
   gPlatformCommonLibTokenSpaceGuid.PcdMeasuredBootEnabled | $(HAVE_MEASURED_BOOT)

@@ -81,6 +81,31 @@ class Board(BaseBoard):
         # 0 - PCH UART0, 1 - PCH UART1, 2 - PCH UART2, 0xFF - EC UART 0x3F8
         self.DEBUG_PORT_NUMBER =0
 
+#//6884V109_3+>>
+        self.SECUREBOOT_KEYS_DEFAULTLOAD = 1
+        self.SECUREBOOT_PK_KEY_ENABLE   = 1
+        self.SECUREBOOT_KEK_KEY_ENABLE  = 1
+        self.SECUREBOOT_DB_KEY_ENABLE   = 1
+        self.SECUREBOOT_DBX_KEY_ENABLE  = 1
+        self.SECUREBOOT_DBT_KEY_ENABLE  = 1
+        self.PLATFORM_BOOT_TIMEOUT      = 1
+        self.PLATFORM_SERIAL_TERMINAL   = 1
+
+        self.SECUREBOOT_PK_FILE      = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/PK/Advantech_PK.cer'
+        self.SECUREBOOT_KEK_FILE     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/Advantech_KEK.cer'
+        self.SECUREBOOT_KEK_FILE2    = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/KEK_MSFTproductionKekCA.cer'
+        self.SECUREBOOT_KEK_FILE1    = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/KEK/KEK_MSFTproductionKekCA.2023.cer'
+        self.SECUREBOOT_DB_FILE      = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_microsoft_option_rom_uefi_ca_2023.cer'
+        self.SECUREBOOT_DB_FILE1     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_microsoft_uefi_ca_2023.cer'
+        self.SECUREBOOT_DB_FILE2     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTpreReleaseCandidateWindowsSigningCA.cer'
+        self.SECUREBOOT_DB_FILE3     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTproductionUEFIsigningCA.cer'
+        self.SECUREBOOT_DB_FILE4     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_MSFTproductionWindowsSigningCA2011.cer'
+        self.SECUREBOOT_DB_FILE5     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DB/db_windows_uefi_ca_2023.cer'
+        self.SECUREBOOT_DBX_FILE     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBX/MicCorKEKCA2011_2011-06-24.crt'
+        self.SECUREBOOT_DBX_FILE1    = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBX/MicCorThiParMarRoo_2010-10-05.crt'
+        self.SECUREBOOT_DBT_FILE     = 'Platform/RaptorlakeBoardPkg/Binaries/Keys/SecureBootKeys/DBT/MsRootCA2010.cer'
+#//<<+6884V109_3
+
         self.ENABLE_MULTI_USB_BOOT_DEV = 1
 
         self.CPU_MAX_LOGICAL_PROCESSOR_NUMBER = 32

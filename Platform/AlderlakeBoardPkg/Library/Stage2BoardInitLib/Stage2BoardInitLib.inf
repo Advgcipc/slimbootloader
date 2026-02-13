@@ -128,8 +128,11 @@
   gPlatformModuleTokenSpaceGuid.PcdFlashBaseAddress
   gPlatformModuleTokenSpaceGuid.PcdFlashSize
   gPlatformModuleTokenSpaceGuid.PcdIgdOpRegionAddress
+  gPlatformModuleTokenSpaceGuid.PcdAcpiTableTemplatePtr
 #//6884V101_3
   gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate  
+#//6884V109_1
+  gPlatformModuleTokenSpaceGuid.PcdSmbiosTablesBase
 
 [FixedPcd]
   gPlatformAlderLakeTokenSpaceGuid.PcdAdlLpSupport

@@ -383,6 +383,8 @@
   gPlatformCommonLibTokenSpaceGuid.PcdTccEnabled                  | FALSE  | BOOLEAN | 0x20000221
   gPlatformCommonLibTokenSpaceGuid.PcdFspNoEop                    | FALSE  | BOOLEAN | 0x20000223
   gPlatformCommonLibTokenSpaceGuid.PcdTxtEnabled                  | FALSE  | BOOLEAN | 0x20000229
+  # Enable ELF payload support
+  gPlatformCommonLibTokenSpaceGuid.PcdElfSupportEnabled           | TRUE   | BOOLEAN | 0x2000022A
   # Enable FV payload support
   gPlatformCommonLibTokenSpaceGuid.PcdFvSupportEnabled            | TRUE   | BOOLEAN | 0x2000022B
   # Enable PE32 payload support
@@ -392,7 +394,6 @@
   gPlatformCommonLibTokenSpaceGuid.PcdMultiboot2SupportEnabled    | TRUE   | BOOLEAN | 0x2000022F
 #//6884V101_3
   gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate            | {0}    | VOID*   | 0x20000240
-
 
 [PcdsFixedAtBuild]
   gPlatformCommonLibTokenSpaceGuid.PcdFipsSupport     | FALSE      | BOOLEAN | 0x20000226

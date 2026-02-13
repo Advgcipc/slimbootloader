@@ -542,30 +542,30 @@ UpdateSmbiosInfo (
 
 }
 
-VOID
-EFIAPI
-BuildBiosStringHob ()
-{
-  EFI_PEI_BIOS_STRING_HOB *BiosStringHob;
-  BOOT_LOADER_VERSION  *VerInfoTbl;
-  CHAR8 PlatformName[10]= {0};
-  VerInfoTbl    = GetVerInfoPtr ();
-
-  BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
-
-  if (BiosStringHob != NULL) {
-    CopyMem (PlatformName, GetPlatformName (), 8);
-
-    AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
-
-    BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
-    BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
-    BiosStringHob->BIOSFormalVersion  = 'V';
-    
-    AsciiSPrint (BiosStringHob->ProjectBuildDate, 16, "%a",PcdGetPtr (PcdVerInfoBuildDate));
-  }
-
-}
+//6884V109_1 VOID
+//6884V109_1 EFIAPI
+//6884V109_1 BuildBiosStringHob ()
+//6884V109_1 {
+//6884V109_1   EFI_PEI_BIOS_STRING_HOB *BiosStringHob;
+//6884V109_1   BOOT_LOADER_VERSION  *VerInfoTbl;
+//6884V109_1   CHAR8 PlatformName[10]= {0};
+//6884V109_1   VerInfoTbl    = GetVerInfoPtr ();
+//6884V109_1 
+//6884V109_1   BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
+//6884V109_1 
+//6884V109_1   if (BiosStringHob != NULL) {
+//6884V109_1     CopyMem (PlatformName, GetPlatformName (), 8);
+//6884V109_1 
+//6884V109_1     AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
+//6884V109_1 
+//6884V109_1     BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+//6884V109_1     BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+//6884V109_1     BiosStringHob->BIOSFormalVersion  = 'V';
+//6884V109_1     
+//6884V109_1     AsciiSPrint (BiosStringHob->ProjectBuildDate, 16, "%a",PcdGetPtr (PcdVerInfoBuildDate));
+//6884V109_1   }
+//6884V109_1 
+//6884V109_1 }
 
 VOID
 Stage2BoardInitNotify (
@@ -587,7 +587,7 @@ Stage2BoardInitNotify (
 
     break;
     case PostSiliconInit:
-      BuildBiosStringHob();
+//6884V109_1      BuildBiosStringHob();
     break;
     case PostPciEnumeration:
       UpdateSmbiosInfo ();
@@ -680,7 +680,7 @@ BoardInit (
       case PLATFORM_ID_ADL_N_UP7EN50:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePostMemAdlNLpddr5Rvp) / sizeof (mGpioTablePostMemAdlNLpddr5Rvp[0]), (UINT8*)mGpioTablePostMemAdlNLpddr5Rvp);
         break;
-      case PLATFORM_ID_ADL_N_UP2PTWL:
+//6884V109_1      case PLATFORM_ID_ADL_N_UP2PTWL:
       default:
         break;
     }
@@ -716,7 +716,7 @@ BoardInit (
           case PLATFORM_ID_ADL_N_UP7EN50:
             ConfigureGpio (CDATA_NO_TAG, sizeof (mAdlNTsnDeviceGpioTable) / sizeof (mAdlNTsnDeviceGpioTable[0]), (UINT8*)mAdlNTsnDeviceGpioTable);
             break;
-          case PLATFORM_ID_ADL_N_UP2PTWL:
+//6884V109_1          case PLATFORM_ID_ADL_N_UP2PTWL:
           default:
             DEBUG ((DEBUG_WARN, "TSN GPIO: Unrecognized BoardId 0x%X\n", GetPlatformId ()));
             break;

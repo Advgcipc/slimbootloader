@@ -1,11 +1,16 @@
 /** @file
 
-  Copyright (c) 2016 - 2023, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2016 - 2023, Intel Corporation. All rights resered.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "Stage2.h"
+
+//6884V109_3+>>
+#include <Library/PrintLib.h>
+#include <BiosStringHob.h> 
+//<<+6884V109_3
 
 /**
   Callback function to add performance measure point during component loading.
@@ -438,6 +443,75 @@ S3ResumePath (
   FindAcpiWakeVectorAndJump (S3Data->AcpiBase);
 }
 
+//6884V109_3+>>
+
+VOID
+EFIAPI
+BuildBiosStringHob ()
+{
+  EFI_SECURE_BOOT_KEYS_HOB *SecureBootKeysHob;
+
+  EFI_PEI_BIOS_STRING_HOB *BiosStringHob;
+  BOOT_LOADER_VERSION  *VerInfoTbl;
+  CHAR8 PlatformName[10]= {0};
+  CHAR8 *pPDStr = NULL;
+  VerInfoTbl    = GetVerInfoPtr ();
+
+  EFI_PEI_BIOS_PD_STRING PDname[8] =  {\
+                                      {'S',{'S','O','M',0}}, {'A',{'A','I','M','B',0}},\
+                                      {'E',{'E','S','B','C',0}},{'I',{'D','P','X',0}},\
+                                      {'D',{'A','C','G','-','M','E','B','2',0}},{'R',{'A','R','K',0}},\
+                                      {'G',{'E','A','I',0}},{'Z',{'D','S',0}}\
+                                      };
+  EFI_PEI_BIOS_PD_STRING *pPDname = PDname;
+
+  BiosStringHob = BuildGuidHob (&gAhcBiosStringGuid, sizeof (EFI_PEI_BIOS_STRING_HOB));
+
+  if (BiosStringHob != NULL) {
+    CopyMem (PlatformName, GetPlatformName (), 8);
+    if (PlatformName[6] != 0){
+      for (UINT8 Index = 0; Index < 8; Index++,pPDname = pPDname+1) {
+        if (PlatformName[6] == pPDname->BIOSPD) {
+          pPDStr = pPDname->BIOSPDString;
+          PlatformName[6] = 0;
+        }
+      }
+    }
+
+    if (pPDStr)
+      AsciiSPrint (BiosStringHob->ProjectName, 16, "%a-%a", pPDStr, PlatformName);
+    else
+      AsciiSPrint (BiosStringHob->ProjectName, 16, "%a", PlatformName);
+
+    BiosStringHob->BIOSMajorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMajorVersion;
+    BiosStringHob->BIOSMinorVersion   = (UINT8) VerInfoTbl->ImageVersion.ProjMinorVersion;
+    BiosStringHob->BIOSFormalVersion  = 'V';
+    
+    AsciiSPrint (BiosStringHob->ProjectBuildDate, 16, "%a",PcdGetPtr (PcdVerInfoBuildDate));
+  }
+
+  SecureBootKeysHob = BuildGuidHob (&gEfiGlobalVariableGuid, sizeof (EFI_SECURE_BOOT_KEYS_HOB));
+  if (SecureBootKeysHob != NULL) {
+    SecureBootKeysHob->PKKeyAddress   = PcdGet32 (PcdPKKeyAddress);
+    SecureBootKeysHob->PKKeySize      = PcdGet32 (PcdPKKeySize);
+    SecureBootKeysHob->KEKKeyAddress  = PcdGet32 (PcdKEKKeyAddress);
+    SecureBootKeysHob->KEKKeySize     = PcdGet32 (PcdKEKKeySize);
+    SecureBootKeysHob->DBKeyAddress   = PcdGet32 (PcdDBKeyAddress);
+    SecureBootKeysHob->DBKeySize      = PcdGet32 (PcdDBKeySize);
+    SecureBootKeysHob->DBXKeyAddress  = PcdGet32 (PcdDBXKeyAddress);
+    SecureBootKeysHob->DBXKeySize     = PcdGet32 (PcdDBXKeySize);
+    SecureBootKeysHob->DBTKeyAddress  = PcdGet32 (PcdDBTKeyAddress);
+    SecureBootKeysHob->DBTKeySize     = PcdGet32 (PcdDBTKeySize);
+
+    SecureBootKeysHob->SecureBootKeysDefaultLoad  = PcdGet8 (PcdSecureBootKeysDefaultLoad);
+    SecureBootKeysHob->PlatformBootDefaultTimeout  = PcdGet16 (PcdPlatformBootDefaultTimeout);
+    SecureBootKeysHob->SerialTerminalDefault        = PcdGet8 (PcdPlatformSerialTerminal);
+
+  }
+
+}
+//<<+6884V109_3
+
 /**
   Entry point to the C language phase of Stage2.
 
@@ -502,6 +576,48 @@ SecStartup (
   Status = PcdSet32S (PcdGraphicsVbtAddress,   PCD_GET32_WITH_ADJUST (PcdGraphicsVbtAddress) + Delta);
   Status = PcdSet32S (PcdSplashLogoAddress,    PCD_GET32_WITH_ADJUST (PcdSplashLogoAddress) + Delta);
 
+
+//6884V109_3+>>
+//  DEBUG ((DEBUG_INFO, "\n============= PcdSecureBootKeysEnabled = %X\n", PcdGetBool (PcdSecureBootKeysEnabled)));
+//  DEBUG ((DEBUG_INFO, "\n============= PcdPKKeyAddress = %X\n", PcdGet32 (PcdPKKeyAddress)));
+//  DEBUG ((DEBUG_INFO, "\n============= PcdPKKeySize = %X\n", PcdGet32 (PcdPKKeySize)));
+//
+  if (PcdGetBool (PcdSecureBootPKKeyEnabled)) {
+    Status = PcdSet32S (PcdPKKeyAddress,    PCD_GET32_WITH_ADJUST (PcdPKKeyAddress) + Delta);
+    Status = PcdSet32S (PcdPKKeySize,    PCD_GET32_WITH_ADJUST (PcdPKKeySize));
+  }
+  if (PcdGetBool (PcdSecureBootKEKKeyEnabled)) {
+    Status = PcdSet32S (PcdKEKKeyAddress,    PCD_GET32_WITH_ADJUST (PcdKEKKeyAddress) + Delta);
+    Status = PcdSet32S (PcdKEKKeySize,    PCD_GET32_WITH_ADJUST (PcdKEKKeySize));
+  }
+
+  if (PcdGetBool (PcdSecureBootDBKeyEnabled)) {
+    Status = PcdSet32S (PcdDBKeyAddress,    PCD_GET32_WITH_ADJUST (PcdDBKeyAddress) + Delta);
+    Status = PcdSet32S (PcdDBKeySize,    PCD_GET32_WITH_ADJUST (PcdDBKeySize));
+  }
+
+  if (PcdGetBool (PcdSecureBootDBXKeyEnabled)) {
+    Status = PcdSet32S (PcdDBXKeyAddress,    PCD_GET32_WITH_ADJUST (PcdDBXKeyAddress) + Delta);
+    Status = PcdSet32S (PcdDBXKeySize,    PCD_GET32_WITH_ADJUST (PcdDBXKeySize));
+  }
+
+  if (PcdGetBool (PcdSecureBootDBTKeyEnabled)) {
+    Status = PcdSet32S (PcdDBTKeyAddress,    PCD_GET32_WITH_ADJUST (PcdDBTKeyAddress) + Delta);
+    Status = PcdSet32S (PcdDBTKeySize,    PCD_GET32_WITH_ADJUST (PcdDBTKeySize));
+  }
+
+//
+//
+////  DEBUG ((DEBUG_INFO, "\n============= After PcdGraphicsVbtAddress = %X\n", PcdGet32 (PcdGraphicsVbtAddress)));
+////  DEBUG ((DEBUG_INFO, "\n============= After PcdSplashLogoAddress = %X\n", PcdGet32 (PcdSplashLogoAddress)));
+//  DEBUG ((DEBUG_INFO, "==== PcdSecureBootKeysLoadedEnabled = %X\n", PcdGetBool (PcdSecureBootKeysLoadedEnabled)));
+  DEBUG ((DEBUG_INFO, "==== PcdPKKey=%X Address = %X PcdPKKeySize = %X\n", PcdGetBool (PcdSecureBootPKKeyEnabled), PcdGet32 (PcdPKKeyAddress),PcdGet32 (PcdPKKeySize)));
+  DEBUG ((DEBUG_INFO, "==== PcdKEKKey=%X Address = %X PcdKEKKeySize = %X\n", PcdGetBool (PcdSecureBootKEKKeyEnabled), PcdGet32 (PcdKEKKeyAddress),PcdGet32 (PcdKEKKeySize)));
+  DEBUG ((DEBUG_INFO, "==== PcdDBKey=%X Address = %X PcdDBKeySize = %X\n", PcdGetBool (PcdSecureBootDBKeyEnabled), PcdGet32 (PcdDBKeyAddress),PcdGet32 (PcdDBKeySize)));
+  DEBUG ((DEBUG_INFO, "==== PcdDBXKey=%X Address = %X PcdDBXKeySize = %X\n", PcdGetBool (PcdSecureBootDBXKeyEnabled), PcdGet32 (PcdDBXKeyAddress),PcdGet32 (PcdDBXKeySize)));
+  DEBUG ((DEBUG_INFO, "==== PcdDBTKey=%X Address = %X PcdDBTKeySize = %X\n", PcdGetBool (PcdSecureBootDBTKeyEnabled), PcdGet32 (PcdDBTKeyAddress),PcdGet32 (PcdDBTKeySize)));
+//<<+6884V109_3
+
   LdrGlobal->LdrHobList = (VOID *)(UINTN)LdrGlobal->MemPoolEnd;
   BuildHobHandoffInfoTable (
     BootMode,
@@ -553,6 +669,10 @@ SecStartup (
   // Create base HOB
   BuildBaseInfoHob (Stage2Param);
 
+//6884V109_3+>>
+  BuildBiosStringHob();
+//<<+6884V109_3
+ 
   // Display splash
   SplashPostPci = FALSE;
   if (FixedPcdGetBool (PcdSplashEnabled)) {
