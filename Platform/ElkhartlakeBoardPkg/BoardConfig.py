@@ -33,6 +33,7 @@ class Board(BaseBoard):
 
         self.BOARD_NAME           = 'ehl'
         self.BOARD_PKG_NAME       = 'ElkhartlakeBoardPkg'
+        self._SMBIOS_YAML_FILE    = os.path.join('Platform', self.BOARD_PKG_NAME, 'SmbiosStrings.yaml')
         self.SILICON_PKG_NAME     = 'ElkhartlakePkg'
 
         self.PCI_EXPRESS_BASE     = 0xC0000000
@@ -95,6 +96,9 @@ class Board(BaseBoard):
             self.PSE_TSIP_SIZE  = 0x00001000 if self.ENABLE_PSEFW_LOADING == 1 else 0
             self.SIIPFW_SIZE += self.TSNC_SIZE + self.TMAC_SIZE + self.PSE_TSIP_SIZE
 
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
+
         if self.HAVE_FIT_TABLE:
             self.FIT_ENTRY_MAX_NUM  = 10
 
@@ -145,6 +149,8 @@ class Board(BaseBoard):
         self.PAYLOAD_EXE_BASE     = 0x00B00000
         self.PAYLOAD_SIZE         = 0x00030000
         self.EPAYLOAD_SIZE        = 0x00162000
+        self.OS_LOADER_FD_SIZE    = 0x00058000
+        self.OS_LOADER_FD_NUMBLK  = self.OS_LOADER_FD_SIZE // self.FLASH_BLOCK_SIZE
         self.UCODE_SIZE           = 0x00010000 if self.HAVE_FSP_BIN != 0 else 0
         self.MRCDATA_SIZE         = 0x00008000
         self.CFGDATA_SIZE         = 0x00004000
@@ -295,6 +301,9 @@ class Board(BaseBoard):
           # Name | Image File         |    CompressAlg    | AuthType                            | Key File                  | Region Align   | Region Size    |  Svn Info
           # ===============================================================================================================================================================
           ('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,    0,           0        ,      0),   # Container Header
+        )
+        container_list.append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
 
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')

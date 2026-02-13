@@ -24,8 +24,6 @@
 #include <Library/DebugPrintErrorLevelLib.h>
 #include <Library/FspSupportLib.h>
 #include <Guid/GraphicsInfoHob.h>
-#include <Guid/SystemTableInfoGuid.h>
-#include <Guid/SerialPortInfoGuid.h>
 #include <Pi/PiBootMode.h>
 #include <Library/BootloaderCoreLib.h>
 #include <Library/HeciLib.h>
@@ -39,7 +37,8 @@
 #include <IndustryStandard/Acpi.h>
 #include <Library/SpiFlashLib.h>
 #include <Library/TpmLib.h>
-#include <Library/VtdLib.h>
+#include <Library/VTdLib.h>
+#include <Library/DmarLib.h>
 #include <Library/VtdPmrLib.h>
 #include <RegAccess.h>
 #include <IndustryStandard/Pci.h>

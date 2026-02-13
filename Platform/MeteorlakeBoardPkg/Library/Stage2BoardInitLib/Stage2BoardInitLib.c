@@ -339,8 +339,9 @@ BoardInit (
       }
     }
     BuildOsConfigDataHob ();
+    // Override the Smbios default Info using SMBIOS binary blob
     if (FeaturePcdGet (PcdSmbiosEnabled)) {
-      InitializeSmbiosInfo ();
+      LoadSmbiosStringsFromComponent (SIGNATURE_32 ('I', 'P', 'F', 'W'), SIGNATURE_32 ('S', 'M', 'B', 'S'));
     }
 
     // FIPS is disabled by default. Enable it only when specified by config data.
@@ -546,31 +547,6 @@ SaveNvsData (
   return Status;
 }
 
-/**
- Update serial port information to global HOB data structure.
-
- @param SerialPortInfo  Pointer to global HOB data structure.
- **/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-  )
-{
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize ();
-  if (GetDebugPort () >= GetPchMaxSerialIoUartControllersNum ()) {
-    // IO Type
-    SerialPortInfo->Type = 1;
-  } else {
-    // MMIO Type
-    SerialPortInfo->Type = 2;
-  }
-
-  DEBUG ((DEBUG_INFO, "SerialPortInfo Type=%d BaseAddr=0x%08X RegWidth=%d\n",
-    SerialPortInfo->Type, SerialPortInfo->BaseAddr, SerialPortInfo->RegWidth));
-}
 
 /**
  Update the OS boot option
@@ -754,8 +730,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gSmmInformationGuid) {
@@ -1825,11 +1799,18 @@ PlatformUpdateAcpiGnvs (
   UpdateCpuNvs (CpuNvs);
 
   //System Agent NVS Init
+  SaNvs->XPcieCfgBaseAddress      = (UINT32)(PcdGet64(PcdPciExpressBaseAddress));
   SaNvs->Mmio64Base               = 0;
   SaNvs->Mmio64Length             = 0;
   SaNvs->Mmio32Base               = PcdGet32(PcdPciResourceMem32Base);
-  SaNvs->Mmio32Length             = ACPI_MMIO_BASE_ADDRESS - SaNvs->Mmio32Base;
-  SaNvs->XPcieCfgBaseAddress      = (UINT32)(PcdGet64(PcdPciExpressBaseAddress));
+  if (SaNvs->Mmio32Base < SaNvs->XPcieCfgBaseAddress) {
+    SaNvs->Mmio32Length = SaNvs->XPcieCfgBaseAddress - SaNvs->Mmio32Base;
+  } else if (SaNvs->Mmio32Base < PCH_PCR_BASE_ADDRESS) {
+    SaNvs->Mmio32Length = PCH_PCR_BASE_ADDRESS - SaNvs->Mmio32Base;
+  } else {
+    DEBUG((DEBUG_INFO, "acpi: Unable to configure M32L with M32B=0x%08X\n", SaNvs->Mmio32Base));
+  }
+
   SaNvs->SimicsEnvironment = 0;
   SaNvs->AlsEnable = 0;
   SaNvs->IgdState = 1;

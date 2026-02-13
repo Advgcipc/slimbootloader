@@ -39,6 +39,7 @@ class Board(BaseBoard):
         self._FSP_PATH_NAME                   = 'Silicon/AlderlakePkg/Azb/FspBin'
         self.MICROCODE_INF_FILE               = 'Silicon/AlderlakePkg/Microcode/MicrocodeAzb.inf'
         self.FSP_INF_FILE                     = 'Silicon/AlderlakePkg/FspBin/FspBinAzb.inf'
+        self._SMBIOS_YAML_FILE                = os.path.join('Platform', self.BOARD_PKG_NAME, 'SmbiosStrings.yaml')
         self._LP_SUPPORT                      = True
         self._N_SUPPORT                       = False
         self._AZB_SUPPORT                     = True
@@ -177,7 +178,10 @@ class Board(BaseBoard):
         self.REDUNDANT_SIZE                   = ((self.REDUNDANT_SIZE + 0xFFFF) & ~0xFFFF)
         self.SIIPFW_SIZE                      = 0x1000
 
-        self.OS_LOADER_FD_SIZE                = 0x58000
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
+
+        self.OS_LOADER_FD_SIZE                = 0x60000
         self.OS_LOADER_FD_NUMBLK              = self.OS_LOADER_FD_SIZE // self.FLASH_BLOCK_SIZE
 
         self.NON_REDUNDANT_SIZE               = 0x3BF000 + self.SIIPFW_SIZE
@@ -259,6 +263,7 @@ class Board(BaseBoard):
             'HeciLib|Silicon/CommonSocPkg/Library/HeciLib/HeciLib.inf',
             'MeChipsetLib|Silicon/$(SILICON_PKG_NAME)/Library/MeChipsetLib/MeChipsetLib.inf',
             'VtdLib|Silicon/$(SILICON_PKG_NAME)/Library/VTdLib/VTdLib.inf',
+            'DmarLib|Silicon/CommonSocPkg/Library/DmarLib/DmarLib.inf',
             'PsdLib|Silicon/$(SILICON_PKG_NAME)/Library/PsdLib/PsdLib.inf',
             'HeciMeExtLib|Silicon/$(SILICON_PKG_NAME)/Library/HeciMeExtLib/HeciMeExtLib.inf',
             'MeExtMeasurementLib|Silicon/$(SILICON_PKG_NAME)/Library/MeExtMeasurementLib/MeExtMeasurementLib.inf',
@@ -340,6 +345,9 @@ class Board(BaseBoard):
           # Name | Image File             |    CompressAlg  | AuthType                        | Key File                        | Region Align   | Region Size |  Svn Info
           # ========================================================================================================================================================
           ('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,        0,          0     ,        0),   # Container Header
+        )
+        container_list.append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
 
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')

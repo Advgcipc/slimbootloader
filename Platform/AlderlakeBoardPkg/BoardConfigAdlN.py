@@ -23,19 +23,20 @@ class Board(BaseBoard):
         super(Board, self).__init__(*args, **kwargs)
 
         self.VERINFO_IMAGE_ID     = 'SB_ASL'
-        self.VERINFO_PROJ_MAJOR_VER = 1
-        self.VERINFO_PROJ_MINOR_VER = 4
+        self.VERINFO_PROJ_MAJOR_VER = 2
+        self.VERINFO_PROJ_MINOR_VER = 5
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
         self.BOARD_NAME           = 'adln'
         self.BOARD_PKG_NAME       = 'AlderlakeBoardPkg'
         self.SILICON_PKG_NAME     = 'AlderlakePkg'
-        self.FSP_IMAGE_ID         = '$TWLFSP$'
+        self.FSP_IMAGE_ID         = '$TWLFSPE'
         self._EXTRA_INC_PATH      = ['Silicon/AlderlakePkg/Adln/Include']
         self._FSP_PATH_NAME       = 'Silicon/AlderlakePkg/Adln/FspBin'
         self.MICROCODE_INF_FILE   = 'Silicon/AlderlakePkg/Microcode/Microcode.inf'
         self.ACPI_TABLE_INF_FILE  = 'Platform/AlderlakeBoardPkg/AcpiTables/AcpiTablesN.inf'
+        self._SMBIOS_YAML_FILE    = os.path.join('Platform', self.BOARD_PKG_NAME, 'SmbiosStrings.yaml')
         self._LP_SUPPORT          = True
         self._N_SUPPORT           = True
 
@@ -187,6 +188,9 @@ class Board(BaseBoard):
             self.TMAC_SIZE = 0x00001000
             self.SIIPFW_SIZE += self.TMAC_SIZE
 
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
+
         self.NON_REDUNDANT_SIZE   = 0x3BF000 + self.SIIPFW_SIZE
         self.NON_VOLATILE_SIZE    = 0x001000
         self.SLIMBOOTLOADER_SIZE  = (self.TOP_SWAP_SIZE + self.REDUNDANT_SIZE) * 2 + \
@@ -284,6 +288,7 @@ class Board(BaseBoard):
             'HeciLib|Silicon/CommonSocPkg/Library/HeciLib/HeciLib.inf',
             'MeChipsetLib|Silicon/$(SILICON_PKG_NAME)/Library/MeChipsetLib/MeChipsetLib.inf',
             'VtdLib|Silicon/$(SILICON_PKG_NAME)/Library/VTdLib/VTdLib.inf',
+            'DmarLib|Silicon/CommonSocPkg/Library/DmarLib/DmarLib.inf',
             'PsdLib|Silicon/$(SILICON_PKG_NAME)/Library/PsdLib/PsdLib.inf',
             'HeciMeExtLib|Silicon/$(SILICON_PKG_NAME)/Library/HeciMeExtLib/HeciMeExtLib.inf',
             'MeExtMeasurementLib|Silicon/$(SILICON_PKG_NAME)/Library/MeExtMeasurementLib/MeExtMeasurementLib.inf',
@@ -358,6 +363,9 @@ class Board(BaseBoard):
           # Name | Image File             |    CompressAlg  | AuthType                        | Key File                        | Region Align   | Region Size |  Svn Info
           # ========================================================================================================================================================
           ('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,        0,          0     ,        0),   # Container Header
+        )
+        container_list.append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
 
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')

@@ -33,6 +33,7 @@ class Board(BaseBoard):
         self._EXTRA_INC_PATH      = ['Silicon/TigerlakePkg/FspBin']
         self._FSP_PATH_NAME       = 'Silicon/TigerlakePkg/FspBin'
         self.BOARD_PKG_NAME       = 'TigerlakeBoardPkg'
+        self._SMBIOS_YAML_FILE    = os.path.join('Platform', self.BOARD_PKG_NAME, 'SmbiosStrings.yaml')
         self.SILICON_PKG_NAME     = 'TigerlakePkg'
         self.PCH_PKG_NAME         = 'TigerlakePchPkg'
         self.FSP_IMAGE_ID         = 'TGLI-FSP'
@@ -184,6 +185,9 @@ class Board(BaseBoard):
             self.TMAC_SIZE = 0x00001000
             self.SIIPFW_SIZE += self.TMAC_SIZE
 
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
+
         Redundant_Components_Size = self.UCODE_SIZE + self.STAGE2_SIZE + self.STAGE1B_SIZE + self.FWUPDATE_SIZE + self.CFGDATA_SIZE + self.KEYHASH_SIZE
         if Redundant_Components_Size > self.REDUNDANT_SIZE:
             raise Exception ('Redundant region size 0x%x is smaller than required components size 0x%x!' % (self.REDUNDANT_SIZE, Redundant_Components_Size))
@@ -274,6 +278,7 @@ class Board(BaseBoard):
             'PchSpiLib|Silicon/CommonSocPkg/Library/PchSpiLib/PchSpiLib.inf',
             'SpiFlashLib|Silicon/CommonSocPkg/Library/SpiFlashLib/SpiFlashLib.inf',
             'VtdLib|Silicon/$(SILICON_PKG_NAME)/Library/VTdLib/VTdLib.inf',
+            'DmarLib|Silicon/CommonSocPkg/Library/DmarLib/DmarLib.inf',
             'ShellExtensionLib|Platform/$(BOARD_PKG_NAME)/Library/ShellExtensionLib/ShellExtensionLib.inf',
             'IgdOpRegionLib|Silicon/CommonSocPkg/Library/IgdOpRegionLib/IgdOpRegionLib.inf',
             'HeciInitLib|Silicon/$(PCH_PKG_NAME)/Library/HeciInitLib/HeciInitLib.inf',
@@ -349,6 +354,9 @@ class Board(BaseBoard):
           # Name | Image File             |    CompressAlg  | AuthType                        | Key File                        | Region Align   | Region Size |  Svn Info
           # ========================================================================================================================================================
           ('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,        0,          0     ,        0),   # Container Header
+        )
+        container_list.append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')
 

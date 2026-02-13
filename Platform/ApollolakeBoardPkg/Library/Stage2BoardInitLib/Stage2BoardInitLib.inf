@@ -48,6 +48,7 @@
   SpiFlashLib
   TpmLib
   VtdLib
+  DmarLib
   ConfigDataLib
   RleCompressLib
   SeedListInfoLib
@@ -92,7 +93,6 @@
   gPlatformModuleTokenSpaceGuid.PcdPayloadReservedMemSize
   gPlatformModuleTokenSpaceGuid.PcdPsdBiosEnabled
   gPlatformModuleTokenSpaceGuid.PcdSmbiosStringsPtr
-  gPlatformModuleTokenSpaceGuid.PcdSmbiosStringsCnt
   gPlatformModuleTokenSpaceGuid.PcdSmbiosTablesBase
   gPlatformModuleTokenSpaceGuid.PcdSmbiosEnabled
   gPlatformCommonLibTokenSpaceGuid.PcdVerifiedBootEnabled
@@ -108,3 +108,4 @@
   gPlatformCommonLibTokenSpaceGuid.PcdDmaBufferSize
   gPlatformCommonLibTokenSpaceGuid.PcdEmmcHs400SupportEnabled
   gPlatformModuleTokenSpaceGuid.PcdIgdOpRegionAddress
+  gPlatformModuleTokenSpaceGuid.PcdAcpiTableTemplatePtr

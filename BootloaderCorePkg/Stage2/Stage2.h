@@ -53,7 +53,6 @@
 #include <Guid/GraphicsInfoHob.h>
 #include <Guid/SmmInformationGuid.h>
 #include <Guid/MpCpuTaskInfoHob.h>
-#include <Guid/PciRootBridgeInfoGuid.h>
 #include <UniversalPayload/PciRootBridges.h>
 #include <UniversalPayload/AcpiTable.h>
 #include <UniversalPayload/SmbiosTable.h>
@@ -81,6 +80,7 @@
 #include <Guid/SmmBaseHob.h>
 #include <Library/IppCryptoPerfLib.h>
 #include <Library/BuildFdtLib.h>
+#include <Library/PlatformHookLib.h>
 
 #define UIMAGE_FIT_MAGIC               (0x56190527)
 

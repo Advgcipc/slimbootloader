@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2017 - 2023, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2017 - 2025, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -18,8 +18,6 @@
 #include <Library/BoardInitLib.h>
 #include <Library/SerialPortLib.h>
 #include <Guid/GraphicsInfoHob.h>
-#include <Guid/SystemTableInfoGuid.h>
-#include <Guid/SerialPortInfoGuid.h>
 #include <FspsUpd.h>
 #include <GlobalNvsAreaDef.h>
 #include <Library/BootloaderCoreLib.h>
@@ -514,35 +512,6 @@ UpdateBlRsvdRegion ()
   return EFI_SUCCESS;
 }
 
-/**
-  Add a Smbios type string into a buffer
-
-**/
-STATIC
-EFI_STATUS
-AddSmbiosTypeString (
-  SMBIOS_TYPE_STRINGS  *Dest,
-  UINT8                 Type,
-  UINT8                 Index,
-  CHAR8                *String
-  )
-{
-  UINTN   Length;
-
-  Dest->Type    = Type;
-  Dest->Idx     = Index;
-  if (String != NULL) {
-    Length = AsciiStrLen (String);
-
-    Dest->String  = (CHAR8 *)AllocateZeroPool (Length + 1);
-    if (Dest->String == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-    CopyMem (Dest->String, String, Length);
-  }
-
-  return EFI_SUCCESS;
-}
 
 /**
   Initialize necessary information for Smbios
@@ -557,26 +526,22 @@ InitializeSmbiosInfo (
   )
 {
   CHAR8                 TempStrBuf[SMBIOS_STRING_MAX_LENGTH];
-  UINT16                Index;
+  CHAR8                *SmbiosStrTbl;
   UINT16                PlatformId;
   UINTN                 Length;
-  SMBIOS_TYPE_STRINGS  *TempSmbiosStrTbl;
+  CHAR8                *TempSmbiosStrTbl;
   BOOT_LOADER_VERSION  *VerInfoTbl;
-  VOID                 *SmbiosStringsPtr;
 
-  Index         = 0;
   PlatformId    = GetPlatformId ();
-  TempSmbiosStrTbl  = (SMBIOS_TYPE_STRINGS *) AllocateTemporaryMemory (0);
-  if (TempSmbiosStrTbl == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  VerInfoTbl    = GetVerInfoPtr ();
+  TempSmbiosStrTbl  = (CHAR8 *) AllocateTemporaryMemory (0);
+  SmbiosStrTbl = TempSmbiosStrTbl;
 
   //
   // SMBIOS_TYPE_BIOS_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    1, "Intel Corporation");
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 1, "Intel Corporation");
+
+  VerInfoTbl = GetVerInfoPtr ();
   if (VerInfoTbl != NULL) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
       "SB_CFL.%03d.%03d.%03d.%03d.%03d.%05d.%c-%016lX%a\0",
@@ -592,15 +557,13 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    3, "Unknown date");
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 2, TempStrBuf);
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 3, __DATE__);
 
   //
   // SMBIOS_TYPE_SYSTEM_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     1, "Intel Corporation");
   if ((PlatformId == PLATFORM_ID_CFL_S) || (PlatformId == PLATFORM_ID_CFL_H)) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "CoffeeLake Client Platform");
@@ -609,21 +572,21 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     3, "0.1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     4, "System Serial Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     5, "System SKU Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     6, "CannonLake Client System");
 
   //
   // SMBIOS_TYPE_BASEBOARD_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     1, "Intel Corporation");
   if (PlatformId == PLATFORM_ID_CFL_S) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "CoffeeLake S 82 UDIMM RVP");
@@ -634,11 +597,11 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     3, "1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     4, "Board Serial Number");
 
   //
@@ -648,18 +611,17 @@ InitializeSmbiosInfo (
   //
   // SMBIOS_TYPE_END_OF_TABLE
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_END_OF_TABLE,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_END_OF_TABLE,
     0, NULL);
 
-  Length = sizeof (SMBIOS_TYPE_STRINGS) * Index;
-  SmbiosStringsPtr = AllocatePool (Length);
-  if (SmbiosStringsPtr == NULL) {
+  Length = SmbiosStrTbl - TempSmbiosStrTbl;
+  SmbiosStrTbl = AllocatePool (Length);
+  if (SmbiosStrTbl == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyMem (SmbiosStringsPtr, TempSmbiosStrTbl, Length);
-  (VOID) PcdSet32S (PcdSmbiosStringsPtr, (UINT32)(UINTN)SmbiosStringsPtr);
-  (VOID) PcdSet16S (PcdSmbiosStringsCnt, Index);
+  CopyMem (SmbiosStrTbl, TempSmbiosStrTbl, Length);
+  (VOID) PcdSet32S (PcdSmbiosStringsPtr, (UINT32)(UINTN)SmbiosStrTbl);
 
   return EFI_SUCCESS;
 }
@@ -1785,30 +1747,6 @@ SaveNvsData (
   return Status;
 }
 
-/**
-  Update Serial Interface Information for Payload
-
-  @param[in]  SerialPortInfo    Serial Interface Information to be updated for Payload
-
-**/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-)
-{
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize();
-  if (SerialPortInfo->BaseAddr < 0x10000) {
-    // IO Type
-    SerialPortInfo->Type = 1;
-  } else {
-    // MMIO Type
-    SerialPortInfo->Type = 2;
-  }
-
-}
 
 /**
  Update the OS boot option
@@ -1963,8 +1901,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gSmmInformationGuid) {
@@ -2354,8 +2290,16 @@ PlatformUpdateAcpiGnvs (
   //
   PlatformNvs->PlatformId = (UINT8) GetPlatformId ();
 
+  SaNvs->XPcieCfgBaseAddress = (UINT32)(PcdGet64(PcdPciExpressBaseAddress));
+
   SaNvs->Mmio32Base   = PcdGet32(PcdPciResourceMem32Base);
-  SaNvs->Mmio32Length = ACPI_MMIO_BASE_ADDRESS - SaNvs->Mmio32Base;
+  // PcdPciExpressBaseAddress is 0xE000_0000
+  if (SaNvs->Mmio32Base < SaNvs->XPcieCfgBaseAddress) {
+    SaNvs->Mmio32Length = SaNvs->XPcieCfgBaseAddress - SaNvs->Mmio32Base;
+  } else {
+    DEBUG((DEBUG_INFO, "acpi: Unable to configure M32L with M32B=0x%08X\n", SaNvs->Mmio32Base));
+  }
+
   SaNvs->Mmio64Base   = PcdGet64(PcdPciResourceMem64Base);
   SaNvs->Mmio64Length = SaNvs->Mmio64Base;
 

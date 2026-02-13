@@ -136,6 +136,8 @@ GetBootDeviceInfo (
 {
   EFI_STATUS                 Status;
   BOOLEAN                    IsHex;
+  UINTN                      TempDevType;
+  UINTN                      TempImageType;
 
   do {
     ShellPrint (L"Enter ImageType (Default 0x%X, Fastboot 0x%X)\n",
@@ -146,13 +148,17 @@ GetBootDeviceInfo (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-    BootOption->ImageType = (BOOT_IMAGE_TYPE) ((IsHex) ? StrHexToUintn (Buffer) : StrDecimalToUintn (Buffer));
 
     if (StrLen (Buffer) == 0) {
       BootOption->ImageType = CurrOption->ImageType;
       break;
-    } else if (BootOption->ImageType < EnumImageTypeMax) {
-      break;
+    } else {
+      TempImageType = (IsHex) ? StrHexToUintn (Buffer) : StrDecimalToUintn (Buffer);
+      if (TempImageType < EnumImageTypeMax) {
+        // Only perform the cast to BOOT_IMAGE_TYPE if the value is valid
+        BootOption->ImageType = (BOOT_IMAGE_TYPE) TempImageType;
+        break;
+      }
     }
     ShellPrint (L"Invalid ImageType value '%s', please re-enter\n", Buffer);
   } while (1);
@@ -166,13 +172,17 @@ GetBootDeviceInfo (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-    BootOption->DevType = (OS_BOOT_MEDIUM_TYPE) ((IsHex) ? StrHexToUintn (Buffer) : StrDecimalToUintn (Buffer));
 
     if (StrLen (Buffer) == 0) {
       BootOption->DevType = CurrOption->DevType;
       break;
-    } else if (BootOption->DevType < OsBootDeviceMax) {
-      break;
+    } else {
+      TempDevType = (IsHex) ? StrHexToUintn (Buffer) : StrDecimalToUintn (Buffer);
+      if (TempDevType < OsBootDeviceMax) {
+        // Only perform the cast to OS_BOOT_MEDIUM_TYPE if the value is valid
+        BootOption->DevType = (OS_BOOT_MEDIUM_TYPE) TempDevType;
+        break;
+      }
     }
     ShellPrint (L"Invalid DevType value '%s', please re-enter\n", Buffer);
   } while (1);

@@ -46,6 +46,7 @@ class Board(BaseBoard):
         self._FSP_PATH_NAME       = 'Silicon/RaptorlakePkg/Rplp/Fsp'
         self.FSP_INF_FILE         = 'Silicon/RaptorlakePkg/Rplp/Fsp/FspBinRplp.inf'
         self.MICROCODE_INF_FILE   = 'Silicon/RaptorlakePkg/Rplp/Microcode/MicrocodeRplp.inf'
+        self._SMBIOS_YAML_FILE    = os.path.join('Platform', self.BOARD_PKG_NAME_OVERRIDE, 'SmbiosStrings.yaml')
         self._LP_SUPPORT          = False
         self._N_SUPPORT           = False
 
@@ -241,18 +242,21 @@ class Board(BaseBoard):
                     FusaConfig = open (os.path.join(brd_cfg2_src_dir, 'CfgData_Fusa_Feature.dlt')).readlines()
 
             for line in FusaConfig:
-                if (re.search("TCC_CFG_DATA\.TccEnable\s+\|\s*1",line) != None or
-                    re.search("TCC_CFG_DATA\.TccEnable\s+\|\s*0x0*1",line) != None):
+                if (re.search(r"TCC_CFG_DATA\.TccEnable\s+\|\s*1",line) != None or
+                    re.search(r"TCC_CFG_DATA\.TccEnable\s+\|\s*0x0*1",line) != None):
                     # use setattr() to avoid matching release.py regex
                     setattr(self, 'ENABLE_TCC', 1)
-                elif (re.search("SILICON_CFG_DATA\.PchTsnEnable\s+\|\s*1",line) != None or
-                    re.search("SILICON_CFG_DATA\.PchTsnEnable\s+\|\s*0x0*1",line) != None):
+                elif (re.search(r"SILICON_CFG_DATA\.PchTsnEnable\s+\|\s*1",line) != None or
+                    re.search(r"SILICON_CFG_DATA\.PchTsnEnable\s+\|\s*0x0*1",line) != None):
                     # use setattr() to avoid matching release.py regex
                     setattr(self, 'ENABLE_TSN', 1)
 
         if self.ENABLE_TSN:
             self.TMAC_SIZE = 0x00001000
             self.SIIPFW_SIZE += self.TMAC_SIZE
+
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
 
         self.NON_REDUNDANT_SIZE   = 0x3BF000 + self.SIIPFW_SIZE + self.FUSA_SIZE
         self.NON_VOLATILE_SIZE    = 0x001000
@@ -342,7 +346,7 @@ class Board(BaseBoard):
                     else:
                         lines += open (os.path.join(brd_cfg_src_dir, 'CfgData_Fusa_Feature.dlt')).read()
                     # remove the TCC_CFG_DATA.TccEnable line to avoid its presence in final dlt files
-                    lines = re.sub("TCC_CFG_DATA\.TccEnable\s+\|[^\n]+","",lines)
+                    lines = re.sub(r"TCC_CFG_DATA\.TccEnable\s+\|[^\n]+","",lines)
                     if self.ENABLE_PRE_OS_CHECKER:
                         if os.path.exists(os.path.join(brd_cfg2_src_dir, 'CfgData_Posc_Feature.dlt')):
                             lines += open (os.path.join(brd_cfg2_src_dir, 'CfgData_Posc_Feature.dlt')).read()
@@ -380,6 +384,7 @@ class Board(BaseBoard):
             'HeciLib|Silicon/CommonSocPkg/Library/HeciLib/HeciLib.inf',
             'MeChipsetLib|Silicon/$(SILICON_PKG_NAME)/Library/MeChipsetLib/MeChipsetLib.inf',
             'VtdLib|Silicon/$(SILICON_PKG_NAME)/Library/VTdLib/VTdLib.inf',
+            'DmarLib|Silicon/CommonSocPkg/Library/DmarLib/DmarLib.inf',
             'PsdLib|Silicon/$(SILICON_PKG_NAME)/Library/PsdLib/PsdLib.inf',
             'HeciMeExtLib|Silicon/$(SILICON_PKG_NAME)/Library/HeciMeExtLib/HeciMeExtLib.inf',
             'MeExtMeasurementLib|Silicon/$(SILICON_PKG_NAME)/Library/MeExtMeasurementLib/MeExtMeasurementLib.inf',
@@ -463,6 +468,9 @@ class Board(BaseBoard):
           # Name | Image File             |    CompressAlg  | AuthType                        | Key File                        | Region Align   | Region Size |  Svn Info
           # ========================================================================================================================================================
           [('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,        0,          0     ,        0)],   # Container Header
+        )
+        container_list[0].append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
 
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')

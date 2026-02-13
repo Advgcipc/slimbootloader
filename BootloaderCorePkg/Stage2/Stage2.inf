@@ -76,12 +76,11 @@
   FitLib
   IppCryptoPerfLib
   BuildFdtLib
+  PlatformHookLib
 
 [Guids]
   gFspReservedMemoryResourceHobGuid
-  gLoaderSerialPortInfoGuid
   gLoaderPlatformDeviceInfoGuid
-  gLoaderSystemTableInfoGuid
   gLoaderPerformanceInfoGuid
   gLoaderLibraryDataGuid
   gLoaderMemoryMapInfoGuid
@@ -162,5 +161,8 @@
   gPlatformCommonLibTokenSpaceGuid.PcdHandOffFdtEnable
   gPlatformModuleTokenSpaceGuid.PcdSmramTsegBase
   gPlatformModuleTokenSpaceGuid.PcdSmramTsegSize
+  gPlatformCommonLibTokenSpaceGuid.PcdElfSupportEnabled
+  gPlatformCommonLibTokenSpaceGuid.PcdFvSupportEnabled
+  gPlatformCommonLibTokenSpaceGuid.PcdPe32SupportEnabled
 [Depex]
   TRUE

@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2017-2023, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2017-2025, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -10,7 +10,17 @@
 #include <VerInfo.h>
 #include <Library/SmbiosInitLib.h>
 
+#define VTD_RMRR_USB_LENGTH                   0x20000
+#define R_SA_MCHBAR_VTD1_OFFSET               0x6C88  ///< DMA Remapping HW UNIT1 for IGD
+#define R_SA_MCHBAR_VTD2_OFFSET               0x6C80  ///< DMA Remapping HW UNIT2 for all other - PEG, USB, SATA etc
 #define  VBT_OFFSET            36
+
+extern EFI_ACPI_DMAR_HEADER mAcpiDmarTableTemplate;
+STATIC
+CONST EFI_ACPI_COMMON_HEADER *mPlatformAcpiTables[] = {
+  (EFI_ACPI_COMMON_HEADER *)&mAcpiDmarTableTemplate,
+  NULL
+};
 
 UINT32       mOtgDualRoleCfg0 = 0;
 
@@ -100,35 +110,6 @@ CreateNhltAcpiTable (
   return PlatformService->AcpiTableUpdate ((UINT8 *)Table, Table->Header.Length);
 }
 
-/**
-  Add a Smbios type string into a buffer
-
-**/
-STATIC
-EFI_STATUS
-AddSmbiosTypeString (
-  SMBIOS_TYPE_STRINGS  *Dest,
-  UINT8                 Type,
-  UINT8                 Index,
-  CHAR8                *String
-  )
-{
-  UINTN   Length;
-
-  Dest->Type    = Type;
-  Dest->Idx     = Index;
-  if (String != NULL) {
-    Length = AsciiStrLen (String);
-
-    Dest->String  = (CHAR8 *)AllocateZeroPool (Length + 1);
-    if (Dest->String == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-    CopyMem (Dest->String, String, Length);
-  }
-
-  return EFI_SUCCESS;
-}
 
 /**
   Initialize necessary information for Smbios
@@ -143,26 +124,21 @@ InitializeSmbiosInfo (
   )
 {
   CHAR8                 TempStrBuf[SMBIOS_STRING_MAX_LENGTH];
-  UINT16                Index;
+  CHAR8                *SmbiosStrTbl;
   UINT16                PlatformId;
   UINTN                 Length;
-  SMBIOS_TYPE_STRINGS  *TempSmbiosStrTbl;
+  CHAR8                *TempSmbiosStrTbl;
   BOOT_LOADER_VERSION  *VerInfoTbl;
-  VOID                 *SmbiosStringsPtr;
 
-  Index         = 0;
   PlatformId    = GetPlatformId ();
-  TempSmbiosStrTbl  = (SMBIOS_TYPE_STRINGS *) AllocateTemporaryMemory (0);
-  VerInfoTbl    = GetVerInfoPtr ();
-  if (TempSmbiosStrTbl == NULL) {
-    DEBUG ((DEBUG_ERROR, "TempSmbiosStrTbl allocation failed\n"));
-    return EFI_OUT_OF_RESOURCES;
-  }
+  TempSmbiosStrTbl  = (CHAR8 *) AllocateTemporaryMemory (0);
+  SmbiosStrTbl = TempSmbiosStrTbl;
   //
   // SMBIOS_TYPE_BIOS_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    1, "Intel Corporation");
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 1, "Intel Corporation");
+
+  VerInfoTbl = GetVerInfoPtr ();
   if (VerInfoTbl != NULL) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
       "SBL:%03d.%03d.%03d.%03d.%03d.%05d.%c-%016lX%a\0",
@@ -178,15 +154,13 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    3, "Unknown date");
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 2, TempStrBuf);
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BIOS_INFORMATION, 3, __DATE__);
 
   //
   // SMBIOS_TYPE_SYSTEM_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     1, "Intel Corporation");
   if (PlatformId == PLATFORM_ID_OXH) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Oxbow Hill CRB Client Platform");
@@ -203,21 +177,21 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     3, "0.1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     4, "System Serial Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     5, "System SKU Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_SYSTEM_INFORMATION,
     6, "ApolloLake Client System");
 
   //
   // SMBIOS_TYPE_BASEBOARD_INFORMATION
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     1, "Intel Corporation");
   if (PlatformId == PLATFORM_ID_OXH) {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Oxbow Hill CRB Board");
@@ -234,28 +208,27 @@ InitializeSmbiosInfo (
   } else {
     AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
   }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     3, "1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_BASEBOARD_INFORMATION,
     4, "Board Serial Number");
 
   //
   // SMBIOS_TYPE_END_OF_TABLE
   //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_END_OF_TABLE,
+  SmbiosStrTbl = AddSmbiosTypeString (SmbiosStrTbl, SMBIOS_TYPE_END_OF_TABLE,
     0, NULL);
 
-  Length = sizeof (SMBIOS_TYPE_STRINGS) * Index;
-  SmbiosStringsPtr = AllocatePool (Length);
-  if (SmbiosStringsPtr == NULL) {
+  Length = SmbiosStrTbl - TempSmbiosStrTbl;
+  SmbiosStrTbl = AllocatePool (Length);
+  if (SmbiosStrTbl == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyMem (SmbiosStringsPtr, TempSmbiosStrTbl, Length);
-  (VOID) PcdSet32S (PcdSmbiosStringsPtr, (UINT32)(UINTN)SmbiosStringsPtr);
-  (VOID) PcdSet16S (PcdSmbiosStringsCnt, Index);
+  CopyMem (SmbiosStrTbl, TempSmbiosStrTbl, Length);
+  (VOID) PcdSet32S (PcdSmbiosStringsPtr, (UINT32)(UINTN)SmbiosStrTbl);
 
   return EFI_SUCCESS;
 }
@@ -933,6 +906,11 @@ BoardInit (
     }
     BuildOsConfigDataHob ();
     break;
+  case PrePciEnumeration:
+    if (FeaturePcdGet (PcdVtdEnabled)) {
+      Status = PcdSet32S (PcdAcpiTableTemplatePtr, (UINT32)(UINTN)mPlatformAcpiTables);
+    }
+    break;
   case PostPciEnumeration:
     // Enable framebuffer as WC for performance
     Status = SetFrameBufferWriteCombining (0, MAX_UINT32);
@@ -1453,26 +1431,6 @@ SaveNvsData (
 }
 
 /**
- Update serial port information to global HOB data structure.
-
- @param SerialPortInfo  Pointer to global HOB data structure.
- **/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-  )
-{
-  SerialPortInfo->Type     = 2;
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize();
-
-  DEBUG ((DEBUG_INFO, "SerialPortInfo Type=%d BaseAddr=0x%08X RegWidth=%d\n",
-          SerialPortInfo->Type, SerialPortInfo->BaseAddr, SerialPortInfo->RegWidth));
-}
-
-/**
  Update the OS boot option
 
  @param[out] OsBootOptionList   pointer to boot option list.
@@ -1659,8 +1617,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gLoaderPlatformInfoGuid) {
@@ -1762,6 +1718,71 @@ UpdateAcpiDsdt (
 }
 
 /**
+  Update the DMAR table using new DmarLib
+
+  @param[in, out] AcpiHeader         - The ACPI table header to be updated
+**/
+VOID
+UpdateDmarAcpi (
+  IN OUT   EFI_ACPI_DESCRIPTION_HEADER       *AcpiHeader
+  )
+{
+  EFI_STATUS                                 Status;
+  UINT8                                      Flags;
+  UINT64                                     BaseAddress;
+  EFI_ACPI_DMAR_STRUCTURE_HEADER             *DmarHdr;
+  UINTN                                      McD0BaseAddress;
+
+  // Check if VTd is enabled
+  McD0BaseAddress = PCI_LIB_ADDRESS (SA_MC_BUS, 0, 0, 0);
+  if ((MmioRead32 (McD0BaseAddress + R_SA_MC_CAPID0_A) & BIT23)) {
+    DEBUG ((DEBUG_INFO, "Vtd Disabled, skip DMAR Table update\n"));
+    return;
+  }
+
+  /// Set INTR_REMAP bit (BIT 0) if interrupt remapping is supported
+  Flags = 0;
+  if ((MmioRead32 (0xFED64000 + 0x10) & BIT3) && (MmioRead32 (DEF_VTD_BASE_ADDRESS + 0x10) & BIT3)) {
+    Flags |= BIT0;
+  }
+
+  // Set X2APIC_OPT_OUT bit (BIT 1) based on APIC mode
+  if (((AsmReadMsr64 (0x1B)) & (BIT11 + BIT10)) == BIT11 + BIT10) {
+    Flags |= BIT1;
+  } else {
+    Flags &= 0xFD;
+  }
+
+  Status = AddAcpiDmarHdr (AcpiHeader, Flags);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to add DMAR header\n"));
+    return;
+  }
+
+  // Add DRHD for Graphics Engine (VTD Engine 1)
+  BaseAddress = ReadVtdBaseAddress(0);  // Graphics VTD Engine
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    ASSERT (DmarHdr != NULL);
+    AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_ENDPOINT, 0, 0, 0, 2, 0);  // IGD
+  }
+
+  // Add DRHD for General Purpose Engine (VTD Engine 2)
+  BaseAddress = ReadVtdBaseAddress(1);  // General Purpose VTD Engine
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    ASSERT (DmarHdr != NULL);
+    // Add IOAPIC scope
+    AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_IOAPIC, 0, 2, 0, 0x1F, 0);
+    // Add HPET scope
+    AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_MSI_CAPABLE_HPET, 0, 0, 0, 0x1F, 0);
+  }
+
+  // Calculate DMAR table checksum
+  AcpiHeader->Checksum = CalculateCheckSum8 ((UINT8 *)AcpiHeader, AcpiHeader->Length);
+}
+
+/**
   Update PCH NVS and SA NVS area address and size in ACPI table.
 
   @param[in] Current    Pointer to ACPI description header
@@ -1780,8 +1801,6 @@ PlatformUpdateAcpiTable (
   EFI_ACPI_DESCRIPTION_HEADER                       *Table;
   EFI_ACPI_HIGH_PRECISION_EVENT_TIMER_TABLE_HEADER  *Hpet;
   UINT16                                            Data16;
-  EFI_ACPI_DMAR_TABLE                               *Dmar;
-  PLATFORM_DATA                                     *PlatformData;
   GLOBAL_NVS_AREA                                   *Gnvs;
   HDA_CFG_DATA                                      *HdaCfgData;
 
@@ -1823,14 +1842,9 @@ PlatformUpdateAcpiTable (
     }
   }
 
-  if (Table->Signature == EFI_ACPI_VTD_DMAR_TABLE_SIGNATURE) {
+  if (Table->Signature == EFI_ACPI_6_4_DMA_REMAPPING_TABLE_SIGNATURE) {
+    DEBUG ((DEBUG_INFO, "Updated DMAR Table entries\n"));
     if (FeaturePcdGet (PcdVtdEnabled)) {
-      PlatformData  = (PLATFORM_DATA *)GetPlatformDataPtr ();
-      if (PlatformData->RmrrUsbAddress != 0) {
-        Dmar = (EFI_ACPI_DMAR_TABLE *)Table;
-        Dmar->RmrrHeci.RmrBaseAddress  = PlatformData->RmrrUsbAddress;
-        Dmar->RmrrHeci.RmrLimitAddress = Dmar->RmrrHeci.RmrBaseAddress + VTD_RMRR_USB_LENGTH - 1;
-      }
       UpdateDmarAcpi (Table);
     } else {
       Status = EFI_UNSUPPORTED;
@@ -1907,7 +1921,12 @@ PlatformUpdateAcpiGnvs (
   }
 
   Pnvs->Mmio32Base   = PcdGet32 (PcdPciResourceMem32Base);
-  Pnvs->Mmio32Length = 0xD0000000 - Pnvs->Mmio32Base;
+  // SC_PCR_BASE_ADDRESS: 0xD000_0000 and PcdPciExpressBaseAddress: 0xE000_0000
+  if (Pnvs->Mmio32Length < SC_PCR_BASE_ADDRESS) {
+    Pnvs->Mmio32Length = SC_PCR_BASE_ADDRESS - Pnvs->Mmio32Base;
+  } else {
+    DEBUG((DEBUG_INFO, "acpi: Unable to configure M32L with M32B=0x%08X\n", Pnvs->Mmio32Base));
+  }
 
   HdaCfgData = (HDA_CFG_DATA *) FindConfigDataByTag (CDATA_HDA_TAG);
   if ((HdaCfgData != NULL) && (HdaCfgData->DspEnable == TRUE)) {

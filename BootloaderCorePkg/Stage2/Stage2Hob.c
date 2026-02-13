@@ -7,27 +7,6 @@
 
 #include "Stage2.h"
 
-#define EFI_PCI_ATTRIBUTE_ISA_MOTHERBOARD_IO          0x0001
-#define EFI_PCI_ATTRIBUTE_ISA_IO                      0x0002
-#define EFI_PCI_ATTRIBUTE_VGA_PALETTE_IO              0x0004
-#define EFI_PCI_ATTRIBUTE_VGA_MEMORY                  0x0008
-#define EFI_PCI_ATTRIBUTE_VGA_IO                      0x0010
-#define EFI_PCI_ATTRIBUTE_IDE_PRIMARY_IO              0x0020
-#define EFI_PCI_ATTRIBUTE_IDE_SECONDARY_IO            0x0040
-#define EFI_PCI_ATTRIBUTE_MEMORY_WRITE_COMBINE        0x0080
-#define EFI_PCI_ATTRIBUTE_MEMORY_CACHED               0x0800
-#define EFI_PCI_ATTRIBUTE_MEMORY_DISABLE              0x1000
-#define EFI_PCI_ATTRIBUTE_DUAL_ADDRESS_CYCLE          0x8000
-#define EFI_PCI_ATTRIBUTE_ISA_IO_16                   0x10000
-#define EFI_PCI_ATTRIBUTE_VGA_PALETTE_IO_16           0x20000
-#define EFI_PCI_ATTRIBUTE_VGA_IO_16                   0x40000
-
-#define EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM          1
-#define EFI_PCI_HOST_BRIDGE_MEM64_DECODE              2
-
-#define EISA_ID(_Name, _Num)      ((UINT32)((_Name) | (_Num) << 16))
-#define EISA_PNP_ID(_PNPId)       (EISA_ID(PNP_EISA_ID_CONST, (_PNPId)))
-
 
 /**
   Print out the current memory map information
@@ -153,8 +132,14 @@ SplitMemroyMap (
 
   // Add a flash map entry
   if (NewIdx < PcdGet32 (PcdMemoryMapEntryNumber)) {
-    MemoryMapInfo->Entry[NewIdx].Base = PcdGet32(PcdFlashBaseAddress);
-    MemoryMapInfo->Entry[NewIdx].Size = PcdGet32(PcdFlashSize);
+    if (PcdGet32(PcdFlashSize) < SIZE_16MB){
+      MemoryMapInfo->Entry[NewIdx].Base = PcdGet32(PcdFlashBaseAddress);
+      MemoryMapInfo->Entry[NewIdx].Size = PcdGet32(PcdFlashSize);
+    } else {
+      // Limit flash map entry to 16MB
+      MemoryMapInfo->Entry[NewIdx].Base = (UINT32)(~SIZE_16MB + 1);
+      MemoryMapInfo->Entry[NewIdx].Size = SIZE_16MB;
+    }
     MemoryMapInfo->Entry[NewIdx].Type = MEM_MAP_TYPE_RESERVED;
     MemoryMapInfo->Entry[NewIdx].Flag = 0;
     NewIdx++;
@@ -273,7 +258,6 @@ BuildBaseInfoHob (
   IN  STAGE2_PARAM                     *Stage2Param
   )
 {
-  SERIAL_PORT_INFO                     *SerialPortInfo;
   LOADER_FSP_INFO                      *LoaderFspInfo;
   MEMORY_MAP_INFO                      *MemoryMapInfo;
   UINT32                               Length;
@@ -296,19 +280,6 @@ BuildBaseInfoHob (
   if (LoaderFspInfo != NULL) {
     LoaderFspInfo->FspsBase   = PCD_GET32_WITH_ADJUST (PcdFSPSBase);
     LoaderFspInfo->FspHobList = (UINT32)(UINTN)LdrGlobal->FspHobList;
-  }
-
-  // Build serial port hob
-  SerialPortInfo = BuildGuidHob (&gLoaderSerialPortInfoGuid, sizeof (SERIAL_PORT_INFO));
-  if (SerialPortInfo != NULL) {
-    SerialPortInfo->Revision    = LOADER_SERIAL_PORT_INFO_REVISION;
-    SerialPortInfo->Type        = 1;
-    SerialPortInfo->BaseAddr64  = 0x3F8;
-    SerialPortInfo->BaseAddr    = 0x3F8;
-    SerialPortInfo->Baud        = 115200;
-    SerialPortInfo->RegWidth    = 1;
-    SerialPortInfo->InputHertz  = 1843200;
-    SerialPortInfo->UartPciAddr = 0;
   }
 
   // Build graphic info hob
@@ -447,98 +418,6 @@ BuildUpldMemroyHobs (
 }
 
 /**
-  Build PCI Root Bridge HOBs required by Universal Payload
-
-**/
-VOID
-EFIAPI
-BuildUpldPciRootBridgeHob (
-  VOID
-)
-{
-  UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES  *UpldRootBridges;
-  PCI_ROOT_BRIDGE_INFO_HOB            *RootBridgeInfoHob;
-  UINT8                                Count;
-  UINT8                                Index;
-  UINT8                                BarType;
-  UINT32                               Length;
-
-  RootBridgeInfoHob = (PCI_ROOT_BRIDGE_INFO_HOB *) GetGuidHobData (NULL, NULL,  &gLoaderPciRootBridgeInfoGuid);
-  if (RootBridgeInfoHob != NULL) {
-
-    Count  = RootBridgeInfoHob->Count;
-    Length = sizeof (UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES) + sizeof (UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGE) * Count;
-    UpldRootBridges = (UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES *)BuildGuidHob (&gUniversalPayloadPciRootBridgeInfoGuid, Length);
-    if (UpldRootBridges != NULL) {
-      ZeroMem (UpldRootBridges, Length);
-      UpldRootBridges->Header.Revision  = UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES_REVISION;
-      UpldRootBridges->Header.Length    = (UINT16)Length;
-      UpldRootBridges->ResourceAssigned = TRUE;
-      UpldRootBridges->Count = Count;
-      for (Index = 0; Index < Count; Index ++) {
-        UpldRootBridges->RootBridge[Index].HID = EISA_PNP_ID(0x0A03);
-        UpldRootBridges->RootBridge[Index].UID = Index;
-        UpldRootBridges->RootBridge[Index].Segment   = 0;
-        UpldRootBridges->RootBridge[Index].Supports  = EFI_PCI_ATTRIBUTE_IDE_PRIMARY_IO |
-                                                       EFI_PCI_ATTRIBUTE_IDE_SECONDARY_IO |
-                                                       EFI_PCI_ATTRIBUTE_ISA_IO_16 |
-                                                       EFI_PCI_ATTRIBUTE_ISA_MOTHERBOARD_IO |
-                                                       EFI_PCI_ATTRIBUTE_VGA_MEMORY |
-                                                       EFI_PCI_ATTRIBUTE_VGA_IO_16 |
-                                                       EFI_PCI_ATTRIBUTE_VGA_PALETTE_IO_16;
-        UpldRootBridges->RootBridge[Index].Attributes = UpldRootBridges->RootBridge[Index].Supports;
-        UpldRootBridges->RootBridge[Index].AllocationAttributes = EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM |
-                                                                  EFI_PCI_HOST_BRIDGE_MEM64_DECODE;
-
-        UpldRootBridges->RootBridge[Index].Bus.Base  = RootBridgeInfoHob->Entry[Index].BusBase;
-        UpldRootBridges->RootBridge[Index].Bus.Limit = RootBridgeInfoHob->Entry[Index].BusLimit;
-
-        BarType = PciBarTypeIo16 - 1;
-        if (RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength > 0) {
-          UpldRootBridges->RootBridge[Index].Io.Base  = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase;
-          UpldRootBridges->RootBridge[Index].Io.Limit = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase + RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength - 1;
-        } else {
-          UpldRootBridges->RootBridge[Index].Io.Base = MAX_UINT16;
-        }
-
-        BarType = PciBarTypeMem32 - 1;
-        if (RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength > 0) {
-          UpldRootBridges->RootBridge[Index].Mem.Base  = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase;
-          UpldRootBridges->RootBridge[Index].Mem.Limit = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase + RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength - 1;
-        } else {
-          UpldRootBridges->RootBridge[Index].Mem.Base = MAX_UINT32;
-        }
-
-        BarType = PciBarTypeMem64 - 1;
-        if (RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength > 0) {
-          UpldRootBridges->RootBridge[Index].MemAbove4G.Base  = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase;
-          UpldRootBridges->RootBridge[Index].MemAbove4G.Limit = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase + RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength - 1;
-        } else {
-          UpldRootBridges->RootBridge[Index].MemAbove4G.Base = MAX_UINT64;
-        }
-
-        BarType = PciBarTypePMem32 - 1;
-        if (RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength > 0) {
-          UpldRootBridges->RootBridge[Index].PMem.Base  = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase;
-          UpldRootBridges->RootBridge[Index].PMem.Limit = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase + RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength - 1;
-        } else {
-          UpldRootBridges->RootBridge[Index].PMem.Base = MAX_UINT32;
-        }
-
-        BarType = PciBarTypePMem64 - 1;
-        if (RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength > 0) {
-          UpldRootBridges->RootBridge[Index].PMemAbove4G.Base  = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase;
-          UpldRootBridges->RootBridge[Index].PMemAbove4G.Limit = RootBridgeInfoHob->Entry[Index].Resource[BarType].ResBase + RootBridgeInfoHob->Entry[Index].Resource[BarType].ResLength - 1;
-        } else {
-          UpldRootBridges->RootBridge[Index].PMemAbove4G.Base = MAX_UINT64;
-        }
-
-      }
-    }
-  }
-}
-
-/**
   Build HOBs required by Universal Payload
 
 **/
@@ -548,9 +427,7 @@ BuildUniversalPayloadHob (
   VOID
 )
 {
-  SERIAL_PORT_INFO                    *SerialPortInfo;
   MEMORY_MAP_INFO                     *MemoryMapInfo;
-  UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO  *PldSerialPortInfo;
   UNIVERSAL_PAYLOAD_ACPI_TABLE        *AcpiHob;
   UNIVERSAL_PAYLOAD_SMBIOS_TABLE      *SmbiosHob;
   UINT8                                PhysicalAddressBits;
@@ -579,27 +456,10 @@ BuildUniversalPayloadHob (
     SmbiosHob->SmBiosEntryPoint = PcdGet32 (PcdSmbiosTablesBase);
   }
 
-  // Update serial port hob
-  SerialPortInfo = (SERIAL_PORT_INFO *)GetGuidHobData (NULL, NULL, &gLoaderSerialPortInfoGuid);
-  if (SerialPortInfo != NULL) {
-    PldSerialPortInfo = BuildGuidHob (&gUniversalPayloadSerialPortInfoGuid, sizeof (UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO));
-    if (PldSerialPortInfo != NULL) {
-      ZeroMem (PldSerialPortInfo, sizeof (UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO));
-      PldSerialPortInfo->Header.Revision = UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO_REVISION;
-      PldSerialPortInfo->Header.Length   = sizeof (UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO);
-      PldSerialPortInfo->UseMmio         = (SerialPortInfo->Type == 2) ? TRUE : FALSE;
-      PldSerialPortInfo->RegisterBase    = SerialPortInfo->BaseAddr64;
-      PldSerialPortInfo->BaudRate        = SerialPortInfo->Baud;
-      PldSerialPortInfo->RegisterStride  = (UINT8) SerialPortInfo->RegWidth;
-    }
-  }
-
   // Build CPU memory space and IO space hob
   PhysicalAddressBits = GetPhysicalAddressBits ();
   BuildCpuHob (PhysicalAddressBits, 16);
 
-  // Build PCI root bridge hob
-  BuildUpldPciRootBridgeHob ();
 }
 
 /**
@@ -840,9 +700,7 @@ BuildExtraInfoHob (
   )
 {
   LOADER_GLOBAL_DATA               *LdrGlobal;
-  S3_DATA                          *S3Data;
-  SERIAL_PORT_INFO                 *SerialPortInfo;
-  SYSTEM_TABLE_INFO                *SystemTableInfo;
+  UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO *SerialPortInfo;
   SYS_CPU_INFO                     *SysCpuInfo;
   PERFORMANCE_INFO                 *PerformanceInfo;
   OS_BOOT_OPTION_LIST              *OsBootOptionInfo;
@@ -867,7 +725,6 @@ BuildExtraInfoHob (
   SECUREBOOT_INFO                  *SecureBootInfoHob;
 
   LdrGlobal = (LOADER_GLOBAL_DATA *)GetLoaderGlobalDataPointer();
-  S3Data    = (S3_DATA *)LdrGlobal->S3DataPtr;
 
   // Build library data hob
   LoaderLibData = BuildGuidHob (&gLoaderLibraryDataGuid, sizeof (LOADER_LIBRARY_DATA));
@@ -877,20 +734,16 @@ BuildExtraInfoHob (
     LoaderLibData->Data  = LdrGlobal->LibDataPtr;
   }
 
-  // Update serial port hob
-  SerialPortInfo = (SERIAL_PORT_INFO *)GetGuidHobData (NULL, NULL, &gLoaderSerialPortInfoGuid);
+  // Build serial port hob
+  SerialPortInfo = BuildGuidHob (&gUniversalPayloadSerialPortInfoGuid, sizeof (UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO));
   if (SerialPortInfo != NULL) {
-    PlatformUpdateHobInfo (&gLoaderSerialPortInfoGuid, SerialPortInfo);
-  }
-
-  // Build ACPI Hob
-  SystemTableInfo = BuildGuidHob (&gLoaderSystemTableInfoGuid, sizeof (SYSTEM_TABLE_INFO));
-  if (SystemTableInfo != NULL) {
-    SystemTableInfo->AcpiTableBase = S3Data->AcpiBase;
-    SystemTableInfo->AcpiTableSize = S3Data->AcpiTop - S3Data->AcpiBase;
-    SystemTableInfo->SmbiosTableBase = (UINT64)PcdGet32 (PcdSmbiosTablesBase);
-    SystemTableInfo->SmbiosTableSize = (UINT32)PcdGet16 (PcdSmbiosTablesSize);
-    PlatformUpdateHobInfo (&gLoaderSystemTableInfoGuid, SystemTableInfo);
+    SerialPortInfo->Header.Revision = UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO_REVISION;
+    SerialPortInfo->Header.Length   = sizeof (UNIVERSAL_PAYLOAD_SERIAL_PORT_INFO);
+    SerialPortInfo->RegisterBase    = GetSerialPortBase ();
+    SerialPortInfo->UseMmio         = (SerialPortInfo->RegisterBase > SIZE_64KB) ? TRUE : FALSE;
+    SerialPortInfo->BaudRate        = 115200;
+    SerialPortInfo->RegisterStride  = GetSerialPortStrideSize ();
+    PlatformUpdateHobInfo (&gUniversalPayloadSerialPortInfoGuid, SerialPortInfo);
   }
 
   // Build Loader Platform Data Hob

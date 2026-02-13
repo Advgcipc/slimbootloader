@@ -36,8 +36,6 @@
 #include <Library/SmbiosInitLib.h>
 #include <Library/BdatLib.h>
 #include <Guid/GraphicsInfoHob.h>
-#include <Guid/SystemTableInfoGuid.h>
-#include <Guid/SerialPortInfoGuid.h>
 #include <Guid/OsConfigDataHobGuid.h>
 #include <Guid/CsmePerformanceInfoGuid.h>
 #include <Guid/SmmInformationGuid.h>
@@ -82,7 +80,7 @@
 #include <Library/HeciLib.h>
 #include <Library/HeciMeExtLib.h>
 #include <Library/PchInfoLib.h>
-#include <Library/DmaRemappingTable.h>
+#include <Library/DmarLib.h>
 #include <Library/VTdLib.h>
 #include <Library/CpuPcieHsPhyInitLib.h>
 #include <Include/TccConfigSubRegions.h>
@@ -100,6 +98,7 @@
 #include <Library/PrintLib.h>
 #include <Register/RtcRegs.h>
 #include <Library/CrashLogLib.h>
+#include <Acpi/AcpiCommon.h>
 
 #define NHLT_ACPI_TABLE_SIGNATURE  SIGNATURE_32 ('N', 'H', 'L', 'T')
 #define V_EPOC_XTAL_38_4_MHZ  0x249F000

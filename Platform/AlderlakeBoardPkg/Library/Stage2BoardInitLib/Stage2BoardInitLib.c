@@ -33,6 +33,13 @@ STATIC S3_SAVE_REG mS3SaveReg = {
   { { REG_TYPE_IO, WIDE32, { 0, 0}, (ACPI_BASE_ADDRESS + R_ACPI_IO_SMI_EN), 0x00000000 } }
 };
 
+extern EFI_ACPI_DMAR_HEADER mAcpiDmarTableTemplate;
+STATIC
+CONST EFI_ACPI_COMMON_HEADER *mPlatformAcpiTables[] = {
+  (EFI_ACPI_COMMON_HEADER *)&mAcpiDmarTableTemplate,
+  NULL
+};
+
 //6884V101_6
 #include <Library/PrintLib.h>
 #include <BiosStringHob.h> 
@@ -673,6 +680,7 @@ BoardInit (
       case PLATFORM_ID_ADL_N_UP7EN50:
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePostMemAdlNLpddr5Rvp) / sizeof (mGpioTablePostMemAdlNLpddr5Rvp[0]), (UINT8*)mGpioTablePostMemAdlNLpddr5Rvp);
         break;
+      case PLATFORM_ID_ADL_N_UP2PTWL:
       default:
         break;
     }
@@ -708,6 +716,7 @@ BoardInit (
           case PLATFORM_ID_ADL_N_UP7EN50:
             ConfigureGpio (CDATA_NO_TAG, sizeof (mAdlNTsnDeviceGpioTable) / sizeof (mAdlNTsnDeviceGpioTable[0]), (UINT8*)mAdlNTsnDeviceGpioTable);
             break;
+          case PLATFORM_ID_ADL_N_UP2PTWL:
           default:
             DEBUG ((DEBUG_WARN, "TSN GPIO: Unrecognized BoardId 0x%X\n", GetPlatformId ()));
             break;
@@ -758,8 +767,9 @@ BoardInit (
       }
     }
     BuildOsConfigDataHob ();
+    // Override the Smbios default Info using SMBIOS binary blob
     if (FeaturePcdGet (PcdSmbiosEnabled)) {
-      InitializeSmbiosInfo ();
+      LoadSmbiosStringsFromComponent (SIGNATURE_32 ('I', 'P', 'F', 'W'), SIGNATURE_32 ('S', 'M', 'B', 'S'));
     }
 
     if ((SiCfgData != NULL) && (SiCfgData->EcAvailable == 0)) {
@@ -784,6 +794,10 @@ BoardInit (
     break;
   case PrePciEnumeration:
     (VOID) PcdSet32S (PcdPciEnumHookProc, (UINT32)(UINTN) PlatformPciEnumHookProc);
+    if (FeaturePcdGet (PcdVtdEnabled)) {
+      // Prepare platform ACPI tables
+      Status = PcdSet32S (PcdAcpiTableTemplatePtr, (UINT32)(UINTN)mPlatformAcpiTables);
+    }
     break;
   case PostPciEnumeration:
     if (FeaturePcdGet (PcdEnablePciePm)) {
@@ -997,32 +1011,6 @@ SaveNvsData (
 }
 
 /**
- Update serial port information to global HOB data structure.
-
- @param SerialPortInfo  Pointer to global HOB data structure.
- **/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-  )
-{
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize ();
-  if (GetDebugPort () >= GetPchMaxSerialIoUartControllersNum ()) {
-    // IO Type
-    SerialPortInfo->Type = 1;
-  } else {
-    // MMIO Type
-    SerialPortInfo->Type = 2;
-  }
-
-  DEBUG ((DEBUG_INFO, "SerialPortInfo Type=%d BaseAddr=0x%08X RegWidth=%d\n",
-    SerialPortInfo->Type, SerialPortInfo->BaseAddr, SerialPortInfo->RegWidth));
-}
-
-/**
  Update the OS boot option
 
  @param OsBootOptionList pointer to boot option list.
@@ -1184,8 +1172,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gSmmInformationGuid) {
@@ -1196,4 +1182,3 @@ PlatformUpdateHobInfo (
     UpdateCsmeBootPerfHob (HobInfo);
   }
 }
-

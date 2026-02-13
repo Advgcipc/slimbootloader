@@ -24,7 +24,7 @@ class Board(BaseBoard):
 
         self.VERINFO_IMAGE_ID     = 'SB_ARLH'
         self.VERINFO_PROJ_MAJOR_VER = 1
-        self.VERINFO_PROJ_MINOR_VER = 2
+        self.VERINFO_PROJ_MINOR_VER = 3
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -35,6 +35,7 @@ class Board(BaseBoard):
         self.FSP_IMAGE_ID         = '$MTLFSP$'
         self._EXTRA_INC_PATH      = ['Silicon/ArrowlakePkg/Arlh/Fsp']
         self._FSP_PATH_NAME       = 'Silicon/ArrowlakePkg/Arlh/Fsp'
+        self._SMBIOS_YAML_FILE    = os.path.join('Platform', self.BOARD_PKG_NAME, 'SmbiosStrings.yaml')
         self.FSP_INF_FILE         = 'Silicon/ArrowlakePkg/Arlh/Fsp/FspBin.inf'
         self.MICROCODE_INF_FILE   = 'Silicon/ArrowlakePkg/Arlh/Microcode/Microcode.inf'
         self.ACPI_TABLE_INF_FILE  = 'Platform/ArrowlakeBoardPkg/AcpiTables/AcpiTablesP.inf'
@@ -135,7 +136,7 @@ class Board(BaseBoard):
         self.STAGE2_FD_BASE       = 0x01000000
         self.STAGE2_FD_SIZE       = 0x001F0000
 
-        self.PAYLOAD_SIZE         = 0x00031000
+        self.PAYLOAD_SIZE         = 0x00032000
         self.EPAYLOAD_SIZE        = 0x001C0000
 
         self.ENABLE_FAST_BOOT = 0
@@ -188,6 +189,9 @@ class Board(BaseBoard):
                                     self.CFGDATA_SIZE + self.KEYHASH_SIZE
 
         self.SIIPFW_SIZE = 0x1000
+
+        if self._SMBIOS_YAML_FILE:
+            self.SIIPFW_SIZE += 0x1000
 
         self.ENABLE_TCC = 0
         if self.ENABLE_TCC:
@@ -245,57 +249,6 @@ class Board(BaseBoard):
         self._CFGDATA_INT_FILE = []
         self._CFGDATA_EXT_FILE = [self._generated_cfg_file_prefix + 'CfgDataInt_Arlp_Sodimm_Crb.dlt', self._generated_cfg_file_prefix + 'CfgDataInt_Arlp_Sodimm_Rvp.dlt',self._generated_cfg_file_prefix + 'CfgDataInt_Arlp_Lpddr5_Rvp.dlt',self._generated_cfg_file_prefix + 'CfgDataInt_Arlp_Sodimm_Island.dlt']
 
-    def GetCopyList (self,driver_inf):
-        fd = open (driver_inf, 'r')
-        lines = fd.readlines()
-        fd.close ()
-
-        have_copylist_section = False
-        have_defines_section = False
-        copy_list      = []
-        defines_dict   = {}
-        for line in lines:
-            line = line.strip ()
-            if line.startswith('#'):
-                continue
-            if line.startswith('['):
-                if line.startswith('[Defines]'):
-                    have_defines_section = True
-                else:
-                    have_defines_section = False
-
-                if line.startswith('[UserExtensions.SBL."CopyList"]'):
-                    have_copylist_section = True
-                else:
-                    have_copylist_section = False
-
-            # read .inf variables from file.
-            if have_defines_section:
-                match = re.match("^DEFINE\s+(.+)\\s*=\\s*(.+)", line)
-                if match:
-                    defines_dict[match.group(1).strip()] = match.group(2).strip()
-
-            if have_copylist_section:
-                match = re.match("^(.+)\\s*:\\s*(.+)", line)
-                if match:
-                    copy_list.append((match.group(1).strip(), match.group(2).strip()))
-
-        # substitute .inf DEFINES in copy list
-        while True:
-            # Entry may have multiple variables. Do multiple passes until no variables left
-            var_found = 0
-            for entry in copy_list:
-                match0 = re.match("\\$\\(([^\\)\\s]+)\\)", entry[0])
-                match1 = re.match("\\$\\(([^\\)\\s]+)\\)", entry[1])
-                if match0 is not None or match1 is not None:
-                    var_found = 1
-                    idx = copy_list.index(entry)
-                    copy_list[idx] = (entry[0].replace("$(" + match0.group(1)+ ")", defines_dict[match0.group(1)]),
-                        entry[1].replace("$(" + match1.group(1)+ ")", defines_dict[match1.group(1)]))
-            if var_found == 0:
-                break
-        return copy_list
-
     def GetIppCryptoInf(self):
         ipp_crypto_opt_lvl = 0
         ipp_crypto_opt_name = None
@@ -308,15 +261,6 @@ class Board(BaseBoard):
 
         if ipp_crypto_opt_name[-2:]:
             ipp_crypto_inf = os.path.join('BootloaderCommonPkg', 'Library', 'IppCrypto2Lib', 'IppCrypto2Lib%s.inf' % ipp_crypto_opt_name[-2:])
-
-            ipp_crypto_inf_full = os.path.join(os.environ['SBL_SOURCE'],ipp_crypto_inf)
-
-            if os.path.exists(ipp_crypto_inf_full):
-                copy_list = self.GetCopyList(ipp_crypto_inf_full)
-                for entry in copy_list:
-                    src = os.path.join(os.path.dirname(ipp_crypto_inf_full), entry[0])
-                    dst = os.path.join(os.path.dirname(ipp_crypto_inf_full), entry[1])
-                    shutil.copy(src, dst)
 
         return ipp_crypto_inf
 
@@ -383,6 +327,7 @@ class Board(BaseBoard):
             'HeciLib|Silicon/CommonSocPkg/Library/HeciLib/HeciLib.inf',
             'MeChipsetLib|Silicon/CommonSocPkg/Library/MeChipsetLib/MeChipsetLib.inf',
             'VtdLib|Silicon/$(SILICON_PKG_NAME)/Library/VTdLib/VTdLib.inf',
+            'DmarLib|Silicon/CommonSocPkg/Library/DmarLib/DmarLib.inf',
             'PsdLib|Silicon/$(SILICON_PKG_NAME)/Library/PsdLib/PsdLib.inf',
             'HeciMeExtLib|Silicon/$(SILICON_PKG_NAME)/Library/HeciMeExtLib/HeciMeExtLib.inf',
             'MeExtMeasurementLib|Silicon/$(SILICON_PKG_NAME)/Library/MeExtMeasurementLib/MeExtMeasurementLib.inf',
@@ -457,6 +402,9 @@ class Board(BaseBoard):
           # Name | Image File             |    CompressAlg  | AuthType                        | Key File                        | Region Align   | Region Size |  Svn Info
           # ========================================================================================================================================================
           ('IPFW',      'SIIPFW.bin',          '',     container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,        0,          0     ,        0),   # Container Header
+        )
+        container_list.append (
+          ('SMBS',      'smbios.bin',    'Dummy',        container_list_auth_type,   'KEY_ID_CONTAINER'+'_'+self._RSA_SIGN_TYPE,            0,              0x1000,    0),   # SMBIOS Component
         )
 
         bins = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Binaries')

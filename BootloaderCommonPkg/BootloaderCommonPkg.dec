@@ -21,9 +21,7 @@
   gPayloadKeyHashGuid                           = { 0xbf16846f, 0xfde9, 0x487a, { 0xb6, 0x9d, 0xac, 0xad, 0x39, 0x79, 0x5c, 0x4e } }
   gOsBootOptionGuid                             = { 0xa9e97fe1, 0xe2e0, 0x4550, { 0x86, 0xb3, 0x8d, 0x93, 0x66, 0x5e, 0x6f, 0x6d } }
   gLoaderMemoryMapInfoGuid                      = { 0xa1ff7424, 0x7a1a, 0x478e, { 0xa9, 0xe4, 0x92, 0xf3, 0x57, 0xd1, 0x28, 0x32 } }
-  gLoaderSerialPortInfoGuid                     = { 0x6c6872fe, 0x56a9, 0x4403, { 0xbb, 0x98, 0x95, 0x8d, 0x62, 0xde, 0x87, 0xf1 } }
   gLoaderPerformanceInfoGuid                    = { 0x868204be, 0x23d0, 0x4ff9, { 0xac, 0x34, 0xb9, 0x95, 0xac, 0x04, 0xb1, 0xb9 } }
-  gLoaderSystemTableInfoGuid                    = { 0x16c8a6d0, 0xfe8a, 0x4082, { 0xa2, 0x08, 0xcf, 0x89, 0xc4, 0x29, 0x04, 0x33 } }
   gLoaderPlatformDeviceInfoGuid                 = { 0x74f136fd, 0x518f, 0x4884, { 0x83, 0x90, 0x4a, 0xcd, 0x50, 0x28, 0x11, 0xb6 } }
   gLoaderPlatformDataGuid                       = { 0x559265da, 0x0982, 0x46ca, { 0x92, 0x48, 0xa4, 0x36, 0x74, 0x34, 0x07, 0x78 } }
   gPeiFirmwarePerformanceGuid                   = { 0x55765e8f, 0x021a, 0x41f9, { 0x93, 0x2d, 0x4c, 0x49, 0xc5, 0xb7, 0xef, 0x5d } }
@@ -40,7 +38,6 @@
   gSmmInformationGuid                           = { 0x2d939d66, 0xceec, 0x4244, { 0x94, 0x97, 0x6e, 0x1c, 0x6f, 0x92, 0x54, 0x2c } }
   gEsrtSystemFirmwareGuid                       = { 0xbfbaf62d, 0x0a27, 0x4390, { 0x99, 0xf6, 0x8a, 0xe1, 0xca, 0x62, 0x62, 0x77 } }
   gCsmeFWUDriverImageFileGuid                   = { 0x4A467997, 0xA909, 0x4678, { 0x91, 0x0C, 0xE0, 0xFE, 0x1C, 0x90, 0x56, 0xEA } }
-  gLoaderPciRootBridgeInfoGuid                  = { 0xb7f3d111, 0xb98d, 0x422f, { 0x84, 0x31, 0xa7, 0xd8, 0x29, 0xec, 0x00, 0x87 } }
   gLoaderMpCpuTaskInfoGuid                      = { 0xb2d12dd3, 0x1a61, 0x4ef8, { 0xa6, 0xb8, 0xd9, 0x48, 0x92, 0x39, 0x4c, 0xc0 } }
   gCsmePerformanceInfoGuid                      = { 0x7add2938, 0xf96a, 0x45c2, { 0x8f, 0x99, 0x23, 0xf4, 0xf2, 0xf0, 0x6f, 0xb8 } }
   gTpmEventLogInfoGuid                          = { 0xcdaffea5, 0x5e2,  0x4c2f, { 0x8b, 0xa7, 0xad, 0xbc, 0x8d, 0xfd, 0x5a, 0x9e } }
@@ -321,6 +318,40 @@
   #-  PcdHandOffFdtEnable is FALSE, HandOffData is HOB
   gPlatformCommonLibTokenSpaceGuid.PcdHandOffFdtEnable|FALSE|BOOLEAN|0x00010093
 
+  ## Default OEM ID for ACPI table creation, its length must be 0x6 bytes to follow ACPI specification.
+  # @Prompt Default OEM ID for ACPI table creation.
+  gPlatformCommonLibTokenSpaceGuid.PcdAcpiDefaultOemId|"INTEL "|VOID*|0x00010094
+
+  ## Default OEM Table ID for ACPI table creation, it is "OEMTABLE".
+  #  According to ACPI specification, this field is particularly useful when
+  #  defining a definition block to distinguish definition block functions.
+  #  The OEM assigns each dissimilar table a new OEM Table ID.
+  #  This PCD is ignored for definition block.
+  # @Prompt Default OEM Table ID for ACPI table creation.
+  gPlatformCommonLibTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x454C4241544D454F|UINT64|0x00010095
+
+  ## Default OEM Revision for ACPI table creation.
+  #  According to ACPI specification, for LoadTable() opcode, the OS can also
+  #  check the OEM Table ID and Revision ID against a database for a newer
+  #  revision Definition Block of the same OEM Table ID and load it instead.
+  #  This PCD is ignored for definition block.
+  # @Prompt Default OEM Revision for ACPI table creation.
+  gPlatformCommonLibTokenSpaceGuid.PcdAcpiDefaultOemRevision|0x00000005|UINT32|0x00010096
+
+  ## Default Creator ID for ACPI table creation, it is "CREA"
+  #  According to ACPI specification, for tables containing Definition Blocks,
+  #  this is the ID for the ASL Compiler.
+  #  This PCD is ignored for definition block.
+  # @Prompt Default Creator ID for ACPI table creation.
+  gPlatformCommonLibTokenSpaceGuid.PcdAcpiDefaultCreatorId|0x41455243|UINT32|0x00010097
+
+  ## Default Creator Revision for ACPI table creation.
+  #  According to ACPI specification, for tables containing Definition Blocks,
+  #  this is the revision for the ASL Compiler.
+  #  This PCD is ignored for definition block.
+  # @Prompt Default Creator Revision for ACPI table creation.
+  gPlatformCommonLibTokenSpaceGuid.PcdAcpiDefaultCreatorRevision|0x01000013|UINT32|0x00010098
+
 [PcdsDynamic]
   ## This PCD indicates the PCR bank to be enabled/supported by Slim Bootloader for measured boot
   #  Based on the value set, PCR bank world be enabled and extended
@@ -352,8 +383,16 @@
   gPlatformCommonLibTokenSpaceGuid.PcdTccEnabled                  | FALSE  | BOOLEAN | 0x20000221
   gPlatformCommonLibTokenSpaceGuid.PcdFspNoEop                    | FALSE  | BOOLEAN | 0x20000223
   gPlatformCommonLibTokenSpaceGuid.PcdTxtEnabled                  | FALSE  | BOOLEAN | 0x20000229
+  # Enable FV payload support
+  gPlatformCommonLibTokenSpaceGuid.PcdFvSupportEnabled            | TRUE   | BOOLEAN | 0x2000022B
+  # Enable PE32 payload support
+  gPlatformCommonLibTokenSpaceGuid.PcdPe32SupportEnabled          | TRUE   | BOOLEAN | 0x2000022C
+  gPlatformCommonLibTokenSpaceGuid.PcdAbSlotSupportEnabled        | TRUE   | BOOLEAN | 0x2000022D
+  gPlatformCommonLibTokenSpaceGuid.PcdMultibootSupportEnabled     | TRUE   | BOOLEAN | 0x2000022E
+  gPlatformCommonLibTokenSpaceGuid.PcdMultiboot2SupportEnabled    | TRUE   | BOOLEAN | 0x2000022F
 #//6884V101_3
   gPlatformCommonLibTokenSpaceGuid.PcdVerInfoBuildDate            | {0}    | VOID*   | 0x20000240
+
 
 [PcdsFixedAtBuild]
   gPlatformCommonLibTokenSpaceGuid.PcdFipsSupport     | FALSE      | BOOLEAN | 0x20000226

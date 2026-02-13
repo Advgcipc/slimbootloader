@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2008 - 2024, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2008 - 2025, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
@@ -21,8 +21,6 @@
 #include <Library/ConfigDataLib.h>
 #include <Library/VariableLib.h>
 #include <Guid/GraphicsInfoHob.h>
-#include <Guid/SystemTableInfoGuid.h>
-#include <Guid/SerialPortInfoGuid.h>
 #include <Guid/SmmInformationGuid.h>
 #include <FspsUpd.h>
 #include <GlobalNvsAreaDef.h>
@@ -41,7 +39,7 @@
 #include <Guid/OsConfigDataHobGuid.h>
 #include <Library/HobLib.h>
 #include <Library/PcdLib.h>
-#include <Library/DmaRemappingTable.h>
+#include <Library/DmarLib.h>
 #include <Library/VTdLib.h>
 #include <Library/MpInitLib.h>
 #include <Library/HeciInitLib.h>
@@ -101,6 +99,150 @@
 // Data read from the EC data port is valid only when OBF=1.
 //
 #define EC_C_ACPI_ENABLE      0xAA    // Enable ACPI mode
+
+extern EFI_ACPI_DMAR_HEADER mAcpiDmarTableTemplate;
+STATIC
+CONST EFI_ACPI_COMMON_HEADER *mPlatformAcpiTables[] = {
+  (EFI_ACPI_COMMON_HEADER *)&mAcpiDmarTableTemplate,
+  NULL
+};
+
+/**
+  Update the DMAR table
+
+  @param[in, out] AcpiHeader         - The DMAR table header to update
+**/
+VOID
+DmarTableUpdate (
+  IN OUT EFI_ACPI_DESCRIPTION_HEADER *AcpiHeader
+  )
+{
+  EFI_STATUS                         Status;
+  MEMORY_CFG_DATA                    *MemCfgData;
+  SILICON_CFG_DATA                   *SiCfgData;
+  UINT8                              Flags;
+  UINT64                             BaseAddress;
+  EFI_ACPI_DMAR_STRUCTURE_HEADER     *DmarHdr;
+  UINT16                             IgdMode;
+  UINT16                             GttMode;
+  UINT32                             IgdMemSize;
+  UINT32                             GttMemSize;
+  UINT64                             RmrrLimit;
+
+  Flags = 0;
+  IgdMemSize = 0;
+  GttMemSize = 0;
+
+  // Set DMAR Flags based on config data
+  SiCfgData = (SILICON_CFG_DATA *)FindConfigDataByTag (CDATA_SILICON_TAG);
+  if (SiCfgData && SiCfgData->InterruptRemappingSupport) {
+    Flags |= BIT0;
+  }
+
+  MemCfgData = (MEMORY_CFG_DATA *)FindConfigDataByTag (CDATA_MEMORY_TAG);
+  if (MemCfgData) {
+    if (MemCfgData->X2ApicOptOut) {
+      Flags |= BIT1;
+    }
+    if (MemCfgData->DmaControlGuarantee) {
+      Flags |= BIT2;
+    }
+  }
+
+  // Initialize DMAR table header
+  Status = AddAcpiDmarHdr (AcpiHeader, Flags);
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  // Add DRHD for VTD Engine 1
+  BaseAddress = ReadVtdBaseAddress(0);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_ENDPOINT, 0, 0, 0, 2, 0);
+    }
+  }
+
+  // Add DRHD for VTD Engine 2
+  BaseAddress = ReadVtdBaseAddress(1);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_ENDPOINT, 0, 0, 0, 5, 0);
+    }
+  }
+
+  // Add DRHD for VTd Engine 4 (iTBT PCIE 0)
+  BaseAddress = ReadVtdBaseAddress(3);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_BRIDGE, 0, 0, 0, 7, 0);
+    }
+  }
+
+  // Add DRHD for VTD Engine 5 (iTBT PCIE 1)
+  BaseAddress = ReadVtdBaseAddress(4);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_BRIDGE, 0, 0, 0, 7, 1);
+    }
+  }
+
+  // Add DRHD for VTD Engine 6 (iTBT PCIE 2)
+  BaseAddress = ReadVtdBaseAddress(5);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_BRIDGE, 0, 0, 0, 7, 2);
+    }
+  }
+
+  // Add DRHD for VTD Engine 7 (iTBT PCIE 3)
+  BaseAddress = ReadVtdBaseAddress(6);
+  if (BaseAddress != 0) {
+    DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_BRIDGE, 0, 0, 0, 7, 3);
+    }
+  }
+
+  // Add DRHD for VTd Engine 3
+  BaseAddress = ReadVtdBaseAddress(2);
+  if (BaseAddress != 0) {
+  DmarHdr = AddDrhdHdr (AcpiHeader, 0, SIZE_4KB, 0, BaseAddress);
+    if (DmarHdr != NULL) {
+      // Add IOAPIC scope
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_IOAPIC, 0, 2, 0, 0x1E, 7);
+      // Add HPET scope
+      AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_MSI_CAPABLE_HPET, 0, 0, 0, 0x1E, 6);
+    }
+  }
+
+  // Add RMRR for IGD
+  BaseAddress = PCI_LIB_ADDRESS (SA_MC_BUS, 0, 0, 0);
+  IgdMode = ((PciRead16 ((UINTN)BaseAddress + R_SA_GGC) & B_SA_GGC_GMS_MASK) >> N_SA_GGC_GMS_OFFSET) & 0xFF;
+  if (IgdMode < 0xF0) {
+    IgdMemSize = IgdMode * 32 * 1024 * 1024;
+  } else {
+    IgdMemSize = 4 * (IgdMode - 0xF0 + 1) * 1024 * 1024;
+  }
+  GttMode = (PciRead16 ((UINTN)BaseAddress + R_SA_GGC) & B_SA_GGC_GGMS_MASK) >> N_SA_GGC_GGMS_OFFSET;
+  if (GttMode <= V_SA_GGC_GGMS_8MB) {
+    GttMemSize = (1 << GttMode) * 1024 * 1024;
+  }
+  BaseAddress = (PciRead32 ((UINTN)BaseAddress + R_SA_BGSM) & ~(0x01));
+  RmrrLimit   = BaseAddress + IgdMemSize + GttMemSize - 1;
+  DmarHdr     = AddRmrrHdr (AcpiHeader, 0, BaseAddress, RmrrLimit);
+  if (DmarHdr != NULL) {
+    AddScopeData (AcpiHeader, DmarHdr, EFI_ACPI_DEVICE_SCOPE_ENTRY_TYPE_PCI_ENDPOINT, 0, 0, 0, 2, 0);
+  }
+
+  // Calculate DMAR table checksum
+  AcpiHeader->Checksum = CalculateCheckSum8 ((UINT8 *)AcpiHeader, AcpiHeader->Length);
+}
 
 //
 // GPIO_PAD Fileds
@@ -303,11 +445,6 @@ STATIC S3_SAVE_REG mS3SaveReg = {
   { { REG_TYPE_IO, WIDE32, { 0, 0}, (ACPI_BASE_ADDRESS + R_ACPI_IO_SMI_EN), 0x00000000 } }
 };
 
-STATIC
-CONST EFI_ACPI_COMMON_HEADER *mPlatformAcpiTables[] = {
-  NULL
-};
-
 VOID
 EnableLegacyRegions (
   VOID
@@ -476,161 +613,6 @@ ProgramSecuritySetting (
   MmioOr8 (SpiBaseAddress + R_SPI_CFG_BC, (UINT8) (B_SPI_CFG_BC_LE | B_SPI_CFG_BC_EISS));
 
   ClearFspHob ();
-}
-
-/**
-  Add a Smbios type string into a buffer
-
-**/
-STATIC
-EFI_STATUS
-AddSmbiosTypeString (
-  SMBIOS_TYPE_STRINGS  *Dest,
-  UINT8                 Type,
-  UINT8                 Index,
-  CHAR8                *String
-  )
-{
-  UINTN   Length;
-
-  Dest->Type    = Type;
-  Dest->Idx     = Index;
-  if (String != NULL) {
-    Length = AsciiStrLen (String);
-
-    Dest->String  = (CHAR8 *)AllocateZeroPool (Length + 1);
-    if (Dest->String == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-    CopyMem (Dest->String, String, Length);
-  }
-
-  return EFI_SUCCESS;
-}
-
-/**
-  Initialize necessary information for Smbios
-
-  @retval EFI_SUCCESS             Initialized necessary information successfully
-  @retval EFI_OUT_OF_RESOURCES    Failed to allocate memory for Smbios info
-
-**/
-EFI_STATUS
-InitializeSmbiosInfo (
-  VOID
-  )
-{
-  CHAR8                 TempStrBuf[SMBIOS_STRING_MAX_LENGTH];
-  UINT16                Index;
-  UINT8                 BrdIdx;
-  UINTN                 Length;
-  SMBIOS_TYPE_STRINGS  *TempSmbiosStrTbl;
-  BOOT_LOADER_VERSION  *VerInfoTbl;
-  VOID                 *SmbiosStringsPtr;
-
-  Index         = 0;
-  TempSmbiosStrTbl  = (SMBIOS_TYPE_STRINGS *) AllocateTemporaryMemory (0);
-  if (TempSmbiosStrTbl == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  VerInfoTbl    = GetVerInfoPtr ();
-
-  //
-  // SMBIOS_TYPE_BIOS_INFORMATION
-  //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    1, "Intel Corporation");
-  if (VerInfoTbl != NULL) {
-    AsciiSPrint (TempStrBuf, sizeof (TempStrBuf),
-      "SB_TGL.%03d.%03d.%03d.%03d.%03d.%05d.%c-%016lX%a\0",
-      VerInfoTbl->ImageVersion.SecureVerNum,
-      VerInfoTbl->ImageVersion.CoreMajorVersion,
-      VerInfoTbl->ImageVersion.CoreMinorVersion,
-      VerInfoTbl->ImageVersion.ProjMajorVersion,
-      VerInfoTbl->ImageVersion.ProjMinorVersion,
-      VerInfoTbl->ImageVersion.BuildNumber,
-      VerInfoTbl->ImageVersion.BldDebug ? 'D' : 'R',
-      VerInfoTbl->SourceVersion,
-      VerInfoTbl->ImageVersion.Dirty ? "-dirty" : "");
-  } else {
-    AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "Unknown");
-  }
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BIOS_INFORMATION,
-    3, __DATE__);
-
-  //
-  // SMBIOS_TYPE_SYSTEM_INFORMATION
-  //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    1, "Intel Corporation");
-
-  AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", "TigerLake Client Platform");
-
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    3, "0.1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    4, "System Serial Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    5, "System SKU Number");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_SYSTEM_INFORMATION,
-    6, "TigerLake Client System");
-
-  //
-  // SMBIOS_TYPE_BASEBOARD_INFORMATION
-  //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-    1, "Intel Corporation");
-  switch (GetPlatformId ()) {
-    case BoardIdTglUDdr4:
-      BrdIdx = 1;
-      break;
-    case BoardIdTglULp4Type4:
-      BrdIdx = 2;
-      break;
-    case BoardIdTglHDdr4SODimm:
-    case 0xF:
-      BrdIdx = 3;
-      break;
-    case BoardIdTglUpxi11:
-      BrdIdx = 4;
-      break;
-    default:
-      BrdIdx = 0;
-      break;
-  }
-  AsciiSPrint (TempStrBuf, sizeof (TempStrBuf), "%a\0", mBoardIdIndex[BrdIdx]);
-
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-    2, TempStrBuf);
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-    3, "1");
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_BASEBOARD_INFORMATION,
-    4, "Board Serial Number");
-
-  //
-  // SMBIOS_TYPE_PROCESSOR_INFORMATION : TBD
-  //
-
-  //
-  // SMBIOS_TYPE_END_OF_TABLE
-  //
-  AddSmbiosTypeString (&TempSmbiosStrTbl[Index++], SMBIOS_TYPE_END_OF_TABLE,
-    0, NULL);
-
-  Length = sizeof (SMBIOS_TYPE_STRINGS) * Index;
-  SmbiosStringsPtr = AllocatePool (Length);
-  if (SmbiosStringsPtr == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  CopyMem (SmbiosStringsPtr, TempSmbiosStrTbl, Length);
-  (VOID) PcdSet32S (PcdSmbiosStringsPtr, (UINT32)(UINTN)SmbiosStringsPtr);
-  (VOID) PcdSet16S (PcdSmbiosStringsCnt, Index);
-
-  return EFI_SUCCESS;
 }
 
 /**
@@ -870,13 +852,18 @@ BoardInit (
       }
     }
     //
-    // Initialize Smbios Info for SmbiosInit
+    // Override the Smbios default Info using SMBIOS binary blob
     //
     if (FeaturePcdGet (PcdSmbiosEnabled)) {
-      InitializeSmbiosInfo ();
+      LoadSmbiosStringsFromComponent (SIGNATURE_32 ('I', 'P', 'F', 'W'), SIGNATURE_32 ('S', 'M', 'B', 'S'));
       if (FeaturePcdGet (PcdEnableDts)) {
         ReadCpuDts ();
       }
+    }
+    break;
+  case PrePciEnumeration:
+    if (FeaturePcdGet (PcdVtdEnabled)) {
+      Status = PcdSet32S (PcdAcpiTableTemplatePtr, (UINT32)(UINTN)mPlatformAcpiTables);
     }
     break;
   case PostPciEnumeration:
@@ -1793,30 +1780,6 @@ UpdateSmmInfo (
 
 
 /**
-  Update Serial Interface Information for Payload
-
-  @param[in]  SerialPortInfo    Serial Interface Information to be updated for Payload
-
-**/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-)
-{
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize();
-  if (GetDebugPort () >= PCH_MAX_SERIALIO_UART_CONTROLLERS) {
-    // IO Type
-    SerialPortInfo->Type = 1;
-  } else {
-    // MMIO Type
-    SerialPortInfo->Type = 2;
-  }
-}
-
-/**
  Update Hob Info with platform specific data
 
  @param  Guid          The GUID to tag the customized HOB.
@@ -1837,8 +1800,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gSmmInformationGuid) {
@@ -2039,8 +2000,6 @@ PlatformUpdateAcpiTable (
   EFI_STATUS                   Status;
   PLATFORM_DATA               *PlatformData;
   SILICON_CFG_DATA            *SiCfgData;
-  MEMORY_CFG_DATA             *MemCfgData;
-  UINTN                       DmarTableFlags;
   VOID                        *FspHobList;
 
   GlobalNvs  = (GLOBAL_NVS_AREA *)(UINTN) PcdGet32 (PcdAcpiGnvsAddress);
@@ -2108,62 +2067,40 @@ PlatformUpdateAcpiTable (
       UpdateBdatAcpiTable (Table, FspHobList);
       DEBUG ((DEBUG_INFO, "Updated BDAT Table in AcpiTable Entries\n"));
     }
-  }else if (Table->Signature == EFI_ACPI_6_1_LOW_POWER_IDLE_TABLE_STRUCTURE_SIGNATURE){
-      UINT8                                  LpitStateEntries = 0;
-      EFI_ACPI_6_1_GENERIC_ADDRESS_STRUCTURE SetResidencyCounter[3] = { ACPI_LPI_RES_SLP_S0_COUNTER, ACPI_LPI_RES_C10_COUNTER, ACPI_LPI_RES_PS_ON_COUNTER };
-      UINT64                                 ResidencyCounterFrequency = 0;
-      LpitStateEntries = (UINT8)(((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Length - sizeof(EFI_ACPI_DESCRIPTION_HEADER)) / sizeof(ACPI_LPI_NATIVE_CSTATE_DESCRIPTOR);
-      if (LpitStateEntries != 0) {
+  } else if (Table->Signature == EFI_ACPI_6_1_LOW_POWER_IDLE_TABLE_STRUCTURE_SIGNATURE){
+    UINT8                                  LpitStateEntries = 0;
+    EFI_ACPI_6_1_GENERIC_ADDRESS_STRUCTURE SetResidencyCounter[3] = { ACPI_LPI_RES_SLP_S0_COUNTER, ACPI_LPI_RES_C10_COUNTER, ACPI_LPI_RES_PS_ON_COUNTER };
+    UINT64                                 ResidencyCounterFrequency = 0;
+    LpitStateEntries = (UINT8)(((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Length - sizeof(EFI_ACPI_DESCRIPTION_HEADER)) / sizeof(ACPI_LPI_NATIVE_CSTATE_DESCRIPTOR);
+    if (LpitStateEntries != 0) {
+      //
+      // LpitResidencyCounter : 0 - SLP_S0 Based, 1 - C10 Counter, 2 - ATX Shutdown/PS_ON
+      //
         //
-        // LpitResidencyCounter : 0 - SLP_S0 Based, 1 - C10 Counter, 2 - ATX Shutdown/PS_ON
+        // Read PWRM Base Address to fill in Residency counter Address Space
         //
-          //
-          // Read PWRM Base Address to fill in Residency counter Address Space
-          //
-          SetResidencyCounter[0].Address = (UINT64)PCH_PWRM_BASE_ADDRESS + R_PMC_PWRM_SLP_S0_RESIDENCY_COUNTER;
-          ResidencyCounterFrequency = 10000; //Counter runs at 100us granularity which implies 10KHz frequency (10000Hz)
-          if (IsPchLp ()) {
-            ResidencyCounterFrequency = 8197;  //Counter runs at 122us granularity which implies 10KHz frequency (8197Hz)
-          }
-        (((ACPI_LOW_POWER_IDLE_TABLE *)Table)->LpiStates[LpitStateEntries - 1].ResidencyCounter) = SetResidencyCounter[0];
-        (((ACPI_LOW_POWER_IDLE_TABLE *)Table)->LpiStates[LpitStateEntries - 1].ResidencyCounterFrequency) = ResidencyCounterFrequency;
-      }
-    }
-    else if (Table->Signature == EFI_ACPI_5_0_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
-      if (S0IX_STATUS() == 1) {
-        EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE  *FadtTable;
-        DEBUG ((DEBUG_INFO, "Update FADT ACPI table\n"));
-        FadtTable = (EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE*) Table;
-        FadtTable->Flags |= (EFI_ACPI_6_1_PCI_EXP_WAK);
-        FadtTable->Flags |= (EFI_ACPI_6_1_LOW_POWER_S0_IDLE_CAPABLE);
-        FadtTable->Flags |= (EFI_ACPI_6_1_PWR_BUTTON);
-      }
-    }
-
-
-  if (FeaturePcdGet (PcdVtdEnabled)) {
-    PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
-    if (PlatformData != NULL) {
-      if (PlatformData->PlatformFeatures.VtdEnable == 1) {
-        if (Table->Signature == EFI_ACPI_VTD_DMAR_TABLE_SIGNATURE) {
-          DEBUG ((DEBUG_INFO, "Updated DMAR Table in AcpiTable Entries\n"));
-          SiCfgData  = (SILICON_CFG_DATA *)FindConfigDataByTag (CDATA_SILICON_TAG);
-          MemCfgData = (MEMORY_CFG_DATA *)FindConfigDataByTag (CDATA_MEMORY_TAG);
-          DmarTableFlags = 0;
-          if (MemCfgData != NULL) {
-            if (MemCfgData->X2ApicOptOut == 1) {
-              DmarTableFlags  |= DMAR_TABLE_FLAGS_X2APIC_OPT_OUT;
-            }
-            if (MemCfgData->DmaControlGuarantee == 1) {
-              DmarTableFlags  |= DMAR_TABLE_FLAGS_DMA_CONTROL_GUARANTEE;
-            }
-          }
-          if ((SiCfgData != NULL) && SiCfgData->InterruptRemappingSupport != 0) {
-            DmarTableFlags  |= DMAR_TABLE_FLAGS_INT_REMAPPING_SUPPORT;
-          }
-          UpdateDmarAcpi(Table, DmarTableFlags);
+        SetResidencyCounter[0].Address = (UINT64)PCH_PWRM_BASE_ADDRESS + R_PMC_PWRM_SLP_S0_RESIDENCY_COUNTER;
+        ResidencyCounterFrequency = 10000; //Counter runs at 100us granularity which implies 10KHz frequency (10000Hz)
+        if (IsPchLp ()) {
+          ResidencyCounterFrequency = 8197;  //Counter runs at 122us granularity which implies 10KHz frequency (8197Hz)
         }
-      }
+      (((ACPI_LOW_POWER_IDLE_TABLE *)Table)->LpiStates[LpitStateEntries - 1].ResidencyCounter) = SetResidencyCounter[0];
+      (((ACPI_LOW_POWER_IDLE_TABLE *)Table)->LpiStates[LpitStateEntries - 1].ResidencyCounterFrequency) = ResidencyCounterFrequency;
+    }
+  } else if (Table->Signature == EFI_ACPI_5_0_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
+    if (S0IX_STATUS() == 1) {
+      EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE  *FadtTable;
+      DEBUG ((DEBUG_INFO, "Update FADT ACPI table\n"));
+      FadtTable = (EFI_ACPI_6_1_FIXED_ACPI_DESCRIPTION_TABLE*) Table;
+      FadtTable->Flags |= (EFI_ACPI_6_1_PCI_EXP_WAK);
+      FadtTable->Flags |= (EFI_ACPI_6_1_LOW_POWER_S0_IDLE_CAPABLE);
+      FadtTable->Flags |= (EFI_ACPI_6_1_PWR_BUTTON);
+    }
+  } else if (FeaturePcdGet (PcdVtdEnabled) && (Table->Signature == EFI_ACPI_6_4_DMA_REMAPPING_TABLE_SIGNATURE)) {
+    DEBUG ((DEBUG_INFO, "Updated DMAR Table entries\n"));
+    PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
+    if ((PlatformData != NULL) && (PlatformData->PlatformFeatures.VtdEnable == 1)) {
+      DmarTableUpdate (Table);
     }
   }
 
@@ -2238,7 +2175,7 @@ UpdateCpuNvs (
   CpuConfigData = (CPU_CONFIG_DATA *)(UINTN)CpuInitDataHob->CpuConfigData;
   CpuSku = GetCpuSku();
 
-  CpuNvs->Cpuid = GetCpuFamily() | GetCpuStepping();
+  CpuNvs->Cpuid = (UINT32)GetCpuFamily() | (UINT32)GetCpuStepping();
   CpuNvs->Revision = CPU_NVS_AREA_REVISION;
   ///
   /// Calculate the number of Oc bins supported. Read in MSR 194h FLEX_RATIO bits (19:17)
@@ -2843,11 +2780,17 @@ PlatformUpdateAcpiGnvs (
 
 
   // System Agent
+  SaNvs->XPcieCfgBaseAddress      = (UINT32)(PcdGet64(PcdPciExpressBaseAddress));
   SaNvs->Mmio64Base               = PcdGet64(PcdPciResourceMem64Base);
   SaNvs->Mmio64Length             = 0x4000000000ULL;
   SaNvs->Mmio32Base               = PcdGet32(PcdPciResourceMem32Base);
-  SaNvs->Mmio32Length             = ACPI_MMIO_BASE_ADDRESS - SaNvs->Mmio32Base;
-  SaNvs->XPcieCfgBaseAddress      = (UINT32)(PcdGet64(PcdPciExpressBaseAddress));
+  if (SaNvs->Mmio32Base < SaNvs->XPcieCfgBaseAddress) {
+    SaNvs->Mmio32Length = SaNvs->XPcieCfgBaseAddress - SaNvs->Mmio32Base;
+  } else if (SaNvs->Mmio32Base < 0xF0000000) {
+    SaNvs->Mmio32Length = 0xF0000000 - SaNvs->Mmio32Base;
+  } else {
+    DEBUG((DEBUG_INFO, "acpi: Unable to configure M32L with M32B=0x%08X\n", SaNvs->Mmio32Base));
+  }
 
   AsmCpuid(1, &CpuidRegs.RegEax, 0, 0, 0);
   SaNvs->CpuIdInfo                = (CpuidRegs.RegEax & 0x0FFFFF);

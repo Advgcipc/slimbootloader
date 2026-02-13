@@ -318,15 +318,19 @@ ParseElfImage (
       End = ALIGN_VALUE (SegInfo.MemAddr + SegInfo.MemLen, SegInfo.Alignment) - 1;
     }
   }
-  //
-  // 0 - MAX_UINT32  + 1 equals to 0.
-  //
-  ElfCt->ImageSize             = End - Base + 1;
-  ElfCt->PreferredImageAddress = (VOID *) Base;
+
+  if (End == 0 && Base == MAX_UINT32) {
+    ElfCt->ImageSize             = 0;
+    ElfCt->PreferredImageAddress = NULL;
+  } else {
+    ElfCt->ImageSize             = End - Base + 1;
+    ElfCt->PreferredImageAddress = (VOID *) Base;
+  }
   CurrentLoadAddress           = ElfCt->FileBase + FileOffset;
 
   // check if CurrentLoadAddress meets load alignment requirement.
-  if ( ((UINTN)CurrentLoadAddress & ~(SegAlignment - 1)) != (UINTN)CurrentLoadAddress) {
+  // Only when SegAlignment > 1, perform the alignment check
+  if ((SegAlignment > 1) && ((UINTN)CurrentLoadAddress & ~(SegAlignment - 1)) != (UINTN)CurrentLoadAddress) {
     ElfCt->ReloadRequired = TRUE;
   }
   if (!ElfCt->ReloadRequired) {

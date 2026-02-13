@@ -162,7 +162,10 @@ BoardInit (
     break;
   case PostSiliconInit:
     PlatformPostSiliconInit ();
-    InitializeSmbiosInfo ();
+    // Override the Smbios default Info using SMBIOS binary blob
+    if (FeaturePcdGet (PcdSmbiosEnabled)) {
+      LoadSmbiosStringsFromComponent (SIGNATURE_32 ('I', 'P', 'F', 'W'), SIGNATURE_32 ('S', 'M', 'B', 'S'));
+    }
     SetTmeVar ();
     FreeSgxMem ();
     break;
@@ -698,25 +701,6 @@ SaveNvsData (
   return Status;
 }
 
-/**
- Update serial port information to global HOB data structure.
-
- @param SerialPortInfo  Pointer to global HOB data structure.
- **/
-VOID
-EFIAPI
-UpdateSerialPortInfo (
-  IN  SERIAL_PORT_INFO  *SerialPortInfo
-  )
-{
-  SerialPortInfo->Type     = 1;
-  SerialPortInfo->BaseAddr64 = GetSerialPortBase ();
-  SerialPortInfo->BaseAddr   = (UINT32) SerialPortInfo->BaseAddr64;
-  SerialPortInfo->RegWidth = GetSerialPortStrideSize ();
-
-  DEBUG ((DEBUG_INFO, "SerialPortInfo Type=%d BaseAddr=0x%08X RegWidth=%d\n",
-    SerialPortInfo->Type, SerialPortInfo->BaseAddr, SerialPortInfo->RegWidth));
-}
 
 /**
  Update the OS boot option
@@ -931,8 +915,6 @@ PlatformUpdateHobInfo (
     UpdateFrameBufferInfo (HobInfo);
   } else if (Guid == &gEfiGraphicsDeviceInfoHobGuid) {
     UpdateFrameBufferDeviceInfo (HobInfo);
-  } else if (Guid == &gLoaderSerialPortInfoGuid) {
-    UpdateSerialPortInfo (HobInfo);
   } else if (Guid == &gOsBootOptionGuid) {
     UpdateOsBootMediumInfo (HobInfo);
   } else if (Guid == &gSmmInformationGuid) {
@@ -1209,8 +1191,8 @@ PlatformUpdateAcpiGnvs (
           AcpiParameter->Io16Length[Index]    = (UINT16) (ResRange->IoLimit - ResRange->IoBase + 1);
         }
         if (ResRange->Mmio32Limit != 0) {
-          AcpiParameter->Mmio32Base[Index]    = ResRange->Mmio32Base;
-          AcpiParameter->Mmio32Length[Index]  = (ResRange->Mmio32Limit - ResRange->Mmio32Base + 1);
+          AcpiParameter->Mmio32Base[Index]    = (UINT32)ResRange->Mmio32Base;
+          AcpiParameter->Mmio32Length[Index]  = (UINT32)(ResRange->Mmio32Limit - ResRange->Mmio32Base + 1);
         }
         if (ResRange->Mmio64Limit != 0) {
           AcpiParameter->Mmio64Base[Index]    = ResRange->Mmio64Base;
