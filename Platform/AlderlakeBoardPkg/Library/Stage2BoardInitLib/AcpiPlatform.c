@@ -352,6 +352,56 @@ DmarTableUpdate (
   AcpiHeader->Checksum = CalculateCheckSum8 ((UINT8 *)AcpiHeader, AcpiHeader->Length);
 }
 
+//6884V110_1+>>
+#include <IndustryStandard/SerialPortConsoleRedirectionTable.h> 
+
+/**
+  Update Serial Port Console Redirection Table.
+
+  @param[in] Table      Pointer to ACPI Table Data.
+
+  @retval EFI_SUCCESS   The SPCR ACPI table was installed successfully.
+  @retval EFI_ERROR    An error occurred.
+
+**/
+EFI_STATUS
+EFIAPI
+UpdateSpcrAcpiTable (
+  IN VOID* Table
+  )
+{
+  EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE *Spcr;
+
+  DEBUG((DEBUG_VERBOSE, "UpdateSpcrAcpiTable start\n"));
+  if (Table == NULL) {
+    DEBUG((DEBUG_WARN, "Table is not a valid pointer\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Spcr = (EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE *)Table;
+
+  DEBUG ((DEBUG_INIT, "Detected SPCR Table! Current Base: 0x%lx\n", Spcr->BaseAddress.Address));
+
+//  Spcr->BaseAddress.Address   = 0x2F8;
+//  Spcr->GlobalSystemInterrupt = 4;
+//  Spcr->BaudRate              = 7;    // 115200
+//  Spcr->TerminalType          = 3;    // ANSI / VT-UTF8
+
+  DEBUG ((DEBUG_INIT, "\n=== [SBL SPCR Debug] ===\n"));
+  DEBUG ((DEBUG_INIT, "  Signature       : SPCR\n"));
+  DEBUG ((DEBUG_INIT, "  Base Address    : 0x%lx\n", Spcr->BaseAddress.Address));
+  DEBUG ((DEBUG_INIT, "  Address Space   : %d (1=IO, 0=Mem)\n", Spcr->BaseAddress.AddressSpaceId));
+  DEBUG ((DEBUG_INIT, "  Interrupt Type  : 0x%02x\n", Spcr->InterruptType));
+  DEBUG ((DEBUG_INIT, "  GSI (IRQ)       : %d\n", Spcr->GlobalSystemInterrupt));
+  DEBUG ((DEBUG_INIT, "  Baud Rate Code  : %d (7=115200)\n", Spcr->BaudRate));
+  DEBUG ((DEBUG_INIT, "  Terminal Type   : %d\n", Spcr->TerminalType));
+  DEBUG ((DEBUG_INIT, "========================\n\n"));
+    
+  DEBUG ((DEBUG_INIT, "SPCR Table has been patched for Windows EMS.\n"));
+
+  return EFI_SUCCESS;
+}
+//<<+6884V110_1
 
 /**
   Update PCH NVS and SA NVS area address and size in ACPI table.
@@ -567,6 +617,14 @@ PlatformUpdateAcpiTable (
       DmarTableUpdate (Table);
     }
   }
+
+//6884V110_1+>>
+  if (Table->Signature == EFI_ACPI_6_5_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE) {
+    Status = UpdateSpcrAcpiTable(Table);
+    DEBUG ( (DEBUG_INFO, "Updated SPCR Table in AcpiTable Entries %r\n", Status) );
+    ASSERT_EFI_ERROR (Status);
+  }
+//<<+6884V110_1
 
   if (MEASURED_BOOT_ENABLED()) {
     if ((Table->Signature  == EFI_ACPI_5_0_TRUSTED_COMPUTING_PLATFORM_2_TABLE_SIGNATURE) ||

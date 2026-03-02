@@ -60,6 +60,7 @@
   Rtct/Rtct.act
   Lpit/Lpit.act
   Bert/Bert.aslc
+  Spcr/Spcr.aslc   #//6884V110_1
 
 [FixedPcd]
   gPlatformAlderLakeTokenSpaceGuid.PcdAdlLpSupport

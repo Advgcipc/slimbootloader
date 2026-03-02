@@ -34,6 +34,28 @@
 - [x] Debug Features
 
 ### Revision History
+* BIOS Name     : 688400S0080V110.bin
+* BIOS Checksum : 71BB
+* BIOS String   : **** SOM-6884 BIOS V1.10 (03/02/2026) ****
+* Release Date  : 2026/03/02
+* Owner         : Lawrence.Guan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V110_1  Support Windows EMS function by ACPI SPCR table.
+  
+* 6884V110_2  Set secure boot default as disable.
+
+
+### Firmware Update Trigger step
+  
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V109_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
+  Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
+
+### Revision History
 * BIOS Name     : 688400S0180V109.bin
 * BIOS Checksum : AB2D
 * BIOS String   : **** SOM-6884 BIOS V1.09 (02/12/2026) ****

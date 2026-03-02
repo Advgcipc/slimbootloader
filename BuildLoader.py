@@ -180,16 +180,18 @@ class BaseBoard(object):
         self.ENABLE_SMP_INIT       = 1
         self.ENABLE_FSP_LOAD_IMAGE = 0
         self.ENABLE_SPLASH         = 0
-#//6884V109_3
-        self.SECUREBOOT_KEYS_DEFAULTLOAD    = 1
-        self.SECUREBOOT_PK_KEY_ENABLE       = 1
-        self.SECUREBOOT_KEK_KEY_ENABLE      = 1
-        self.SECUREBOOT_DB_KEY_ENABLE       = 1
-        self.SECUREBOOT_DBX_KEY_ENABLE      = 1
-        self.SECUREBOOT_DBT_KEY_ENABLE      = 1
+#//6884V109_3+>>
+#//6884V110_2+>>
+        self.SECUREBOOT_KEYS_DEFAULTLOAD    = 0
+        self.SECUREBOOT_PK_KEY_ENABLE       = 0
+        self.SECUREBOOT_KEK_KEY_ENABLE      = 0
+        self.SECUREBOOT_DB_KEY_ENABLE       = 0
+        self.SECUREBOOT_DBX_KEY_ENABLE      = 0
+        self.SECUREBOOT_DBT_KEY_ENABLE      = 0
+#//<<+6884V110_2
         self.PLATFORM_BOOT_TIMEOUT          = 1
         self.PLATFORM_SERIAL_TERMINAL       = 1
-#//6884V109_3
+#//<<+6884V109_3
         self.ENABLE_FRAMEBUFFER_INIT = 0
         self.ENABLE_PRE_OS_CHECKER = 0
         self.ENABLE_CRYPTO_SHA_OPT  = IPP_CRYPTO_OPTIMIZATION_MASK['SHA256_V8']

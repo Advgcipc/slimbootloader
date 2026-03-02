@@ -1,0 +1,54 @@
+﻿/** @file
+  Serial Port Console Redirection Table (SPCR)
+**/
+
+#include <IndustryStandard/Acpi.h>
+#include <IndustryStandard/SerialPortConsoleRedirectionTable.h>
+
+#pragma pack(1)
+
+EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
+  {
+    EFI_ACPI_2_0_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE,
+    sizeof (EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE),
+    2,                          // Revision
+    0,                          // Checksum
+    { 'I', 'N', 'T', 'E', 'L', ' ' }, // OEMID
+    0,                          // OEM Table ID
+    0,                          // OEM Revision
+    SIGNATURE_32('S', 'B', 'L', ' '), // Creator ID
+    0                           // Creator Revision
+  },
+  0,                            // Interface Type: 0 = 16550 UART
+  {0, 0, 0},                    // Reserved1
+  {
+    1,                          // Address Space ID: 1 = System I/O
+    8,                          // Register Bit Width
+    0,                          // Register Bit Offset
+    1,                          // Access Size
+    0x2F8                       // COM2 - Base Address
+  },
+  0x08,                         // Interrupt Type 0x08 (PC-AT Dual-8259)
+  0,                            // Irq
+  3,                            // Global System Interrupt for COM2
+  7,                            // Baud Rate: 7 = 115200
+  0,                            // Parity
+  1,                            // Stop Bits
+  0,                            // Flow Control
+  3,                            // Terminal Type
+  0,                            // Reserved2
+  0xFFFF,                       // PciDeviceId
+  0xFFFF,                       // PciVendorId
+  0,                            // PciBusNumber
+  0,                            // PciDeviceNumber
+  0,                            // PciFunctionNumber
+  0,                            // PciFlags
+  0,                            // PciSegment
+  0                             // Reserved3
+};
+
+#pragma pack()
+
+VOID* ReferenceAcpiTable (VOID) {
+  return (VOID*)&Spcr;
+}

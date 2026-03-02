@@ -81,13 +81,15 @@ class Board(BaseBoard):
         # 0 - PCH UART0, 1 - PCH UART1, 2 - PCH UART2, 0xFF - EC UART 0x3F8
         self.DEBUG_PORT_NUMBER =0
 
-#//6884V109_3+>>
-        self.SECUREBOOT_KEYS_DEFAULTLOAD = 1
-        self.SECUREBOOT_PK_KEY_ENABLE   = 1
-        self.SECUREBOOT_KEK_KEY_ENABLE  = 1
-        self.SECUREBOOT_DB_KEY_ENABLE   = 1
-        self.SECUREBOOT_DBX_KEY_ENABLE  = 1
-        self.SECUREBOOT_DBT_KEY_ENABLE  = 1
+#//6884V109_3+>> 
+#//6884V110_2+>>
+        self.SECUREBOOT_KEYS_DEFAULTLOAD = 0
+        self.SECUREBOOT_PK_KEY_ENABLE   = 0
+        self.SECUREBOOT_KEK_KEY_ENABLE  = 0
+        self.SECUREBOOT_DB_KEY_ENABLE   = 0
+        self.SECUREBOOT_DBX_KEY_ENABLE  = 0
+        self.SECUREBOOT_DBT_KEY_ENABLE  = 0
+#//<<+6884V110_2
         self.PLATFORM_BOOT_TIMEOUT      = 1
         self.PLATFORM_SERIAL_TERMINAL   = 1
 
