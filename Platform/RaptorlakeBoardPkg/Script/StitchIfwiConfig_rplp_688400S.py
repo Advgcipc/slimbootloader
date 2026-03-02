@@ -186,12 +186,15 @@ def get_xml_change_list (platform, plt_params_list):
         ('./FlashLayout/EcRegion/EcRegionPointer',                                   '$SourceDir\EcRegionPointer.bin'),
         ('./FlashLayout/EcRegion/InputFile',                                         '$SourceDir\EcRegion.bin'),
         ('./FlashLayout/EcRegion/Enabled',                                           'Enabled'),
-        ('./FlashLayout/GbeRegion/InputFile',                                        '$SourceDir\GbeRegion.bin'),
-        ('./FlashLayout/GbeRegion/Enabled',                                          'Enabled'),
+#//6884V111_2        ('./FlashLayout/GbeRegion/InputFile',                                        '$SourceDir\GbeRegion.bin'),
+#//6884V111_2         ('./FlashLayout/GbeRegion/Enabled',                                          'Enabled'),
+        ('./FlashLayout/GbeRegion/Enabled',                                          'Disabled'),
         ('./FlashLayout/SubPartitions/IunitSubPartition/InputFile',                  '$SourceDir\IunitSubPartition.bin'),
         ('./FlashLayout/SubPartitions/PchcSubPartitionData/InputFile',               '$SourceDir\PchcSubPartitionData.bin'),
-        ('./FlashSettings/FlashConfiguration/QuadOutReadEnable',                     'Yes'),
-        ('./FlashSettings/FlashConfiguration/QuadIoReadEnable',                      'Yes'),
+        ('./FlashSettings/FlashConfiguration/QuadOutReadEnable',                     'No'),              #//6884V111_2
+        ('./FlashSettings/FlashConfiguration/QuadIoReadEnable',                      'No'),              #//6884V111_2
+        ('./FlashSettings/FlashConfiguration/SpiDualOutReadEnable',                  'Yes'),             #//6884V111_2
+        ('./FlashSettings/FlashConfiguration/SpiDualIoReadEnable',                   'Yes'),             #//6884V111_2
         ('./FlashSettings/VsccTable/VsccEntries/VsccEntry/VsccEntryName',            'VsccEntry0'),
         ('./FlashSettings/BiosConfiguration/BiosRedAssistance',                      'Disabled'),
         ('./PlatformProtection/PlatformIntegrity/OemExtInputFile',                   '$SourceDir\OemExtInputFile.bin'),
@@ -202,27 +205,107 @@ def get_xml_change_list (platform, plt_params_list):
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC1',   'Enabled'),
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC2',   'Enabled'),
         ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC3',   'Enabled'),
-        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC4',   'Enabled'),
-        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC5',   'Enabled'),
-        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC6',   'Enabled'),
-        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC7',   'Enabled'),
-        ('./NetworkingConnectivity/WiredLanConfiguration/PhyConnected',              'PHY on SMLink0'),
+        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC4',   'Disabled'),       #//6884V111_2
+        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC5',   'Disabled'),       #//6884V111_2
+        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC6',   'Disabled'),       #//6884V111_2
+        ('./Icc/IccPolicies/Profiles/Profile/ClockOutputConfiguration/ClkoutSRC7',   'Disabled'),       #//6884V111_2
+        ('./NetworkingConnectivity/WiredLanConfiguration/PhyConnected',              'No PHY Connected'),
         ('./IntegratedSensorHub/IntegratedSensorHub/IshSupported',                   'No'),
         ('./IntegratedSensorHub/IntegratedSensorHub/IshPowerUpState',                'Disabled'),
         ('./PlatformProtection/IntelPttConfiguration/PttSupported',                  'No'),
         ('./PlatformProtection/IntelPttConfiguration/PttPwrUpState',                 'Disabled'),
         ('./IntegratedSensorHub/IshImage/InputFile',                                 '$SourceDir\IshImage.bin'),
         ('./IntegratedSensorHub/IshData/PdtBinary',                                  '$SourceDir\PdtBinary.bin'),
-        ('./Debug/DelayedAuthenticationModeConfiguration/DelayedAuthMode',           'No'),
+        ('./Debug/DelayedAuthenticationModeConfiguration/DelayedAuthMode',           'Yes'),            #//6884V111_2
         ('./FlexIO/Type-CSubsystemConfiguration/IomBinaryFile',                      '$SourceDir\IomBinaryFile.bin'),
         ('./FlexIO/Type-CSubsystemConfiguration/PhyBinaryFile',                      '$SourceDir\PhyBinaryFile.bin'),
         ('./FlexIO/Type-CSubsystemConfiguration/TbtBinaryFile',                      '$SourceDir\TbtBinaryFile.bin'),
         ('./IntelUniquePlatformId/EntitlementsConfiguration/IcpsSwSkuing',           'Yes'),
         ('./FlexIO/Usb3PortConfiguration/USB3Port4SpdCap',                           'USB 3.1 Gen1'),
         ('./FlexIO/Type-CSubsystemConfiguration/XdciSplitDieConfig',                 'xDCI Split Die Disabled'),
-        ('./FlashSettings/FlashConfiguration/FastReadClockFreq',                     '25MHz'),
-        ('./FlashSettings/FlashConfiguration/ReadIdAndReadStatClkFreq',              '25MHz'),
-        ('./FlashSettings/FlashConfiguration/WriteEraseClockFreq',                   '25MHz'),
+        ('./FlexIO/PciePortConfiguration/PCIeController2Config',                     '2x2'),             #//6884A2V109_3
+        ('./FlexIO/PciePortConfiguration/PCIeController3Config',                     '4x1'),             #//6884A2V109_3
+        ('./FlashSettings/FlashConfiguration/FastReadClockFreq',                     '50MHz'),           #//6884V111_2
+        ('./FlashSettings/FlashConfiguration/ReadIdAndReadStatClkFreq',              '50MHz'),           #//6884V111_2
+        ('./FlashSettings/FlashConfiguration/WriteEraseClockFreq',                   '50MHz'),           #//6884V111_2
+        ('./Icc/IccPolicies/Profiles/Profile/PwrManagementConfiguration/ClkreqMapSRC3',                   'GPPC_D5'),           #//6884V111_2
+        ('./NetworkingConnectivity/WiredLanConfiguration/GbePCIePortSelect',         'None'),            #//6884V111_2
+        ('./NetworkingConnectivity/WiredLanConfiguration/LanEnable',                 'No'),              #//6884V111_2
+        ('./NetworkingConnectivity/WirelessLanConfiguration/CnviWlanCrdEn',          'Disabled'),        #//6884V111_2
+        ('./NetworkingConnectivity/WirelessLanConfiguration/MEWlanPowerWell',        'Primary Well || SLP_SUS#'),        #//6884V111_2
+        ('./NetworkingConnectivity/TimeSensitiveNetworkingConfiguration/TsnEnabled', 'TSN Disabled'),                    #//6884V111_2
+        ('./InternalPchBuses/EspiConfiguration/EspiEcBusfreq',                       '50MHz'),                           #//6884V111_2
+        ('./InternalPchBuses/EspiConfiguration/EspiEcMaxIoMode',                     'Single, Dual and Quad'),           #//6884V111_2
+        ('./InternalPchBuses/EspiConfiguration/EspiEcSlave1DeviceEn',                'Yes'),              #//6884V111_2
+        ('./Power/DeepSx/DeepSxSupportEnable',                                       'No'),               #//6884V111_2
+        ('./Camera/IPUSecurity/SecureTouchCameraMask',                               '0x0'),              #//6884V111_2
+        ('./Debug/IntelMeFirmwareDebuggingOverrides/DbgOverridePreProdSi',           '0x7'),              #//6884V111_2
+        ('./Debug/IntelMeFirmwareDebuggingOverrides/DbgOverrideProdSi',              '0x7'),              #//6884V111_2
+        ('./Debug/DirectConnectInterfaceConfiguration/Usb3DciOobEnable',             'Yes'),              #//6884V111_2
+        ('./CpuStraps/CpuStraps/Vccp105CpuPg',                                       'VCCP 1.05 CPU PG Not present'),            #//6884V111_2
+        ('./CpuStraps/CpuStraps/PlatformImonDisable',                                'Disabled'),          #//6884V111_2
+        ('./FlexIO/PcieLaneReversalConfiguration/PCIeCtrl3LnReversal',               'No'),                #//6884V111_2
+        ('./FlexIO/PciePortConfiguration/PCIeController2Config',                     '2x2'),               #//6884V111_3
+        ('./FlexIO/PciePortConfiguration/PCIeController3Config',                     '4x1'),               #//6884V111_2
+        ('./FlexIO/SataPcieComboPortConfiguration/SataPCIeComboPort0',               'SATA'),              #//6884V111_2
+        ('./FlexIO/SataPcieComboPortConfiguration/SataPCIeComboPort1',               'SATA'),              #//6884V111_2
+        ('./FlexIO/Usb3PortConfiguration/USB3Port4SpdCap',                           'USB 3.1 Gen2'),      #//6884V111_2
+        ('./FlexIO/Usb3PortConfiguration/USB3Prt4ConTypeSel',                        'Type A / Type C'),   #//6884V111_2
+        ('./FlexIO/Usb3PortConfiguration/USB3PCIeComboPort3',                        'PCIe'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt1ConTypeSel',                        'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt2ConTypeSel',                        'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt3ConTypeSel',                        'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt4ConTypeSel',                        'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt5ConTypeSel',                        'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Usb2PortConfiguration/USB2Prt10ConTypeSel',                       'Type A / Type C'),              #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort1Config',                   'DP Fixed Connection'),          #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort2Config',                   'DP Fixed Connection'),          #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort3Config',                   'DP Fixed Connection'),          #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypeCPort4Config',                   'No Thunderbolt'),               #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypecPort1ConTypeSel',               'Type A'),                       #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypecPort2ConTypeSel',               'Type A'),                       #//6884V111_2
+        ('./FlexIO/Type-CSubsystemConfiguration/TypecPort3ConTypeSel',               'Type A'),                       #//6884V111_2  
+        ('./FlexIO/ThunderboltConfiguration/TboltEnable',                            'No'),                           #//6884V111_2     
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort1Mode',          'No'),                           #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort2Mode',          'No'),                           #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort3Mode',          'No'),                           #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort4Mode',          'No'),                           #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort1RetimerEnabled',          'No'),                   #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort2RetimerEnabled',          'No'),                   #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort3RetimerEnabled',          'No'),                   #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort4RetimerEnabled',          'No'),                   #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort1SmbusAddr',          '0x0'),                              #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort2SMBusAddr',          '0x0'),                              #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort3SmbusAddr',          '0x0'),                              #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort4SmbusAddr',          '0x0'),                              #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/USB2PortForTypeCPort2',          'USB2 Port 1'),                    #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/USB2PortForTypeCPort3',          'USB2 Port 1'),                    #//6884V111_2
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/USB2PortForTypeCPort4',          'USB2 Port 2'),                    #//6884V111_2     
+        ('./FlexIO/PowerDelivery_PdControllerConfiguration/TypeCPort2RetimerEnabled', 'No'),                                   #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/HdaVoltSelect',                                    '3.3Volts'),                       #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppE1voltSelect',                                  '3.3Volts'),                       #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/GppE6voltSelect',                                  '3.3Volts'),                       #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF2voltSelect',                                  '3.3Volts'),                       #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF11voltSelect',                                  '3.3Volts'),                      #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/GppF12voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF13voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF14voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF16voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF17voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppF18voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppH6voltSelect',                                   '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppH7voltSelect',                                   '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppH15voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppA21voltSelect',                                  '1.8Volts'),                      #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/GppB0voltSelect',                                   '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppB1voltSelect',                                   '3.3Volts'),                      #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/GppB14voltSelect',                                  '3.3Volts'),                      #//6884V111_2 
+        ('./Gpio/GpioVccioVoltageControl/GppB15voltSelect',                                  '3.3Volts'),                      #//6884V111_2
+        ('./Gpio/GpioVccioVoltageControl/GppB23voltSelect',                                  '3.3Volts'),                      #//6884V111_2
+        ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs0Cfg',                      'Legacy VCCIO'),                  #//6884V111_2
+        ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs1Cfg',                      'Legacy VCCIO'),                  #//6884V111_2 
+        ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs2Cfg',                      'Legacy VCCIO'),                  #//6884V111_2
+        ('./Gpio/ThunderboltLsxBssb-LsConfiguration/TbltLsxBssbLs3Cfg',                      'Legacy VCCIO'),                  #//6884V111_2
     ])
 
     if 'dual' in plt_params_list:

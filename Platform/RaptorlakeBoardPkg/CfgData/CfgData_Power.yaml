@@ -595,16 +595,16 @@
       name         : Short term Power Limit value for custom cTDP level 1
       type         : EditNum, HEX, (0x00, 0x3E7F83)
       help         : >
-                     Short term Power Limit value for custom cTDP level 1. Units are based on POWER_MGMT_CONFIG.CustomPowerUnit.Valid Range 0 to 4095875 in Step size of 125
+                     6884V111_1 - Short term Power Limit value for custom cTDP level 1. Units are based on POWER_MGMT_CONFIG.CustomPowerUnit.Valid Range 0 to 4095875 in Step size of 125
       length       : 0x04
-      value        : 0x00
+      value        : 0x54
   - Custom1PowerLimit2 :
       name         : Long term Power Limit value for custom cTDP level 1
       type         : EditNum, HEX, (0x00, 0x3E7F83)
       help         : >
-                     Long term Power Limit value for custom cTDP level 1. Units are based on POWER_MGMT_CONFIG.CustomPowerUnit.Valid Range 0 to 4095875 in Step size of 125
+                     6884V111_1 - Long term Power Limit value for custom cTDP level 1. Units are based on POWER_MGMT_CONFIG.CustomPowerUnit.Valid Range 0 to 4095875 in Step size of 125
       length       : 0x04
-      value        : 0x00
+      value        : 0x60
   - Custom2PowerLimit1 :
       name         : Short term Power Limit value for custom cTDP level 2
       type         : EditNum, HEX, (0x00, 0x3E7F83)

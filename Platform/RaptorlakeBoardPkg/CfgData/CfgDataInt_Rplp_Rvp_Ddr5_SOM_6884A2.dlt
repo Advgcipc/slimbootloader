@@ -73,7 +73,10 @@ MEMORY_CFG_DATA.CsiSpeed                 | {0x02, 0x01, 0x02, 0x02, 0x02, 0x02, 
 MEMORY_CFG_DATA.CpuPcieRpClockReqMsgEnable | {0x1, 0x1, 0x1}
 MEMORY_CFG_DATA.CpuPcieRpPcieSpeed         | {0x00, 0x00, 0x00, 0x00}
 MEMORY_CFG_DATA.EnableC6Dram               | 0x1
-MEMORY_CFG_DATA.BootFrequency              | 0x2
+#//6884V111_1 MEMORY_CFG_DATA.BootFrequency              | 0x2
+#//6884V111_1+>>
+MEMORY_CFG_DATA.BootFrequency              | 0x1
+#//<<+6884V111_1
 MEMORY_CFG_DATA.FClkFrequency              | 0x0
 #//6884V101_1 MEMORY_CFG_DATA.PcieClkSrcUsage            | { 0x40, 0x8, 0x4, 0x41, 0x42, 0x5, 0x70, 0x7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0}
 #//6884V107_1 MEMORY_CFG_DATA.PcieClkSrcUsage            | { 0x80, 0x8, 0xff, 0x42, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0}
@@ -98,6 +101,9 @@ MEMORY_CFG_DATA.PchHdaDspEnable            | 0x1
 MEMORY_CFG_DATA.CpuDmiHwEqGen3CoeffListCp  | { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 MEMORY_CFG_DATA.CpuDmiHwEqGen4CoeffListCm | { 0x00, 0x0E, 0x0A, 0x07, 0x07, 0x07, 0x07, 0x07 }
 MEMORY_CFG_DATA.CpuDmiHwEqGen4CoeffListCp | { 0x00, 0x07, 0x06, 0x07, 0x07, 0x07, 0x07, 0x07 }
+#//6884V111_1+>>
+MEMORY_CFG_DATA.ActiveSmallCoreCount            | 0x4
+#//<<+6884V111_1
 
 GRAPHICS_CFG_DATA.InternalGfx              | 0x2
 
@@ -138,10 +144,14 @@ SILICON_CFG_DATA.PchHdaEnable         | 0x1
 
 POWER_CFG_DATA.MaxRatio             | 0x4
 POWER_CFG_DATA.TdcEnable            | {0x1, 0x1, 0x0, 0x0, 0x0}
-POWER_CFG_DATA.Eist                 | 0x1
+#//6884V111_1 POWER_CFG_DATA.Eist                 | 0x1
 POWER_CFG_DATA.EnergyEfficientTurbo | 0x1
 POWER_CFG_DATA.PsysPmax             | 0
 POWER_CFG_DATA.EnableItbm           | 0x1
+#//6884V111_1+>>
+POWER_CFG_DATA.TurboMode            | 0
+POWER_CFG_DATA.Eist                 | 0
+#//<<+6884V111_1
 
 PEP_CFG_DATA.PepPcieDg              | 1
 PEP_CFG_DATA.PepUfs0                | 1

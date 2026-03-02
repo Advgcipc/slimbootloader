@@ -539,3 +539,11 @@
                      //6884A3V103_1 - 0- Disable, 1- Enable (Default) Azalia controller
       length       : 0x01
       value        : 0x01
+  - EnableTcoTimer :
+      name         : Enable TCO Timer
+      type         : Combo
+      option       : $EN_DIS
+      help         : >
+                     6884V111_1 - Enable/disable TCO Timer    0- Disable; 1- Enable.
+      length       : 0x01
+      value        : 0x1

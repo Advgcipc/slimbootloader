@@ -842,6 +842,7 @@ UpdateFspConfig (
     FspsConfig->TccOffsetClamp                = PowerCfgData->TccOffsetClamp;
     FspsConfig->TccOffsetLock                 = PowerCfgData->TccOffsetLock;
     FspsConfig->TurboMode                     = PowerCfgData->TurboMode;
+    FspsConfig->Eist                          = PowerCfgData->Eist;         //6884V111_1
     FspsConfig->TccActivationOffset           = PowerCfgData->TccActivationOffset;
     FspsConfig->PowerLimit1                   = PowerCfgData->PowerLimit1;
     FspsConfig->PowerLimit2Power              = PowerCfgData->PowerLimit2Power;

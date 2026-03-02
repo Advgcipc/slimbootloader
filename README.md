@@ -34,6 +34,36 @@
 - [x] Debug Features
 
 ### Revision History
+* BIOS Name     : 688400S0080V111.bin
+* BIOS Checksum : 
+* BIOS String   : **** SOM-6884 BIOS V1.10 (03/02/2026) ****
+* Release Date  : 2026/03/02
+* Owner         : Lawrence.Guan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V111_1  Set FSP and config default:
+  1. P-Core All cores 
+  2. E-Core = 4 cores
+  3. CPU Turbo Mode Disabled 
+  4. Intel SpeedStep Disabled 
+  5. Boot performance mode Max Non-Turbo Performance 
+  6. configurable CPU TDP PL1=10.5W, PL2=12W 
+  7. Enable TCO Timer Enabled 
+  
+* 6884V111_2  Support StitchIfwiConfig for RPLP.
+  
+* 6884V111_3  Update PCIe controller 2(Port 5-8)  [2x2]
+  
+### Firmware Update Trigger step
+  
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V111_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
+  Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
+
+### Revision History
 * BIOS Name     : 688400S0080V110.bin
 * BIOS Checksum : 71BB
 * BIOS String   : **** SOM-6884 BIOS V1.10 (03/02/2026) ****
@@ -51,7 +81,7 @@
 
 ### Firmware Update Trigger step
   
-  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V109_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V110_FwuImage.bin to usb key \FwuImage.bin
   Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
   Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
 
