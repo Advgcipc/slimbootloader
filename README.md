@@ -34,8 +34,36 @@
 - [x] Debug Features
 
 ### Revision History
+* BIOS Name     : 688400S0080V112.bin ; 688400S0180V112.bin
+* BIOS Checksum : B462 ; D4CB
+* BIOS String   : **** SOM-6884 BIOS V1.10 (03/10/2026) ****
+* Release Date  : 2026/03/10
+* Owner         : Lawrence.Guan
+* Requester     : Ronny.Tao
+* Customer      : Boeing
+
+### Release Description
+
+* 6884V112_1  Set default boot option priority:  
+    1. USB  
+    2. SATA port 0  
+    3. Others disable  
+    Note:  
+    - Replace the Universal Payload to adjust the boot option priority.
+    - EDK2 source: 
+      - Branch: edk2-stable202511
+      - SHA-1: 4f76706e7db90f95f5aca16e3db54033df078001
+      - Code mod: Platform\RaptorlakeBoardPkg\Binaries\EDK2\6884V112_1\mod
+  
+### Firmware Update Trigger step
+  
+  Prepare Firmware update image:  copy Outputs\rplp\688400S0080V112_FwuImage.bin to usb key \FwuImage.bin
+  Prepare Firmware update script: copy Platform\RaptorlakeBoardPkg\Binaries\fwu.nsh to usb key \fwu.nsh
+  Trigger Firmware update:        boot to uefishell and execute .\Fwu.nsh 
+
+### Revision History
 * BIOS Name     : 688400S0080V111.bin
-* BIOS Checksum : 
+* BIOS Checksum : C497
 * BIOS String   : **** SOM-6884 BIOS V1.10 (03/02/2026) ****
 * Release Date  : 2026/03/02
 * Owner         : Lawrence.Guan
