@@ -31,7 +31,8 @@ class Board(BaseBoard):
 #//7583V110        self.VERINFO_PROJ_MINOR_VER = 9
 #//7583V111        self.VERINFO_PROJ_MINOR_VER = 10
 #//7583V112_1        self.VERINFO_PROJ_MINOR_VER = 11
-        self.VERINFO_PROJ_MINOR_VER = 12
+#//6883V110_1        self.VERINFO_PROJ_MINOR_VER = 12
+        self.VERINFO_PROJ_MINOR_VER = 10
         self.VERINFO_SVN            = 1
         self.VERINFO_BUILD_DATE     = time.strftime("%m/%d/%Y")
 
@@ -248,7 +249,8 @@ class Board(BaseBoard):
         #   VbtBin folder.
         #self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt2.dat'}
 #//7583V112_1
-        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt250.dat',3:'Vbtsbl3.dat'}
+#//6883V110_1        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt250.dat',3:'Vbtsbl3.dat'}
+        self._MULTI_VBT_FILE      = {1:'Vbt.dat', 2:'Vbt250.dat',3:'Vbtsbl3.dat',4:'Vbtsbl4.dat'}
 
 
     def PlatformBuildHook (self, build, phase):
@@ -294,6 +296,8 @@ class Board(BaseBoard):
             'BootGuardLib|Silicon/CommonSocPkg/Library/BootGuardLibCBnT/BootGuardLibCBnT.inf',
             'BdatLib|Silicon/CommonSocPkg/Library/BdatLib/BdatLib.inf',
             'ItbtPcieRpLib|Silicon/$(SILICON_PKG_NAME)/Library/ItbtPcieRpLib/ItbtPcieRpLib.inf',
+#//6883V110_6
+            'SmbusLib|Silicon/CommonSocPkg/Library/SmbusLib/SmbusLib.inf',
             'PsdLib|Silicon/$(SILICON_PKG_NAME)/Library/PsdLib/PsdLib.inf',
             'MeExtMeasurementLib|Silicon/$(PCH_PKG_NAME)/Library/MeExtMeasurementLib/MeExtMeasurementLib.inf',
             'BasePchPciBdfLib|Silicon/$(PCH_PKG_NAME)/Library/BasePchPciBdfLib/BasePchPciBdfLib.inf',

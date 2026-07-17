@@ -50,7 +50,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
   @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
 **/
-#define SMBUS_LIB_LENGTH(SmBusAddress)             (((SmBusAddress) >> 16) & 0x3f)
+//#define SMBUS_LIB_LENGTH(SmBusAddress)             (((SmBusAddress) >> 16) & 0x3f)
+#define SMBUS_LIB_LENGTH(SmBusAddress)             ((((UINTN)SmBusAddress) >> 16) & 0x3f)
 
 /**
   Macro that returns the SMBUS PEC value from an SmBusAddress Parameter value.

@@ -42,6 +42,47 @@
 #include <Library/SocInitLib.h>
 #include <Library/TccLib.h>
 
+//6883V110_6
+#include <Library/SmbusLib.h>
+//
+// NXP3460
+//
+#define NXP3460_SMBUSADDRESS            0x40
+#define NXP3460_DPPORT_CONTROL_REG      0x80
+#define NXP3460_LVDS1_CONTROL_REG       0x81
+#define NXP3460_LVDS2_CONTROL_REG       0x82
+#define NXP3460_LVDS3_CONTROL_REG       0x83
+
+#define NXP3460_EDID_EMULATION_REG      0x84
+#define NXP3460_EDID_EMULATION_SEL      0x0E
+#define NXP3460_EDID_EMULATION_ON       0x01
+#define NXP3460_EDID_EMULATION_OFF      0x0
+
+#define NXP3460_EDID_ROM_ACCESS_REG     0x85
+#define NXP3460_PWM1_FREQUENCY_REG      0x86
+#define NXP3460_PWM2_FREQUENCY_REG      0x89
+#define NXP3460_FAST_LINK_REG           0x8C
+#define NXP3460_PIN_CONFIG1_REG         0x8D
+#define NXP3460_PIN_CONFIG2_REG         0x8E
+#define NXP3460_PWM_DEFAULT_BITCOUNT    0x8F
+
+#define NXP3460_PWM1_VALUE_REG          0x90
+#define NXP3460_PWM2_VALUE_REG          0x91
+#define NXP3460_PWM_DEFFREQUENCY_REG    0x92
+#define NXP3460_PANEL_T3_TIMING         0x93
+#define NXP3460_PANEL_T12_TIMING        0x94
+#define NXP3460_BACKLIGHT_CONTROL_REG   0x95
+#define NXP3460_PANEL_T2_DELAY          0x96
+#define NXP3460_PANEL_T4_TIMING         0x97
+#define NXP3460_PANEL_T5_DELAY          0x98
+
+#define NXP3460_FLASH_COMMAND           0xE8
+#define NXP3460_FLASH_MAGIC_NUMBER      0xE9
+#define NXP3460_FLASH_TRIGGER           0xEB
+#define NXP3460_CONFIG_MAGIC_NUMBER     0xEC
+//6883V110_6
+#include "A9610Lib.c"
+
 //7583V110 >>
 #include <Register/GpioRegs.h>
 
@@ -54,6 +95,8 @@ CONST PLT_DEVICE  mPlatformDevices[]= {
   {{0x00020000}, OsBootDeviceNvme  , 1 },
   {{0x00050000}, OsBootDeviceNvme  , 2 },
   {{0x00000200}, PlatformDeviceGraphics, 0},
+//6883V110_6
+  {{0x00001F04}, PltDeviceSmbus    , 0 }
 };
 
 VOID
@@ -451,6 +494,10 @@ UpdateFspConfig (
 //7583X001
   case BoardIdTglUSOM7583:
     CopyMem(SaDisplayConfigTable, (VOID *)(UINTN)mSOM7583DisplayDdiConfig, sizeof(mSOM7583DisplayDdiConfig));
+//6883V110_4
+    Fspmcfg->IotgPllSscEn = 0;
+    Fspmcfg->PcieRefPllSsc = 0;
+
     break;
   default:
     DEBUG((DEBUG_INFO, "Unsupported board Id %x .....\n", BoardId));
@@ -661,10 +708,91 @@ PlatformFeaturesInit (
   }
 //7583X003_2
 PlatformData->BtGuardInfo.BypassTpmInit = FALSE;
-PlatformData->BtGuardInfo.TpmType = Ptt;
+//6883V110_2 PlatformData->BtGuardInfo.TpmType = Ptt;
+PlatformData->BtGuardInfo.TpmType = dTpm20;
 //7583X003_2
 
   SetFeatureCfg (LdrFeatures);
+}
+
+//6883V110_6
+/**
+  Initialize Nxp.
+**/
+VOID
+NxpInitialize (
+  VOID
+  )
+{
+  EFI_STATUS                   Status;
+  UINT8                        BootMode;
+  PLATFORM_DATA               *PlatformData;
+  UINT8                        Data8;
+  RETURN_STATUS                Status0; 
+  UINTN Nxpaddr = (NXP3460_SMBUSADDRESS >> 1);
+  
+  BootMode     = GetBootMode();
+  PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
+
+  Status = A9610_NXP3460_RESET_INIT ();
+  if(PlatformData != NULL) {
+
+//    Features = SmBusReadDataByte (SMBUS_LIB_ADDRESS(NXP3460_SMBUSADDRESS, 0, 0, 0), &Status0);
+
+    //
+    // Enable Override CFG PINs
+    //
+//Nxpaddr = SMBUS_LIB_ADDRESS((NXP3460_SMBUSADDRESS >> 1),NXP3460_PIN_CONFIG2_REG, 1, 0);
+//Nxpaddr = 0x00008E20;
+    Data8 = 0x0F;
+    SmBusWriteDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_PIN_CONFIG2_REG, 0, 0), Data8, &Status0);
+//    SmBusWriteDataByte (Nxpaddr, Data8, &Status0);
+ DEBUG ((DEBUG_INFO, "SmBusWriteDataByte NXP3460_PIN_CONFIG2_REG %x\n", Status0));
+
+    //
+    // emulation ON, and Emulated EDID selection if OFF 
+    //
+    // NonEDIDSupport=0 1280x1024 = 0x05
+    Data8 = 0x05;
+    SmBusWriteDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_EDID_EMULATION_REG, 0, 0), Data8, &Status0);
+ DEBUG ((DEBUG_INFO, "SmBusWriteDataByte NXP3460_EDID_EMULATION_REG %x\n", Status0));
+
+    //
+    // Color depth and Dual LVDS mode
+    //
+    Data8 = 0;
+    Data8 = SmBusReadDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_LVDS1_CONTROL_REG, 0, 0), &Status0);
+ DEBUG ((DEBUG_INFO, "SmBusReadDataByte NXP3460_LVDS1_CONTROL_REG %x %x\n", Status0,Data8));
+
+    Data8 &= 0xC4;
+//  NonEDIDPanelMode;
+    Data8 |= 0x00;
+//  NonEDIDColorDepth;
+    Data8 |= 0x20;
+
+    SmBusWriteDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_LVDS1_CONTROL_REG, 0, 0), Data8, &Status0);
+
+ DEBUG ((DEBUG_INFO, "SmBusWriteDataByte NXP3460_LVDS1_CONTROL_REG %x\n", Status0));
+    //
+    // 0x82 [5:3] LVDS clock frequency center spreading
+    //      [2:0] LVDS differential output swing level
+    //
+    Data8 = 0;
+    Data8 = SmBusReadDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_LVDS2_CONTROL_REG, 0, 0), &Status0);
+ DEBUG ((DEBUG_INFO, "SmBusReadDataByte NXP3460_LVDS2_CONTROL_REG %x %x\n", Status0,Data8));
+
+    Data8 &= 0xC0;
+//  LvdsClockSpread;
+    Data8 |= 0x00;
+//  LvdsSwingLevel;
+    Data8 |= 0x03;
+  
+    SmBusWriteDataByte (SMBUS_LIB_ADDRESS(Nxpaddr, NXP3460_LVDS2_CONTROL_REG, 0, 0), Data8, &Status0);
+
+ DEBUG ((DEBUG_INFO, "SmBusWriteDataByte NXP3460_LVDS2_CONTROL_REG %x\n", Status0));
+
+  }
+
 }
 
 /**
@@ -684,7 +812,7 @@ TpmInitialize (
   PlatformData = (PLATFORM_DATA *)GetPlatformDataPtr ();
 
 //7583X003_2
-if(PlatformData->BtGuardInfo.TpmType == Ptt)
+//6883V110_2  if(PlatformData->BtGuardInfo.TpmType == Ptt)
     Status = TpmInit(PlatformData->BtGuardInfo.BypassTpmInit, BootMode);
 //7583X003_2
 
@@ -912,6 +1040,9 @@ DEBUG_CODE_END();
         ConfigureGpio (CDATA_NO_TAG, sizeof (mGpioTablePreMemTglUDdr4) / sizeof (mGpioTablePreMemTglUDdr4[0]), (UINT8*)mGpioTablePreMemTglUDdr4);
         break;
     }
+//6883V110_6
+      NxpInitialize();
+
     break;
   case PostMemoryInit:
     //

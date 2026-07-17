@@ -57,31 +57,31 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
       CTMP, 16, // EC CPU Temperature         0x70   (2 Bytes)
       STMP, 16, // EC System Temperature      0x72   (2 Bytes)
 			Offset(0x80),
-			GDV0, 8,	// GPIO Data Registers (GP00) 0x80   (1 Bytes)
-			GDV1, 8,	// GPIO Data Registers (GP01) 0x81   (1 Bytes)
-			GDV2, 8,	// GPIO Data Registers (GP20) 0x82   (1 Bytes)
-			GDV3, 8,	// GPIO Data Registers (GP21) 0x83   (1 Bytes)
-			GDV4, 8,	// GPIO Data Registers (GP30) 0x84   (1 Bytes)
-			GDV5, 8,	// GPIO Data Registers (GP31) 0x85   (1 Bytes)
-			GDV6, 8,	// GPIO Data Registers (GP32) 0x86   (1 Bytes)
-			GDV7, 8,	// GPIO Data Registers (GP33) 0x87   (1 Bytes)
-			GDV8, 8,	// GPIO Data Registers (GP34) 0x88   (1 Bytes)
-			GDV9, 8,	// GPIO Data Registers (GP35) 0x89   (1 Bytes)
-			GDVA, 8,	// GPIO Data Registers (GP36) 0x8A   (1 Bytes)
-			GDVB, 8,	// GPIO Data Registers (GP37) 0x8B   (1 Bytes)
+			GDR0, 8,	// GPIO Direction Registers (GP00) 0x80   (1 Bytes)
+			GDR1, 8,	// GPIO Direction Registers (GP01) 0x81   (1 Bytes)
+			GDR2, 8,	// GPIO Direction Registers (GP20) 0x82   (1 Bytes)
+			GDR3, 8,	// GPIO Direction Registers (GP21) 0x83   (1 Bytes)
+			GDR4, 8,	// GPIO Direction Registers (GP30) 0x84   (1 Bytes)
+			GDR5, 8,	// GPIO Direction Registers (GP31) 0x85   (1 Bytes)
+			GDR6, 8,	// GPIO Direction Registers (GP32) 0x86   (1 Bytes)
+			GDR7, 8,	// GPIO Direction Registers (GP33) 0x87   (1 Bytes)
+			GDR8, 8,	// GPIO Direction Registers (GP34) 0x88   (1 Bytes)
+			GDR9, 8,	// GPIO Direction Registers (GP35) 0x89   (1 Bytes)
+			GDRA, 8,	// GPIO Direction Registers (GP36) 0x8A   (1 Bytes)
+			GDRB, 8,	// GPIO Direction Registers (GP37) 0x8B   (1 Bytes)
 			Offset(0x90),
-			GDR0, 8,	// GPIO Direction Registers (GP00) 0x90   (1 Bytes)
-			GDR1, 8,	// GPIO Direction Registers (GP01) 0x91   (1 Bytes)
-			GDR2, 8,	// GPIO Direction Registers (GP20) 0x92   (1 Bytes)
-			GDR3, 8,	// GPIO Direction Registers (GP21) 0x93   (1 Bytes)
-			GDR4, 8,	// GPIO Direction Registers (GP30) 0x94   (1 Bytes)
-			GDR5, 8,	// GPIO Direction Registers (GP31) 0x95   (1 Bytes)
-			GDR6, 8,	// GPIO Direction Registers (GP32) 0x96   (1 Bytes)
-			GDR7, 8,	// GPIO Direction Registers (GP33) 0x97   (1 Bytes)
-			GDR8, 8,	// GPIO Direction Registers (GP34) 0x98   (1 Bytes)
-			GDR9, 8,	// GPIO Direction Registers (GP35) 0x99   (1 Bytes)
-			GDRA, 8,	// GPIO Direction Registers (GP36) 0x9A   (1 Bytes)
-			GDRB, 8,	// GPIO Direction Registers (GP37) 0x9B   (1 Bytes)
+			GDV0, 8,	// GPIO Data Registers      (GP00) 0x90   (1 Bytes)
+			GDV1, 8,	// GPIO Data Registers      (GP01) 0x91   (1 Bytes)
+			GDV2, 8,	// GPIO Data Registers      (GP20) 0x92   (1 Bytes)
+			GDV3, 8,	// GPIO Data Registers      (GP21) 0x93   (1 Bytes)
+			GDV4, 8,	// GPIO Data Registers      (GP30) 0x94   (1 Bytes)
+			GDV5, 8,	// GPIO Data Registers      (GP31) 0x95   (1 Bytes)
+			GDV6, 8,	// GPIO Data Registers      (GP32) 0x96   (1 Bytes)
+			GDV7, 8,	// GPIO Data Registers      (GP33) 0x97   (1 Bytes)
+			GDV8, 8,	// GPIO Data Registers      (GP34) 0x98   (1 Bytes)
+			GDV9, 8,	// GPIO Data Registers      (GP35) 0x99   (1 Bytes)
+			GDVA, 8,	// GPIO Data Registers      (GP36) 0x9A   (1 Bytes)
+			GDVB, 8,	// GPIO Data Registers      (GP37) 0x9B   (1 Bytes)
 			Offset(0xC0),
 			WDGC, 8,	// Watch dog Control Register 0xC0   (1 Bytes)
 			Offset(0xC8),
@@ -107,7 +107,17 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 			If(LEqual(Arg0, 0x3)) {
 				Store(Arg1, ECF)
 			}
+      Store(3,\_SB.PC00.GFX0.CLID)
 		}
+
+    Method(GLID, 0)
+    {
+      Store(GDV5,Local0)
+      ShiftRight(Local0, 0x05, Local0)
+      And(Local0, 0x01, Local0)
+          
+      Return (Local0) // Return Pass
+    }
 		
 		Device(LID1) {
 			Name(_HID,EISAID("PNP0C0D"))
@@ -116,7 +126,18 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 			}
 			Method(_LID,0) {
 				// 0 = Closed, 1 = Open.
-				Return(1)
+//				Return(1)
+    Store(\_SB.PC00.GFX0.CLID,Local0)
+//    And(Local0, 0x0F, Local0)
+    And(Local0, 0x01, Local0)
+
+    If (LEqual(Local0, 0))
+    {
+      Store(0, Local1) 
+    } else {
+      Store(1, Local1) 
+    }
+    Return(Local1)
 			}
 		}
 
@@ -127,12 +148,45 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
       }
 		}
 
+    // Save the Lid State in global NVS and IGD OpRegion.
+    //Store(LSTE,\_SB.PC00.GFX0.CLID)
+//    If (LEqual(ECRD(RefOf(LSTE)), 0))
+//    {
+//      Store(0,\_SB.PC00.GFX0.CLID)
+//    }
+//    If (LEqual(ECRD(RefOf(LSTE)), 1))
+//    {
+//      Store(3,\_SB.PC00.GFX0.CLID)
+//    }
+//    Store(ECRD(RefOf(LSTE)),LIDS)
+
+
 		Method(_Q21) {          	// ACPI LID make event
-//    D8XH (0, 0x21)
+
+    If (LEqual(GLID, 0))
+    {
+      D8XH (0, 0x21)
+// Switch CLID
+//      Store(\_SB.PC00.GFX0.CLID,Local0)
+//      And(Local0, Not(0x01), Local0)
+//      Store(Local0,\_SB.PC00.GFX0.CLID)
+//      Notify(\_SB.PC00.LPCB.EC0.LID1,0x80)
+    }  
 		}
 
 		Method(_Q22) {          	// ACPI LID break event
-    D8XH (0, 0x22)
+
+    If (LEqual(GLID, 1))
+    {
+      D8XH (0, 0x22)
+// Switch CLID
+//      Store(\_SB.PC00.GFX0.CLID,Local0)
+//     Or(Local0, 0x01, Local0)
+//      Store(Local0,\_SB.PC00.GFX0.CLID)
+
+//      Notify(\_SB.PC00.LPCB.EC0.LID1,0x80)
+
+    }  
 		}
 
 		Method(_Q23) {          	// ACPI Sleep button event
@@ -150,6 +204,19 @@ Name(_GPE, 0x44) // #GPP_E4  <- EC_SCI# @GPE_DW2
 
 		Method(_Q51) {          	// Battery event
     D8XH (0, 0x51)
+    Store(\_SB.PC00.GFX0.CLID,Local0)
+    D8XH (Local0, 0x51)
+    If (LEqual(Local0, 0))
+    {
+      Store(3,\_SB.PC00.GFX0.CLID)
+    }
+
+    If (LEqual(Local0, 3))
+    {
+      Store(0,\_SB.PC00.GFX0.CLID)
+    }
+
+
 		}
 
 		Method(_Q52) {                  // power button event

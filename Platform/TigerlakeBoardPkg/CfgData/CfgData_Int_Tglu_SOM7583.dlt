@@ -9,7 +9,7 @@
 #
 
 PLATFORMID_CFG_DATA.PlatformId                              | 0x0010
-PLAT_NAME_CFG_DATA.PlatformName                             | 'SOM-7583'
+PLAT_NAME_CFG_DATA.PlatformName                             | 'SOM-6883'
 
 
 MEMORY_CFG_DATA.SpdAddressTable                             | {0xA0, 0, 0xA0, 0, 0xA0, 0, 0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -37,10 +37,12 @@ MEMORY_CFG_DATA.DmaControlGuarantee                         | 1
 
 MEMORY_CFG_DATA.UsbTcPortEnPreMem                           | 0
 
-MEMORY_CFG_DATA.PcieClkSrcUsage   | { 0x40, 0x80, 0xFF, 0xFF, 0x08, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+#MEMORY_CFG_DATA.PcieClkSrcUsage   | { 0x40, 0xFF, 0xFF, 0x04, 0x08, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+MEMORY_CFG_DATA.PcieClkSrcUsage   | { 0x40, 0xFF, 0xFF, 0x80, 0x08, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
 
 #//7583V112_1 if missing file please copy from
-GEN_CFG_DATA.VbtImageId                   | 3
+#//6883V110_1 GEN_CFG_DATA.VbtImageId                   | 3
+GEN_CFG_DATA.VbtImageId                   | 4
 
 #SILICON_CFG_DATA.PortUsb20Enable.Usb2Port1                  | 0
 
@@ -66,9 +68,27 @@ PLDSEL_CFG_DATA.PldSelGpio.PinPolarity                      | 0
 GEN_CFG_DATA.PayloadId                                      | 'AUTO'
  
 GPIO_CFG_DATA.GpioPinConfig0_GPP_B15.GPIODirection_GPP_B15  | 0xB
-SILICON_CFG_DATA.PchHdaEnable                               | 0x00
+#//6883V110_5 Assert Stage2.c(452)
+SILICON_CFG_DATA.PchHdaEnable                               | 0x01
 
-GPIO_CFG_DATA.GpioPinConfig1_GPP_A19.GPIOSkip_GPP_A19       | 1           # TGL-U Only. Skip for TGL-H.
+
+#//6883V110_3
+#// DPPA:E22,E23,E14 DPPB:H16,H17,A18 DDP1:E18,E19,A19 DDP2:E20,E21,A20
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E18.GPIOSkip_GPP_E18       | 1
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E19.GPIOSkip_GPP_E19       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_A19.GPIOSkip_GPP_A19       | 1           
+
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E20.GPIOSkip_GPP_E20       | 1
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E21.GPIOSkip_GPP_E21       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_A20.GPIOSkip_GPP_A20       | 1           
+
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H16.GPIOSkip_GPP_H16       | 1
+GPIO_CFG_DATA.GpioPinConfig1_GPP_H17.GPIOSkip_GPP_H17       | 1
+GPIO_CFG_DATA.GpioPinConfig1_GPP_A18.GPIOSkip_GPP_A18       | 1
+
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E22.GPIOSkip_GPP_E22       | 1
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E23.GPIOSkip_GPP_E23       | 1           
+GPIO_CFG_DATA.GpioPinConfig1_GPP_E14.GPIOSkip_GPP_E14       | 1           
 
 GPIO_CFG_DATA.GpioPinConfig1_GPP_C02.GPIOSkip_GPP_C02       | 1           
 GPIO_CFG_DATA.GpioPinConfig1_GPP_E04.GPIOSkip_GPP_E04       | 1           

@@ -46,8 +46,8 @@ static GPIO_INIT_CONFIG mGpioTablePreMemSOM7583[] =
     {GPIO_VER2_LP_GPP_A12,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_A13,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_A17,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_A18,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_A20,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+//6883V110_3    {GPIO_VER2_LP_GPP_A18,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+//6883V110_3    {GPIO_VER2_LP_GPP_A20,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_A21,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_A22,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_A23,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
@@ -73,8 +73,9 @@ static GPIO_INIT_CONFIG mGpioTablePreMemSOM7583[] =
     {GPIO_VER2_LP_GPP_C11,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_C12,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_C13,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_C14,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_C15,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+//6883V110_3    {GPIO_VER2_LP_GPP_C14,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+    {GPIO_VER2_LP_GPP_C14,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirIn,  GpioOutDefault , GpioIntLevel | GpioIntApic,GpioHostDeepReset,  GpioTermWpu20K}},  //Not Used
+     {GPIO_VER2_LP_GPP_C15,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_C18,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_C19,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_C22,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
@@ -139,8 +140,8 @@ static GPIO_INIT_CONFIG mGpioTablePreMemSOM7583[] =
     {GPIO_VER2_LP_GPP_H13,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_H14,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_H15,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_H16,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
-    {GPIO_VER2_LP_GPP_H17,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+//6883V110_3    {GPIO_VER2_LP_GPP_H16,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
+//6883V110_3    {GPIO_VER2_LP_GPP_H17,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_H18,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_H19,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used
     {GPIO_VER2_LP_GPP_H20,  {GpioPadModeGpio, GpioHostOwnGpio, GpioDirOut,  GpioOutLow ,  GpioIntDis,GpioHostDeepReset,  GpioTermNone}},  //Not Used

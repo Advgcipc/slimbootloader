@@ -33,20 +33,35 @@ typedef enum {
 //
 //7583X001
 GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 mSOM7583DisplayDdiConfig[16] = {
+//6883V110_3
                                                                                DdiPortEdp,      // DDI Port A Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
                                                                                DdiPortDisabled, // DDI Port B Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
-                                                                               DdiHpdDisable,   // DDI Port A HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdEnable,    // DDI Port A HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiHpdEnable,    // DDI Port B HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiHpdDisable,   // DDI Port C HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiHpdEnable,    // DDI Port 1 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
-                                                                               DdiHpdDisable,   // DDI Port 2 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+                                                                               DdiHpdEnable,    // DDI Port 2 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiHpdDisable,   // DDI Port 3 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiHpdDisable,   // DDI Port 4 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
                                                                                DdiDisable,      // DDI Port A DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
                                                                                DdiDdcEnable,    // DDI Port B DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
                                                                                DdiDisable,      // DDI Port C DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
                                                                                DdiDdcEnable,    // DDI Port 1 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
-                                                                               DdiDisable,      // DDI Port 2 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+                                                                               DdiDdcEnable,    // DDI Port 2 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+//                                                                               DdiPortEdp,      // DDI Port A Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
+//                                                                               DdiPortDisabled, // DDI Port B Config : DdiPortDisabled = No LFP is Connected, DdiPortEdp = eDP, DdiPortMipiDsi = MIPI DSI
+//                                                                               DdiHpdDisable,   // DDI Port A HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdEnable,    // DDI Port B HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdDisable,   // DDI Port C HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdEnable,    // DDI Port 1 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdDisable,   // DDI Port 2 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdDisable,   // DDI Port 3 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiHpdDisable,   // DDI Port 4 HPD : DdiHpdDisable = Disable, DdiHpdEnable = Enable HPD
+//                                                                               DdiDisable,      // DDI Port A DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+//                                                                               DdiDdcEnable,    // DDI Port B DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+//                                                                               DdiDisable,      // DDI Port C DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+//                                                                               DdiDdcEnable,    // DDI Port 1 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
+//                                                                               DdiDisable,      // DDI Port 2 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
                                                                                DdiDisable,      // DDI Port 3 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
                                                                                DdiDisable       // DDI Port 4 DDC : DdiDisable = Disable, DdiDdcEnable = Enable DDC
 };

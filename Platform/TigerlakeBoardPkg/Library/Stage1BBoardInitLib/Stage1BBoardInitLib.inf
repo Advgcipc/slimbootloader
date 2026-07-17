@@ -49,7 +49,9 @@
   BoardSupportLib
   WatchDogTimerLib
   TccLib
-
+#//6883V110_6
+  SmbusLib
+  
 [Guids]
 
 [Pcd]

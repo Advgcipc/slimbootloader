@@ -1735,7 +1735,7 @@ UpdateFspConfig (
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &HdaVerbTableDisplayAudio;
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc711;
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc701;
-      HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc274;
+//6883V110_5      HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &TglHdaVerbTableAlc274;
 //7583X003_4
       HdaVerbTablePtr[HdaVerbTableNum++]   = (UINT32)(UINTN) &OemHdaVerbTblSomDb5830;
       FspsUpd->FspsConfig.PchHdaVerbTablePtr      = (UINT32)(UINTN) HdaVerbTablePtr;
